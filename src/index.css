@@ -1,0 +1,136 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+.badge {
+  @apply inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium;
+}
+.badge-high {
+  @apply bg-red-100 text-red-600;
+}
+.badge-medium {
+  @apply bg-yellow-100 text-yellow-700;
+}
+.badge-low {
+  @apply bg-green-100 text-green-700;
+}
+
+/* Remove Tailwind's default focus ring */
+[type="text"]:focus,
+[type="email"]:focus,
+[type="url"]:focus,
+[type="password"]:focus,
+[type="number"]:focus,
+[type="date"]:focus,
+[type="datetime-local"]:focus,
+[type="month"]:focus,
+[type="search"]:focus,
+[type="tel"]:focus,
+[type="time"]:focus,
+[type="week"]:focus,
+[multiple]:focus,
+textarea:focus,
+select:focus {
+  box-shadow: none !important;
+  border-color: inherit !important;
+  outline: none !important;
+}
+
+.MuiPickersOutlinedInput-notchedOutline {
+  border-color: #e5e7eb !important;
+}
+
+.MuiPopover-paper.MuiMenu-paper {
+  border-radius: 4px;
+  z-index: 9999 !important;
+  /* box-shadow: rgba(0, 0, 0, 0.5) 0px 1px 2px 0px; */
+}
+
+.MuiFormLabel-root {
+  color: #7e858d !important;
+  font-weight: 500 !important;
+}
+
+.MuiInputBase-inputMultiline {
+  padding: 0px !important;
+}
+
+.MuiInputBase-input {
+  font-size: 14px !important;
+}
+
+.otp-input input {
+  transition: all 50ms ease-in-out;
+}
+
+.otp-input input:focus {
+  outline: 2px solid #2bcb6b !important;
+  background-color: #e9fcf0;
+  border: none !important;
+}
+
+.MuiPickersDay-root.Mui-selected {
+  color: #fff !important;
+}
+
+.MuiPickersInputBase-root .MuiSvgIcon-root {
+  font-size: 1.25rem;
+}
+
+.MuiButtonBase-root.MuiMenuItem-root,
+table td,
+.MuiAutocomplete-option,
+.MuiAutocomplete-noOptions,
+.MuiAutocomplete-loading {
+  font-size: 14px;
+}
+
+.MuiAutocomplete-noOptions,
+.MuiAutocomplete-loading {
+  padding: 12px !important;
+}
+/* .MuiBackdrop-root {
+  backdrop-filter: blur(3px);
+  background-color: rgba(0, 0, 0, 0.125) !important;
+} */
+
+.MuiFormLabel-root {
+    /* font-style:italic */
+    color: #969aa1 !important;
+    /* font-size: 0.75rem !important; */
+}
+.MuiButton-icon{
+  margin-right: 4px !important;
+}
+
+.fade-enter {
+  opacity: 0;
+  transform: translateY(-5px);
+}
+.fade-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 300ms ease, transform 300ms ease;
+}
+.fade-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+.fade-exit-active {
+  opacity: 0;
+  transform: translateY(-5px);
+  transition: opacity 300ms ease, transform 300ms ease;
+}
+
+
+@media (max-width: 992px) {
+  .sidebar-desktop {
+    display: none !important;
+  }
+  .sidebar-mobile {
+    display: flex !important;
+  }
+}
