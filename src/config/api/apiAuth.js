@@ -4,7 +4,7 @@ export const createAPIEndPointAuth = (endpoint) => {
   const BASE_URL = import.meta.env.VITE_APP_BASE_URL_AUTH;
   const X_API_Key = import.meta.env.VITE_APP_X_API_Key_AUTH;
 
-  console.log("VITE_APP_X_API_Key_AUTH", import.meta.env.VITE_APP_X_API_Key_AUTH);
+  console.log("VITE_APP_X_API_Key_AUTH", import.meta.env.VITE_APP_X_API_Key_AUTH); 
 
   let token = typeof localStorage !== 'undefined' && localStorage.getItem('access_token');
 
