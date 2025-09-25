@@ -11,10 +11,11 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import StatusBadge from "../components/StatusBadge";
+import toast from "react-hot-toast";
 import { createAPIEndPoint } from "../config/api/api";
 import { useApp } from "../state/AppContext";
 import { convertToCST } from "../utils";
-import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 // ✅ Animations
 import { CSSTransition, TransitionGroup } from "react-transition-group";
@@ -23,6 +24,7 @@ export default function ActivityFeed() {
   const { user } = useApp();
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   // 🔹 Fetch notifications
   const fetchNotifications = async () => {
@@ -46,9 +48,7 @@ export default function ActivityFeed() {
   // 🔹 Delete single
   const handleDeleteOne = async (id) => {
     try {
-      await createAPIEndPoint(
-        `notifications/${id}?user_id=`
-      ).delete(user?.id);
+      await createAPIEndPoint(`notifications/${id}?user_id=`).delete(user?.id);
       setActivities((prev) => prev.filter((n) => n.id !== id)); // animate out
       toast.success("Notification deleted");
     } catch (err) {
@@ -98,7 +98,7 @@ export default function ActivityFeed() {
           </button>
         )} */}
       </div>
-
+ 
       {/* Card */}
       <Card
         sx={{
@@ -122,7 +122,8 @@ export default function ActivityFeed() {
                 <div>
                   <Box
                     className="flex flex-col sm:flex-row sm:items-start sm:justify-between
-                               p-5 hover:bg-gray-50 transition"
+                               p-5 hover:bg-gray-50 transition cursor-pointer"
+                    onClick={() => navigate(`/tickets/${a?.ticket_id}`)}
                   >
                     {/* Content */}
                     <Box className="flex-1 mb-3 sm:mb-0">
