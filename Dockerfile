@@ -10,13 +10,13 @@ COPY . .
 ARG VITE_APP_BASE_URL
 ARG VITE_APP_BASE_URL_AUTH
 ARG VITE_APP_X_API_Key
+ARG VITE_APP_X_API_Key_AUTH   # 👈 missing arg add karo
 
 # Convert Build Arguments to Environment Variables
 ENV VITE_APP_BASE_URL=$VITE_APP_BASE_URL
 ENV VITE_APP_BASE_URL_AUTH=$VITE_APP_BASE_URL_AUTH
 ENV VITE_APP_X_API_Key=$VITE_APP_X_API_Key
-ENV VITE_APP_X_API_Key_AUTH=$VITE_APP_X_API_Key_AUTH
-
+ENV VITE_APP_X_API_Key_AUTH=$VITE_APP_X_API_Key_AUTH  # 👈 ab properly resolve hoga
 
 RUN npm run build
 
