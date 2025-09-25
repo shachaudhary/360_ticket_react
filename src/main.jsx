@@ -11,7 +11,7 @@ import { UserProfileProvider } from "./context/UserProfileContext.jsx";
 import { Toaster } from "react-hot-toast"; // ✅ import
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
+  // <React.StrictMode>
     <ThemeProvider theme={theme}>
       <BrowserRouter>
         <UserProfileProvider>
@@ -55,5 +55,5 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         </UserProfileProvider>
       </BrowserRouter>
     </ThemeProvider>
-  </React.StrictMode>
+  // </React.StrictMode>
 );

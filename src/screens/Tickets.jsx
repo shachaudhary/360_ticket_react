@@ -7,6 +7,7 @@ import {
   FormControl,
   Pagination,
   CircularProgress,
+  InputAdornment,
 } from "@mui/material";
 import { IconButton, Tooltip } from "@mui/material";
 import LaunchIcon from "@mui/icons-material/Launch";
@@ -18,6 +19,7 @@ import { useNavigate } from "react-router-dom";
 import { useApp } from "../state/AppContext";
 import StatusBadge from "../components/StatusBadge";
 import DateWithTooltip from "../components/DateWithTooltip";
+import ClearIcon from "@mui/icons-material/Clear";
 import { convertToCST } from "../utils";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import { toProperCase } from "../utils/formatting";
@@ -25,6 +27,7 @@ import { toProperCase } from "../utils/formatting";
 export default function Tickets() {
   const navigate = useNavigate();
   const { user } = useApp();
+  console.log("🚀 ~ Tickets ~ user:", user)
 
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState(""); // 🔹 debounced value
@@ -35,6 +38,7 @@ export default function Tickets() {
   const [categoryFilter, setCategoryFilter] = useState("");
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+  const [userFilter, setUserFilter] = useState("");
   const [categories, setCategories] = useState([]);
 
   // 🔹 Debounce effect
@@ -78,9 +82,7 @@ export default function Tickets() {
       setLoading(true);
 
       const params = new URLSearchParams();
-      params.append("user_id", user?.id);
-      params.append("page", page + 1);
-      params.append("per_page", rowsPerPage);
+      // params.append("user_id", user?.id);
 
       if (debouncedQuery) params.append("search", debouncedQuery); // 🔹 use debounced value
       if (statusFilter) params.append("status", statusFilter.toLowerCase());
@@ -88,9 +90,15 @@ export default function Tickets() {
       if (startDate)
         params.append("start_date", startDate.format("YYYY-MM-DD"));
       if (endDate) params.append("end_date", endDate.format("YYYY-MM-DD"));
+      if (userFilter === "assign_to") params.append("assign_to", user?.id);
+      if (userFilter === "assign_by") params.append("assign_by", user?.id);
+      if (userFilter === "followup") params.append("followup", user?.id);
+      if (userFilter === "tag") params.append("tag", user?.id);
+      params.append("page", page + 1);
+      params.append("per_page", rowsPerPage);
 
       const res = await createAPIEndPoint(
-        `tickets/filter?${params.toString()}`
+        `tickets?${params.toString()}`
       ).fetchAll();
 
       setTickets(res.data.tickets || []);
@@ -115,6 +123,7 @@ export default function Tickets() {
     categoryFilter,
     startDate,
     endDate,
+    userFilter,
   ]);
 
   const currentItems = tickets;
@@ -135,19 +144,28 @@ export default function Tickets() {
       </div>
 
       {/* Filters */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
         {/* Search */}
-        <div className="col-span-1 sm:col-span-2 md:col-span-2">
+        <div className="col-span-1 sm:col-span-2 lg:col-span-2">
           <TextField
             label="Search"
             size="small"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             fullWidth
-            // className="!placeholder:font-semibold"
-            // sx={{
-            //   "&: .MuiInputBase-input::placeholder": { fontWeight: "bold" },
-            // }}
+            InputProps={{
+              endAdornment: query?.length > 0 && (
+                <InputAdornment position="end">
+                  <IconButton
+                    size="small"
+                    onClick={() => setQuery("")}
+                    edge="end"
+                  >
+                    <ClearIcon fontSize="small" />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
         </div>
 
@@ -178,7 +196,6 @@ export default function Tickets() {
               onChange={(e) => setCategoryFilter(e.target.value)}
             >
               <MenuItem value="">All</MenuItem>
-
               {categories.map((c) => (
                 <MenuItem key={c.id} value={c.id}>
                   {c.name}
@@ -189,7 +206,7 @@ export default function Tickets() {
         </div>
 
         {/* Start Date */}
-        <div className="col-span-1">
+        <div className="col-span-1 sm:col-span-1 lg:col-span-1">
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DatePicker
               label="Start Date"
@@ -204,7 +221,7 @@ export default function Tickets() {
         </div>
 
         {/* End Date */}
-        <div className="col-span-1">
+        <div className="col-span-1 sm:col-span-1 lg:col-span-1">
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DatePicker
               label="End Date"
@@ -218,25 +235,52 @@ export default function Tickets() {
           </LocalizationProvider>
         </div>
 
-        {/* Clear Button */}
-        <div className="col-span-1 flex items-center">
-          <button
-            onClick={() => {
-              setQuery("");
-              setStatusFilter("");
-              setCategoryFilter("");
-              setStartDate(null);
-              setEndDate(null);
-              setPage(0);
-            }}
-            className={`h-9 rounded-lg px-3 text-xs font-medium focus:outline-none focus:ring-2 transition-all ${
-              query || statusFilter || categoryFilter || startDate || endDate
-                ? "border border-red-500 text-red-500 hover:bg-red-50 focus:ring-red-500"
-                : "border border-[#E5E7EB] hover:border-[#ddd] hover:text-gray-500 text-gray-400 hover:bg-brand-50 focus:ring-gray-500"
-            }`}
-          >
-            Clear
-          </button>
+        {/* User Filter + Clear button row */}
+        <div className="col-span-1 sm:col-span-2 lg:col-span-6 flex flex-col lg:flex-row items-stretch lg:items-center gap-2">
+          {/* Filter on the left */}
+          <div className="flex-1 lg:flex-initial lg:w-1/6">
+            <FormControl size="small" fullWidth>
+              <InputLabel>Filter</InputLabel>
+              <Select
+                value={userFilter}
+                label="Filter"
+                onChange={(e) => setUserFilter(e.target.value)}
+              >
+                <MenuItem value="">All</MenuItem>
+                <MenuItem value="assign_to">Assigned To Me</MenuItem>
+                <MenuItem value="assign_by">Assigned By Me</MenuItem>
+                <MenuItem value="followup">My Followups</MenuItem>
+                <MenuItem value="tag">Tagged Me</MenuItem>
+              </Select>
+            </FormControl>
+          </div>
+
+          {/* Clear Button on the right */}
+          <div className="flex lg:ml-auto lg:w-auto">
+            <button
+              onClick={() => {
+                setQuery("");
+                setStatusFilter("");
+                setCategoryFilter("");
+                setStartDate(null);
+                setEndDate(null);
+                setUserFilter("");
+                setPage(0);
+              }}
+              className={`h-9 shrink-0 rounded-lg px-3 text-xs font-medium focus:outline-none focus:ring-2 transition-all ${
+                query ||
+                statusFilter ||
+                categoryFilter ||
+                startDate ||
+                endDate ||
+                userFilter
+                  ? "border border-red-500 text-red-500 hover:bg-red-50 focus:ring-red-500"
+                  : "border border-[#E5E7EB] hover:border-[#ddd] hover:text-gray-500 text-gray-400 hover:bg-brand-50 focus:ring-gray-500"
+              }`}
+            >
+              Clear
+            </button>
+          </div>
         </div>
       </div>
 

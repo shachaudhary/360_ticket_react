@@ -132,7 +132,7 @@ export default function Settings() {
         </div>
       ) : categories.length === 0 ? (
         <div className="overflow-hidden rounded-lg border border-[#E5E7EB]">
-          <div className="h-[calc(100vh-139px)] flex-col gap-1 flex items-center justify-center rounded-lg">
+          <div className="h-[calc(100vh-145px)] flex-col gap-1 flex items-center justify-center rounded-lg">
             <p className="text-gray-500 font-normal text-md">
               No categories found
             </p>
@@ -141,7 +141,7 @@ export default function Settings() {
       ) : (
         <div className="overflow-x-auto">
           <div className="overflow-hidden rounded-lg border border-[#E5E7EB]">
-            <div className="overflow-auto h-[calc(100vh-204px)]">
+            <div className="overflow-auto h-[calc(100vh-209px)]">
               <table className="min-w-full divide-y divide-gray-100">
                 <thead className="bg-white sticky top-0 z-10">
                   <tr className="text-left text-xs text-gray-500">
@@ -157,9 +157,9 @@ export default function Settings() {
                     <th className="px-4 py-3 border-r border-b border-[#E5E7EB] font-medium">
                       Created At
                     </th>
-                    <th className="px-4 py-3 text-center border-b border-[#E5E7EB] font-medium">
+                    {/* <th className="px-4 py-3 text-center border-b border-[#E5E7EB] font-medium">
                       Enabled
-                    </th>
+                    </th> */}
                     <th className="px-4 py-3 text-center border-b border-[#E5E7EB] font-medium">
                       Action
                     </th>
@@ -184,18 +184,19 @@ export default function Settings() {
                           "—"
                         )}
                       </td>
-                      <td className="px-4 py-3 border-b border-[#E5E7EB] text-center">
+                      {/* <td className="px-4 py-3 border-b border-[#E5E7EB] text-center">
                         <Switch
                           checked={cat.enabled}
                           onChange={() => handleToggle(cat)}
                           color="primary"
                         />
-                      </td>
-                      <td className="px-4 py-3 border-b border-[#E5E7EB] text-center">
+                      </td> */}
+                      <td className="px-4 py-3 border-b  border-[#E5E7EB] text-center">
                         <Tooltip title="Edit">
                           <IconButton
                             size="small"
                             onClick={() => handleOpenModal(cat)}
+                            className="!bg-slate-50"
                           >
                             <ModeEditSharpIcon
                               fontSize="small"

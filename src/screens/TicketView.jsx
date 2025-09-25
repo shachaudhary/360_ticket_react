@@ -20,6 +20,8 @@ import { createAPIEndPoint } from "../config/api/api";
 import BackButton from "../components/BackButton";
 import CommentBox from "../components/CommentBox";
 import { createAPIEndPointAuth } from "../config/api/apiAuth";
+import { PencilSquareIcon } from "@heroicons/react/24/outline";
+import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { toProperCase } from "../utils/formatting";
 import TicketHeader from "../components/TicketHeader";
@@ -61,8 +63,8 @@ const CommentsList = ({ comments }) => (
                 key={i}
                 className={
                   word.startsWith("@")
-                    // ? "mr-1 text-blue-600 font-medium"
-                    ? "mr-1"
+                    ? // ? "mr-1 text-blue-600 font-medium"
+                      "mr-1"
                     : "mr-1"
                 }
               >
@@ -83,6 +85,7 @@ const CommentsList = ({ comments }) => (
 export default function TicketView() {
   const { id } = useParams();
   const { user } = useApp();
+  const navigate = useNavigate();
   const [ticket, setTicket] = useState(null);
   const [assignee, setAssignee] = useState("");
   const [loading, setLoading] = useState(false);
@@ -156,7 +159,20 @@ export default function TicketView() {
     <Box sx={{ display: "flex", height: "100%", position: "relative" }}>
       {/* 🔹 Main Ticket Details */}
       <Box sx={{ flex: 1, overflowY: "auto", pr: 2 }}>
-        <BackButton self="/tickets" />
+        <div className="flex justify-between items-center">
+          <BackButton self="/tickets" />
+
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={<PencilSquareIcon className="h-4 w-4" />}
+            onClick={() => navigate(`/tickets/${ticket.id}/edit`)}
+            sx={{ borderRadius: 1.25 }}
+            className="!border !border-[#E5E7EB] hover:!border-[#ddd]  !text-gray-500 hover:!bg-gray-50 focus:!ring-gray-500 !px-1 !py-1.5"
+          >
+            Edit
+          </Button>
+        </div>
 
         <Container maxWidth="1440px" sx={{ mt: 2, px: "0px !important" }}>
           <Card
@@ -167,10 +183,11 @@ export default function TicketView() {
               borderRadius: "16px",
               boxShadow: 0,
               p: 2,
-              minHeight: "calc(100dvh - 140px)",
+              minHeight: "calc(100dvh - 144px)",
             }}
           >
             <TicketHeader ticket={ticket} onUpdate={setTicket} />
+
             <Divider sx={{ my: 2 }} />
 
             {/* Ticket Details Grid */}
@@ -188,16 +205,15 @@ export default function TicketView() {
                 <Label
                   title="Assigned At"
                   value={
-                    <DateWithTooltip date={ticket?.assignees[0]?.assigned_at} />
+                    convertToCST(ticket?.assignees[0]?.assigned_at)
+                    // <DateWithTooltip date={ticket?.assignees[0]?.assigned_at} />
                   }
                 />
               )}
               {ticket?.completed_at > 0 && (
                 <Label
-                  title="Assigned At"
-                  value={
-                    <DateWithTooltip date={ticket?.completed_at} />
-                  }
+                  title="Completed At"
+                  value={<DateWithTooltip date={ticket?.completed_at} />}
                 />
               )}
               <Label
@@ -234,7 +250,7 @@ export default function TicketView() {
             )}
 
             {/* Assign Section */}
-            <div className="mt-6 rounded-xl border border-gray-200 p-4">
+            <div className="mt-10 rounded-xl border border-gray-200 p-4">
               <Typography
                 variant="subtitle1"
                 fontWeight={600}
@@ -384,7 +400,7 @@ export default function TicketView() {
       </Box>
 
       {/* Comments Sidebar (desktop) */}
-      <Box className="hidden md:flex flex-col w-[300px] bg-white p-4 pr-0 border-l border-gray-200 -mt-4 -mb-4">
+      <Box className="hidden md:flex flex-col w-[320px] bg-white p-3.5 pr-0 border-l border-gray-200 -mt-4 -mb-4">
         <CommentBox ticketId={ticket.id} onAdd={fetchTicket} />
         <Divider sx={{ my: 2 }} />
         <Typography variant="body2" fontWeight={600} sx={{ mb: 1 }}>

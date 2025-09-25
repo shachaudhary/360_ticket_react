@@ -94,7 +94,7 @@ const ProfilePopover = ({ isMobile = false }) => {
             sx={{ mr: 1 }}
 
           >
-            <NotificationsIcon fontSize="medium" className="!text-[30px] !bg-white !bg-opacity-15 hover:!bg-opacity-25 p-[5px] rounded-full" />
+            <NotificationsIcon fontSize="medium" className="!text-[30px] !text-[#2BCB6B] !text-opacity-100 brightness-150 !bg-white !bg-opacity-10 hover:!bg-opacity-25 p-[5px] rounded-full" />
           </Badge>
         </IconButton>
 
@@ -180,7 +180,7 @@ const ProfilePopover = ({ isMobile = false }) => {
         >
           <MenuItem
             onClick={() => {
-              navigate("/user-profile");
+              navigate("/profile");
               handleClose();
             }}
             sx={{
@@ -195,7 +195,7 @@ const ProfilePopover = ({ isMobile = false }) => {
             <Typography variant="body2">Profile</Typography>
           </MenuItem>
 
-          <MenuItem
+          {/* <MenuItem
             onClick={() => {
               navigate("/account/change-password");
               handleClose();
@@ -210,7 +210,7 @@ const ProfilePopover = ({ isMobile = false }) => {
           >
             <LockIcon sx={{ mr: 1, color: "#1fb058" }} />
             <Typography variant="body2">Account</Typography>
-          </MenuItem>
+          </MenuItem> */}
 
           <MenuItem
             onClick={handleLogout}

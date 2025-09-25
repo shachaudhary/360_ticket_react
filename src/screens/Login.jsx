@@ -24,8 +24,10 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import Avatar from "@mui/material/Avatar";
+import { useApp } from "../state/AppContext";
 
 export default function Login() {
+  const { fetchUser } = useApp();
   const navigate = useNavigate();
   const { getUser } = useUserProfile();
 
@@ -91,6 +93,7 @@ export default function Login() {
       localStorage.setItem("user_profile", JSON.stringify(data.profile));
       localStorage.setItem("user_role", data.profile.user_role);
 
+      await fetchUser();
       await checkDashboard(data);
     } catch (error) {
       setCheck(false);
@@ -340,7 +343,7 @@ export default function Login() {
                   variant="body2"
                   sx={{
                     // color: "primary.main",
-                    mb:1,
+                    mb: 1,
                     cursor: "pointer",
                     display: "flex",
                     alignItems: "center",

@@ -55,8 +55,10 @@ export function AppProvider({ children }) {
 
   // ✅ Auto-refresh user on every app load (page refresh)
   useEffect(() => {
-    fetchUser();
-  }, [fetchUser]);
+    if (user?.id || getUserData()?.id) {
+      fetchUser();
+    }
+  }, [fetchUser, user?.id]);
 
   // Keep state in sync across tabs/windows
   useEffect(() => {

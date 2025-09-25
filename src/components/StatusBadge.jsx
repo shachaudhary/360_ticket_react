@@ -7,11 +7,15 @@ import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import LowPriorityIcon from "@mui/icons-material/LowPriority";
 import HorizontalRuleIcon from "@mui/icons-material/HorizontalRule";
 
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+
 export const statusColors = {
   // Payment Statuses
   received: "#C9F7C9", // Soft Green
   urgent: "#FFEBEE", // same as high (light red)
   high: "#FFF8E1", // move high to amber now
+  update: "#FFF8E1", // move high to amber now
   low: "#E8F5E9", // green
   paid: "#C9F7C9", // Soft Green
   unpaid: "#FFF3CD", // Light Yellow
@@ -66,6 +70,7 @@ export const textColors = {
   received: "#007A33", // Dark Green
   urgent: "#D32F2F", // same as high (strong red)
   high: "#F9A825", // amber
+  update: "#F9A825", // amber
   low: "#388E3C", // green
   paid: "#007A33", // Dark Green
   unpaid: "#D88700", // Amber
@@ -167,14 +172,26 @@ export const shortenStatus = (status) => {
 };
 
 // ✅ helper to pick icon
+// const getPriorityIcon = (status, color) => {
+//   switch (status) {
+//     case "urgent":
+//       return <PriorityHighIcon fontSize="inherit" sx={{ color, mr: 0.25 }} />;
+//     case "high":
+//       return <ArrowUpwardIcon fontSize="inherit" sx={{ color, mr: 0.25 }} />;
+//     case "low":
+//       return <ArrowDownwardIcon fontSize="inherit" sx={{ color, mr: 0.25 }} />;
+//     default:
+//       return null;
+//   }
+// };
 const getPriorityIcon = (status, color) => {
   switch (status) {
     case "urgent":
       return <PriorityHighIcon fontSize="inherit" sx={{ color, mr: 0.25 }} />;
     case "high":
-      return <ArrowUpwardIcon fontSize="inherit" sx={{ color, mr: 0.25 }} />;
+      return <TrendingUpIcon fontSize="inherit" sx={{ color, mr: 0.25 }} />;
     case "low":
-      return <ArrowDownwardIcon fontSize="inherit" sx={{ color, mr: 0.25 }} />;
+      return <TrendingDownIcon fontSize="inherit" sx={{ color, mr: 0.25 }} />;
     default:
       return null;
   }

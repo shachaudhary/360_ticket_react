@@ -3,7 +3,6 @@ import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Layout from "../ui/Layout.jsx";
 import Dashboard from "../screens/Dashboard.jsx";
 import Tickets from "../screens/Tickets.jsx";
-import CreateTicket from "../screens/CreateTicket.jsx";
 import Profile from "../screens/Profile.jsx";
 import Login from "../screens/Login.jsx";
 import TicketView from "../screens/TicketView.jsx";
@@ -14,6 +13,7 @@ import { AnimatePresence } from "framer-motion";
 import PageTransition from "../components/PageTransition.jsx";
 import Settings from "../screens/Settings.jsx";
 import Notifications from "../screens/Notifications.jsx";
+import TicketForm from "../screens/CreateTicket.jsx";
 
 export default function App() {
   const location = useLocation();
@@ -81,23 +81,27 @@ export default function App() {
             path="tickets/new"
             element={
               <PageTransition>
-                <CreateTicket />
+                <TicketForm />
               </PageTransition>
             }
           />
           <Route
-            path="profile"
-            element={
-              <PageTransition>
-                <Profile />
-              </PageTransition>
-            }
+            path="/tickets/:id/edit"
+            element={<TicketForm isEdit={true} />}
           />
           <Route
             path="tickets/:id"
             element={
               <PageTransition>
                 <TicketView />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <PageTransition>
+                <Profile />
               </PageTransition>
             }
           />

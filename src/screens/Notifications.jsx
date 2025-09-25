@@ -112,7 +112,7 @@ export default function ActivityFeed() {
         }}
       >
         {activities.length === 0 ? (
-          <Box className="p-6 text-center text-gray-500 text-sm">
+          <Box className="p-6 text-center h-[calc(100vh-140px)]   flex items-center justify-center text-gray-500 text-sm">
             No notifications found
           </Box>
         ) : (

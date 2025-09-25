@@ -13,7 +13,7 @@ import {
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { ArrowUpTrayIcon } from "@heroicons/react/24/outline";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import dayjs from "dayjs";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -25,11 +25,37 @@ import toast from "react-hot-toast";
 // const priorities = ["Low", "Medium", "High"];
 const priorities = ["Low", "High", "Urgent"];
 
-export default function TicketForm() {
+export default function TicketForm({ isEdit = false }) {
+  const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useApp();
+  const [loadingTicket, setLoadingTicket] = useState(isEdit);
   const [dragActive, setDragActive] = useState(false);
   const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    if (isEdit && id) {
+      const fetchTicket = async () => {
+        try {
+          const res = await createAPIEndPoint(`ticket/${id}`).fetchAll();
+          const t = res.data;
+          formik.setValues({
+            title: t.title || "",
+            details: t.details || "",
+            category_id: t.category?.id || "",
+            due_date: t.due_date ? dayjs(t.due_date) : null,
+            priority: t.priority || "Low",
+            file: null,
+          });
+        } catch (err) {
+          toast.error("Failed to load ticket");
+        } finally {
+          setLoadingTicket(false);
+        }
+      };
+      fetchTicket();
+    }
+  }, [id, isEdit]);
 
   // Fetch categories from API
   useEffect(() => {
@@ -80,7 +106,6 @@ export default function TicketForm() {
           if (key === "file" && values.file) {
             formData.append("files", values.file);
           } else if (key === "due_date" && values.due_date) {
-            // ✅ Fix: format Dayjs → YYYY-MM-DD
             formData.append(
               "due_date",
               dayjs(values.due_date).format("YYYY-MM-DD")
@@ -89,19 +114,21 @@ export default function TicketForm() {
             formData.append(key, values[key]);
           }
         });
-
-        // Add required fields for backend
+        formData.append("user_id", user?.id);
         formData.append("clinic_id", 1);
         formData.append("location_id", 30);
-        formData.append("user_id", user?.id);
 
-        const res = await createAPIEndPoint("ticket").create(formData);
-        console.log("Ticket created:", res.data);
-        // ✅ Show toast here
-        toast.success("Ticket created successfully!");
+        let res;
+        if (isEdit && id) {
+          res = await createAPIEndPoint(`ticket/${id}`).patch(formData);
+          toast.success("Ticket updated successfully!");
+        } else {
+          res = await createAPIEndPoint("ticket").create(formData);
+          toast.success("Ticket created successfully!");
+        }
         navigate("/tickets");
-      } catch (error) {
-        console.error("Error creating ticket:", error);
+      } catch (err) {
+        toast.error("Error saving ticket");
       } finally {
         setSubmitting(false);
       }
@@ -133,13 +160,23 @@ export default function TicketForm() {
     }
   };
 
+  if (loadingTicket) {
+    return (
+      <div className="overflow-hidden">
+        <div className="overflow-auto h-[calc(100vh-92px)] flex items-center justify-center">
+          <CircularProgress size={40} color="primary" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <Box component="form" onSubmit={formik.handleSubmit} className=" bg-white">
-      <BackButton self="/tickets" />
+      <BackButton self={isEdit ? -1 : "/tickets"} />
 
       <div className="space-y-4 mt-4 border-0">
         <h2 className="text-lg md:text-xl font-semibold mb-1">
-          Create New Ticket
+          {isEdit ? "Edit Ticket" : "Create New Ticket"}
         </h2>
 
         {/* Title */}
@@ -305,6 +342,8 @@ export default function TicketForm() {
           >
             {formik.isSubmitting ? (
               <CircularProgress size={20} sx={{ color: "white" }} />
+            ) : isEdit ? (
+              "Update"
             ) : (
               "Create"
             )}

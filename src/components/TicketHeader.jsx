@@ -30,6 +30,7 @@ export default function TicketHeader({ ticket, onUpdate }) {
 
     try {
       await createAPIEndPoint(`ticket/${ticket.id}`).patch({
+        updated_by: user?.id,
         status: newStatus,
       });
 
@@ -52,17 +53,22 @@ export default function TicketHeader({ ticket, onUpdate }) {
       setFollowing(newFollowing);
 
       const formData = new FormData();
-      formData.append("followup_user_ids", user?.id);
+      formData.append(
+        newFollowing ? "followup_user_ids_add" : "followup_user_ids_remove",
+        user?.id
+      );
 
       await createAPIEndPoint(`ticket/${ticket.id}`).patch(formData);
 
       toast.success(
-        newFollowing ? "You are now following this ticket" : "Unfollowed ticket"
+        newFollowing
+          ? "You are now following this ticket"
+          : "Unfollowed this ticket"
       );
     } catch (err) {
       console.error("Failed to follow/unfollow ticket", err);
       toast.error("Something went wrong");
-      setFollowing(following); // rollback
+      setFollowing(following); // rollback state on error
     }
   };
 
@@ -98,91 +104,89 @@ export default function TicketHeader({ ticket, onUpdate }) {
   }
 
   return (
-<Stack
-  direction={{ xs: "column", sm: "row" }} // ✅ column on mobile, row on sm+
-  justifyContent="space-between"
-  alignItems={{ xs: "flex-start", sm: "center" }}
-  spacing={{ xs: 2, sm: 0 }}
-  mb={2}
->
-  {/* Left side: Ticket heading + Follow button */}
-  <Stack
-    direction="row"
-    spacing={2}
-    alignItems="center"
-    flexWrap="wrap"
-  >
-    <Typography
-      variant="h6" // ✅ smaller on mobile
-      fontWeight="bold"
-      color="primary"
-      sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }}
+    <Stack
+      direction={{ xs: "column", sm: "row" }} // ✅ column on mobile, row on sm+
+      justifyContent="space-between"
+      alignItems={{ xs: "flex-start", sm: "center" }}
+      spacing={{ xs: 2, sm: 0 }}
+      mb={2}
     >
-      Ticket #{ticket.id}
-    </Typography>
+      {/* Left side: Ticket heading + Follow button */}
+      <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap">
+        <Typography
+          variant="h6" // ✅ smaller on mobile
+          fontWeight="bold"
+          color="primary"
+          sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }}
+        >
+          Ticket #{ticket.id}
+        </Typography>
 
-    <Button
-      variant={following ? "outlined" : "contained"}
-      size="small"
-      onClick={handleFollowToggle}
-      startIcon={following ? <PersonIcon /> : <PersonAddAlt1Icon />}
-      sx={{
-        textTransform: "none",
-        boxShadow: "none",
-        borderRadius: "14px",
-        fontWeight: 500,
-        px: 1.5,
-        minHeight: 35,
-        ...(following
-          ? { borderColor: "#0984e3", color: "#0984e3" }
-          : {
-              backgroundColor: "#0984e3",
-              color: "white",
-              "&:hover": { backgroundColor: "#74b9ff" },
-            }),
-      }}
-    >
-      {following ? "Following" : "Follow"}
-    </Button>
-  </Stack>
+        <Button
+          variant={following ? "outlined" : "contained"}
+          size="small"
+          onClick={handleFollowToggle}
+          startIcon={following ? <PersonIcon /> : <PersonAddAlt1Icon />}
+          sx={{
+            textTransform: "none",
+            boxShadow: "none",
+            borderRadius: "14px",
+            fontWeight: 500,
+            px: 1.5,
+            minHeight: 35,
+            ...(following
+              ? {
+                  borderColor: "#0984e3",
+                  color: "#0984e3",
+                  "&:hover": { backgroundColor: "#E3F2FD" },
+                }
+              : {
+                  backgroundColor: "#0984e3",
+                  color: "white",
+                  "&:hover": { backgroundColor: "#74b9ff" },
+                }),
+          }}
+        >
+          {following ? "Following" : "Follow"}
+        </Button>
+      </Stack>
 
-  {/* Right side: Status + Actions */}
-  <Stack
-    direction="row"
-    spacing={1}
-    alignItems="center"
-    flexWrap="wrap"
-    justifyContent={{ xs: "flex-start", sm: "flex-end" }}
-  >
-    <StatusBadge status={ticket.status} isBigger={true} />
-
-    {nextAction && (
-      <Button
-        variant="contained"
-        size="small"
-        onClick={() => handleStatusUpdate(nextAction.status)}
-        disabled={submitting}
-        sx={{
-          textTransform: "none",
-          color: "white",
-          px: 1.5,
-          borderRadius: "14px",
-          fontWeight: 500,
-          boxShadow: "none",
-          minHeight: 35,
-          ...nextAction.styles,
-        }}
-        startIcon={!submitting && nextAction.icon}
+      {/* Right side: Status + Actions */}
+      <Stack
+        direction="row"
+        spacing={1}
+        alignItems="center"
+        flexWrap="wrap"
+        justifyContent={{ xs: "flex-start", sm: "flex-end" }}
       >
-        {submitting ? (
-          <CircularProgress size={18} sx={{ color: "white" }} />
-        ) : (
-          nextAction.label
-        )}
-      </Button>
-    )}
-  </Stack>
-</Stack>
+        <StatusBadge status={ticket.status} isBigger={true} />
 
+        {nextAction && (
+          <Button
+            variant="contained"
+            size="small"
+            onClick={() => handleStatusUpdate(nextAction.status)}
+            disabled={submitting}
+            sx={{
+              textTransform: "none",
+              color: "white",
+              px: 1.5,
+              borderRadius: "14px",
+              fontWeight: 500,
+              boxShadow: "none",
+              minHeight: 35,
+              ...nextAction.styles,
+            }}
+            startIcon={!submitting && nextAction.icon}
+          >
+            {submitting ? (
+              <CircularProgress size={18} sx={{ color: "white" }} />
+            ) : (
+              nextAction.label
+            )}
+          </Button>
+        )}
+      </Stack>
+    </Stack>
   );
 }
