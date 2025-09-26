@@ -193,7 +193,7 @@ const getPriorityIcon = (status, color) => {
     case "high":
       return <TrendingUpIcon fontSize="inherit" sx={{ color, mr: 0.25 }} />;
     case "low":
-      return <TrendingDownIcon fontSize="inherit" sx={{ color, mr: 0.25 }} />;
+      return <LowPriorityIcon fontSize="inherit" sx={{ color, mr: 0.25 }} />;
     default:
       return null;
   }

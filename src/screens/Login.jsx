@@ -24,6 +24,7 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import Avatar from "@mui/material/Avatar";
+import bgImage from "../assets/bg-image.jpg";
 import { useApp } from "../state/AppContext";
 
 export default function Login() {
@@ -141,7 +142,11 @@ export default function Login() {
   });
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-lime-200">
+    <div
+      className="flex min-h-screen items-center justify-center bg-cover bg-center"
+      style={{ backgroundImage: `url(${bgImage})` }}
+    >
+      {" "}
       <Container component="main" maxWidth="xs">
         <CssBaseline />
         <Box

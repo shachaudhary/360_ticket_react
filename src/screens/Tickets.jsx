@@ -8,6 +8,7 @@ import {
   Pagination,
   CircularProgress,
   InputAdornment,
+  Chip,
 } from "@mui/material";
 import { IconButton, Tooltip } from "@mui/material";
 import LaunchIcon from "@mui/icons-material/Launch";
@@ -27,7 +28,7 @@ import { toProperCase } from "../utils/formatting";
 export default function Tickets() {
   const navigate = useNavigate();
   const { user } = useApp();
-  console.log("🚀 ~ Tickets ~ user:", user)
+  console.log("🚀 ~ Tickets ~ user:", user);
 
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState(""); // 🔹 debounced value
@@ -394,14 +395,51 @@ export default function Tickets() {
                         <StatusBadge isInside status={t.status} />
                       </td>
                       <td className="px-4 py-3 text-gray-700 border-b border-[#E5E7EB]">
-                        {t.created_by?.username || "—"}
+                        {/* {toProperCase(t.created_by?.username) || "—"} */}
+                        <Chip
+                          label={toProperCase(t.created_by?.username) || "—"}
+                          variant="filled"
+                          sx={{
+                            fontSize: 12.75,
+                            borderRadius: "4px",
+                            color: "#333",
+                            backgroundColor: "#f6f6f6",
+                            height: 27.5,
+                            "& .MuiChip-label": {
+                              px: "7px !important", // ✅ Correct selector
+                            },
+                          }}
+                        />
                       </td>
                       <td className="px-4 py-3 text-gray-700 border-b border-[#E5E7EB]">
-                        {t.assignees && t.assignees.length > 0
+                        {/* {t.assignees && t.assignees.length > 0
                           ? t.assignees
                               .map((a) => toProperCase(a.assign_to_username))
                               .join(", ")
-                          : "Unassigned"}
+                          : "Unassigned"} */}
+
+                        <Chip
+                          label={
+                            t.assignees && t.assignees.length > 0
+                              ? t.assignees
+                                  .map((a) =>
+                                    toProperCase(a.assign_to_username)
+                                  )
+                                  .join(", ")
+                              : "Unassigned"
+                          }
+                          variant="filled"
+                          sx={{
+                            fontSize: 12.75,
+                            borderRadius: "4px",
+                            color: "#333",
+                            backgroundColor: "#f6f6f6",
+                            height: 27.5,
+                            "& .MuiChip-label": {
+                              px: "7px !important", // ✅ Correct selector
+                            },
+                          }}
+                        />
                       </td>
 
                       <td className="px-4 py-3 text-gray-700 border-b border-[#E5E7EB]">

@@ -19,6 +19,7 @@ import { useNavigate } from "react-router-dom";
 
 // ✅ Animations
 import { CSSTransition, TransitionGroup } from "react-transition-group";
+import { toProperCase } from "../utils/formatting";
 
 export default function ActivityFeed() {
   const { user } = useApp();
@@ -98,7 +99,7 @@ export default function ActivityFeed() {
           </button>
         )} */}
       </div>
- 
+
       {/* Card */}
       <Card
         sx={{
@@ -137,7 +138,7 @@ export default function ActivityFeed() {
                           variant="subtitle2"
                           className="font-semibold text-gray-800"
                         >
-                          {a.ticket_title}
+                          {toProperCase(a.ticket_title)}
                         </Typography>
                       </Box>
 
@@ -146,6 +147,11 @@ export default function ActivityFeed() {
                         className="text-gray-600 mb-1 leading-snug"
                       >
                         {a.message}
+                        {a.sender_info?.username && (
+                          <span className="text-gray-500 italic ml-1">
+                            — by {toProperCase(a.sender_info.username)}
+                          </span>
+                        )}
                       </Typography>
                     </Box>
 
