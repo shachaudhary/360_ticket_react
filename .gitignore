@@ -1,81 +1,24 @@
-# === Node / React ===
-node_modules/
-build/
-dist/
-.npm/
-.yarn/
-.pnp.*
-coverage/
+# Logs
+logs
 *.log
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# === Python / Flask ===
-__pycache__/
-*.py[cod]
-*.pyo
-*.pyd
-*.so
-*.egg-info/
-.eggs/
-*.log
-*.pot
-instance/
-db.sqlite3
-.mypy_cache/
-.pytest_cache/
-.pyre/
-.pytype/
-celerybeat-schedule
-.env
+node_modules
+dist
+dist-ssr
+*.local
 
-# === VSCode / IDEs ===
-.vscode/
-.idea/
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
-*.DS_Store
-Thumbs.db
-
-# === OS generated ===
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-desktop.ini
-
-# === Virtual Environments ===
-venv/
-env/
-ENV/
-.venv/
-
-# === Docker ===
-*.pid
-*.seed
-*.pid.lock
-docker-compose.override.yml
-
-# === Logs & Temp ===
-*.log
-*.tmp
-*.temp
-*.bak
-*.swp
-*.swo
-*.orig
-
-# === Misc ===
-*.lock
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-package-lock.json
-pnp.lock.yaml
