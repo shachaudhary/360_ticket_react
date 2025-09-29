@@ -118,73 +118,83 @@ export default function ActivityFeed() {
           </Box>
         ) : (
           <TransitionGroup>
-            {activities.map((a, idx) => (
-              <CSSTransition key={a.id} timeout={300} classNames="fade">
-                <div>
-                  <Box
-                    className="flex flex-col sm:flex-row sm:items-start sm:justify-between
+            <div className="px-0">
+              {activities.map((a, idx) => (
+                <CSSTransition key={a.id} timeout={300} classNames="fade">
+                  <div>
+                    <Box
+                      className=" flex flex-col sm:flex-row sm:items-start sm:justify-between
                                p-5 hover:bg-gray-50 transition cursor-pointer"
-                    onClick={() => navigate(`/tickets/${a?.ticket_id}`)}
-                  >
-                    {/* Content */}
-                    <Box className="flex-1 mb-3 sm:mb-0">
-                      <Box className="flex items-center gap-2 mb-1 flex-wrap">
-                        <StatusBadge
-                          status={a.notification_type}
-                          isInside
-                          customRadius="6px"
-                        />
+                      onClick={() =>
+                        window.open(`/tickets/${a?.ticket_id}`, "_blank")
+                      }
+                    >
+                      {/* Content */}
+                      <Box className="flex-1 mb-3 sm:mb-0">
+                        <Box className="flex items-center gap-2 mb-1 flex-wrap">
+                          <StatusBadge
+                            status={a.notification_type}
+                            isInside
+                            customRadius="6px"
+                          />
+                          <Typography
+                            variant="subtitle2"
+                            className="font-semibold text-gray-800"
+                          >
+                            {toProperCase(a.ticket_title)}
+                          </Typography>
+                        </Box>
+
                         <Typography
-                          variant="subtitle2"
-                          className="font-semibold text-gray-800"
+                          variant="body2"
+                          className="text-gray-600 mb-1 leading-snug"
                         >
-                          {toProperCase(a.ticket_title)}
+                          {a.message}
+                          {a.sender_info?.username && (
+                            <span className="text-gray-500 italic ml-1">
+                              — by {toProperCase(a.sender_info.username)}
+                            </span>
+                          )}
                         </Typography>
                       </Box>
 
-                      <Typography
-                        variant="body2"
-                        className="text-gray-600 mb-1 leading-snug"
-                      >
-                        {a.message}
-                        {a.sender_info?.username && (
-                          <span className="text-gray-500 italic ml-1">
-                            — by {toProperCase(a.sender_info.username)}
-                          </span>
-                        )}
-                      </Typography>
-                    </Box>
-
-                    {/* Right side */}
-                    <Box
-                      className="flex flex-row sm:flex-col 
+                      {/* Right side */}
+                      <Box
+                        className="flex flex-row sm:flex-col 
                                  items-center sm:items-end 
                                  justify-between sm:justify-start 
                                  gap-2 min-w-full sm:min-w-[160px]"
-                    >
-                      <Tooltip title={convertToCST(a.created_at)}>
-                        <Box className="flex items-center text-xs text-gray-500 gap-1">
-                          <AccessTimeIcon sx={{ fontSize: 16 }} />
-                          {convertToCST(a.created_at)}
-                        </Box>
-                      </Tooltip>
-                      <IconButton
-                        size="small"
-                        onClick={() => handleDeleteOne(a.id)}
-                        className="!text-gray-400 !bg-slate-50 hover:!bg-slate-100 hover:!text-slate-400 !rounded-md"
                       >
-                        <CloseIcon fontSize="small" />
-                      </IconButton>
+                        <Tooltip title={convertToCST(a.created_at)}>
+                          <Box className="flex items-center text-xs text-gray-500 gap-1">
+                            <AccessTimeIcon sx={{ fontSize: 16 }} />
+                            {convertToCST(a.created_at)}
+                          </Box>
+                        </Tooltip>
+                        <IconButton
+                          size="small"
+                          onClick={() => handleDeleteOne(a.id)}
+                          className="!text-gray-400 !bg-slate-50 hover:!bg-slate-100 hover:!text-slate-400 !rounded-md"
+                        >
+                          <CloseIcon fontSize="small" />
+                        </IconButton>
+                      </Box>
                     </Box>
-                  </Box>
 
-                  {/* Divider */}
-                  {idx !== activities.length - 1 && (
-                    <Divider sx={{ backgroundColor: "#E5E7EB", mx: 2.5 }} />
-                  )}
-                </div>
-              </CSSTransition>
-            ))}
+                    {/* Divider */}
+                    {idx !== activities.length - 1 && (
+                      <Divider
+                        sx={{
+                          backgroundColor: "#E5E7EB",
+
+                          // mx: 2.5
+                        }}
+                      />
+                    )}
+                  </div>
+                </CSSTransition>
+              ))}
+            </div>
           </TransitionGroup>
         )}
       </Card>

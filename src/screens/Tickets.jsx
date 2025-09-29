@@ -317,7 +317,7 @@ export default function Tickets() {
         <div className="overflow-x-auto">
           {/* Table */}
           <div className="overflow-hidden rounded-lg border border-[#E5E7EB]">
-            <div className="overflow-auto h-[calc(100vh-307.75px)]">
+            <div className="overflow-auto h-[calc(100vh-308.75px)]">
               <table className="min-w-full divide-y divide-gray-100">
                 <thead className="bg-white sticky top-0 z-10">
                   <tr className="text-left text-xs text-gray-500 ">
