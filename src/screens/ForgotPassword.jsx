@@ -17,6 +17,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import bgImage from "../assets/bg-image.jpg";
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
@@ -52,7 +53,10 @@ const ForgotPassword = () => {
   });
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-lime-200">
+    <div
+      className="flex min-h-screen items-center justify-center bg-cover bg-center"
+      style={{ backgroundImage: `url(${bgImage})` }}
+    >
       <Container component="main" maxWidth="xs">
         <CssBaseline />
         <Box

@@ -21,6 +21,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import toast from "react-hot-toast";
+import bgImage from "../assets/bg-image.jpg";
 
 const ResetPassword = () => {
   const navigate = useNavigate();
@@ -69,7 +70,10 @@ const ResetPassword = () => {
   });
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-lime-200">
+    <div
+      className="flex min-h-screen items-center justify-center bg-cover bg-center"
+      style={{ backgroundImage: `url(${bgImage})` }}
+    >
       <Container component="main" maxWidth="xs">
         <CssBaseline />
         <Box
@@ -113,7 +117,7 @@ const ResetPassword = () => {
             <Box
               component="form"
               onSubmit={formik.handleSubmit}
-              sx={{ mt: 2, width: "100%" }}
+              sx={{ mt: 0, width: "100%" }}
             >
               <TextField
                 fullWidth

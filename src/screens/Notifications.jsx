@@ -132,17 +132,17 @@ export default function ActivityFeed() {
                       {/* Content */}
                       <Box className="flex-1 mb-3 sm:mb-0">
                         <Box className="flex items-center gap-2 mb-1 flex-wrap">
+                          <Typography
+                            variant="subtitle2"
+                            className="font-semibold text-gray-800"
+                          >
+                           Ticket #{a.ticket_id} — {toProperCase(a.ticket_title)}
+                          </Typography>
                           <StatusBadge
                             status={a.notification_type}
                             isInside
                             customRadius="6px"
                           />
-                          <Typography
-                            variant="subtitle2"
-                            className="font-semibold text-gray-800"
-                          >
-                            {toProperCase(a.ticket_title)}
-                          </Typography>
                         </Box>
 
                         <Typography

@@ -32,15 +32,24 @@ import {
   Legend,
 } from "recharts";
 import dayjs from "dayjs";
+import { createAPIEndPoint } from "../config/api/api";
+import moment from "moment-timezone";
+
+const url = `/dashboard`;
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [statsData, setStatsData] = useState(null);
+  const [loadingStats, setLoadingStats] = useState(false);
   const [startDate, setStartDate] = useState(dayjs()); // today
   const [endDate, setEndDate] = useState(dayjs().add(7, "day")); // +7 days
   const [timeView, setTimeView] = useState("week");
+  const [categories, setCategories] = useState([]);
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [priorityFilter, setPriorityFilter] = useState("");
 
-  const url = `/dashboard`;
+  const priorities = ["Low", "High", "Urgent"]; // 🔹 static options
 
   useEffect(() => {
     const fetchAuth = async () => {
@@ -54,25 +63,49 @@ export default function Dashboard() {
     fetchAuth();
   }, [navigate]);
 
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await createAPIEndPoint("category").fetchAll();
+        setCategories(res.data || []);
+      } catch (err) {
+        console.error("Error fetching categories:", err);
+      }
+    };
+    fetchCategories();
+  }, []);
+
   // helper function to decide which chart data to show
   const getChartData = () => {
-    if (timeView === "custom" && startDate && endDate) {
-      // filter the fake "custom" data based on selected date range
-      return ticketTrends.custom
-        .filter(
-          (d) =>
-            new Date(d.date) >= new Date(startDate) &&
-            new Date(d.date) <= new Date(endDate)
-        )
-        .map((d) => ({
-          name: d.date, // label on X-axis
-          tickets: d.tickets,
-        }));
-    }
-
-    // otherwise just return week or month data
-    return ticketTrends[timeView];
+    return (
+      statsData?.daily_ticket_stats?.map((d) => ({
+        name: moment(d.date).format("MM/DD/YYYY"),
+        tickets: d.count,
+      })) || []
+    );
   };
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        setLoadingStats(true);
+
+        let apiUrl = "tickets/stats";
+        const params = [];
+        if (categoryFilter) params.push(`category_id=${categoryFilter}`);
+        if (priorityFilter) params.push(`priority=${priorityFilter}`);
+        if (params.length > 0) apiUrl += "?" + params.join("&");
+
+        const res = await createAPIEndPoint(apiUrl).fetchAll();
+        setStatsData(res.data || null);
+      } catch (err) {
+        console.error("Error fetching ticket stats:", err);
+      } finally {
+        setLoadingStats(false);
+      }
+    };
+    fetchStats();
+  }, [categoryFilter, priorityFilter]);
 
   const ticketTrends = {
     week: [
@@ -108,32 +141,27 @@ export default function Dashboard() {
     ],
   };
 
-  const statusData = [
-    { name: "Open", value: 128 },
-    { name: "In Progress", value: 82 },
-    { name: "Completed", value: 210 },
-    { name: "Escalated", value: 15 },
-  ];
+  const statusData = Object.entries(statsData?.by_status || {})
+    .map(([name, value]) => ({ name, value }))
+    .filter((item) => item.value > 0);
+
   const COLORS = ["#60a5fa", "#fbbf24", "#34d399", "#f87171"];
 
   const stats = [
     {
       label: "Open Tickets",
-      value: 128,
-      icon: <TicketIcon className="h-6 w-6 text-blue-500" />,
-      bg: "bg-blue-500", // light blue background
+      value: statsData?.pending_count ?? 0,
+      icon: <TicketIcon className="h-6 w-6 text-blue-400" />,
     },
     {
-      label: "Urgent Priority",
-      value: 15,
-      icon: <ExclamationTriangleIcon className="h-6 w-6 text-red-500" />,
-      bg: "bg-red-500", // light red background
+      label: "In Progress",
+      value: statsData?.in_progress_count ?? 0,
+      icon: <WrenchScrewdriverIcon className="h-6 w-6 text-yellow-400" />,
     },
     {
-      label: "Past Due",
-      value: 42,
-      icon: <ClockIcon className="h-6 w-6 text-orange-500" />,
-      bg: "bg-orange-500", // light orange background
+      label: "Completed",
+      value: statsData?.completed_count ?? 0,
+      icon: <CheckCircleIcon className="h-6 w-6 text-green-400" />,
     },
   ];
 
@@ -156,32 +184,91 @@ export default function Dashboard() {
       ) : (
         <div className="space-y-6">
           {/* Header with Date Filters */}
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <h2 className="text-lg md:text-xl font-semibold">Overview</h2>
-            <div className="w-full md:w-[420px] flex gap-3">
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DatePicker
-                  label="Start Date"
-                  value={startDate}
-                  onChange={(date) => setStartDate(date)}
-                  maxDate={endDate}
-                  slotProps={{
-                    textField: { size: "small", fullWidth: true },
-                  }}
-                />
-              </LocalizationProvider>
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+            {/* Left: Heading */}
+            <h2 className="text-lg md:text-xl font-semibold whitespace-nowrap">
+              Overview
+            </h2>
 
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DatePicker
-                  label="End Date"
-                  value={endDate}
-                  onChange={(date) => setEndDate(date)}
-                  minDate={startDate}
-                  slotProps={{
-                    textField: { size: "small", fullWidth: true },
-                  }}
-                />
-              </LocalizationProvider>
+            {/* Right: Filters */}
+            <div className="flex flex-col sm:flex-row flex-wrap gap-3 justify-end w-full">
+              {/* Category Filter */}
+              <div>
+                <FormControl size="small" fullWidth>
+                  <InputLabel>Category</InputLabel>
+                  <Select
+                    value={categoryFilter}
+                    label="Category"
+                    onChange={(e) => setCategoryFilter(e.target.value)}
+                    sx={{ minWidth: 200 }}
+                  >
+                    <MenuItem value="">All</MenuItem>
+                    {categories.map((c) => (
+                      <MenuItem key={c.id} value={c.id}>
+                        {c.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </div>
+
+              {/* Priority Filter */}
+              <div >
+                <FormControl size="small" fullWidth>
+                  <InputLabel>Priority</InputLabel>
+                  <Select
+                    value={priorityFilter}
+                    label="Priority"
+                    onChange={(e) => setPriorityFilter(e.target.value)}
+                    sx={{ minWidth: 200 }}
+                  >
+                    <MenuItem value="">All</MenuItem>
+                    {priorities.map((p) => (
+                      <MenuItem key={p} value={p}>
+                        {p}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </div>
+
+              {/* Start Date */}
+              <div >
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DatePicker
+                    label="Start Date"
+                    value={startDate}
+                    onChange={(date) => setStartDate(date)}
+                    maxDate={endDate}
+                    slotProps={{
+                      textField: {
+                        size: "small",
+                        fullWidth: true,
+                        sx: { minWidth: 200, maxWidth: 200 }, // ✅ apply width constraints here
+                      },
+                    }}
+                  />
+                </LocalizationProvider>
+              </div>
+
+              {/* End Date */}
+              <div>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DatePicker
+                    label="End Date"
+                    value={endDate}
+                    onChange={(date) => setEndDate(date)}
+                    minDate={startDate}
+                    slotProps={{
+                      textField: {
+                        size: "small",
+                        fullWidth: true,
+                        sx: { minWidth: 200, maxWidth: 200 }, // ✅ apply width constraints here
+                      },
+                    }}
+                  />
+                </LocalizationProvider>
+              </div>
             </div>
           </div>
 
@@ -190,14 +277,14 @@ export default function Dashboard() {
             {stats.map((s) => (
               <div
                 key={s.label}
-                className={`rounded-md border border-gray-100 bg-white text-white p-5 shadow-card flex items-center gap-4  bg-opacity-90 ${s.bg} `}
+                className={`rounded-md border border-gray-100 bg-white  p-5 shadow-card flex items-center gap-4  bg-opacity-90 ${s.bg} `}
               >
                 <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gray-50">
                   {s.icon}
                 </div>
                 <div>
-                  <div className="text-sm text-white">{s.label}</div>
-                  <div className="mt-1 text-2xl font-bold">{s.value}</div>
+                  <div className="text-sm text-gray-500">{s.label}</div>
+                  <div className="mt-1 text-2xl font-bold ">{s.value}</div>
                 </div>
               </div>
             ))}
@@ -277,28 +364,34 @@ export default function Dashboard() {
           {/* Status Pie Chart */}
           <div className="rounded-md border border-gray-100 bg-white p-5 shadow-card">
             <h3 className="mb-3 text- text-[#6B7280]">Tickets by Status</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={statusData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, value }) => `${name}: ${value}`}
-                  outerRadius={100}
-                  dataKey="value"
-                >
-                  {statusData.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={COLORS[index % COLORS.length]}
-                    />
-                  ))}
-                </Pie>
-                <Tooltip />
-                {/* <Legend /> */}
-              </PieChart>
-            </ResponsiveContainer>
+            {statusData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={statusData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, value }) => `${name}: ${value}`}
+                    outerRadius={100}
+                    dataKey="value"
+                  >
+                    {statusData.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={COLORS[index % COLORS.length]}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  {/* <Legend /> */}
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="text-center text-gray-400 mb-6 mt-6">
+                No status data available
+              </div>
+            )}
           </div>
         </div>
       )}
