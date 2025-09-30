@@ -147,6 +147,34 @@ export default function TicketView() {
     }
   };
 
+  // ✅ Reusable Logs List
+  const LogsList = ({ logs }) => (
+    <Box className="space-y-2">
+      {logs?.length > 0 ? (
+        logs.map((log, idx) => (
+          <div
+            key={idx}
+            className="rounded-lg border border-gray-200 p-3 text-sm bg-gray-50"
+          >
+            <div className="flex justify-between items-center mb-1">
+              <span className="font-semibold text-gray-800">
+                {toProperCase(log.username)}
+              </span>
+              <span className="text-xs text-gray-500">
+                {convertToCST(log.timestamp)}
+              </span>
+            </div>
+            <div className="text-gray-700 break-words">{log.action}</div>
+          </div>
+        ))
+      ) : (
+        <Typography variant="body2" color="text.secondary">
+          No logs yet
+        </Typography>
+      )}
+    </Box>
+  );
+
   if (!ticket) {
     return (
       <Box className="absolute inset-0 flex items-center justify-center bg-green-50">
@@ -183,7 +211,8 @@ export default function TicketView() {
               borderRadius: "16px",
               boxShadow: 0,
               p: 2,
-              minHeight: "calc(100dvh - 144px)",
+              height: "calc(100dvh - 144px)",
+              overflowY:"auto"
             }}
           >
             <TicketHeader ticket={ticket} onUpdate={setTicket} />
@@ -192,7 +221,7 @@ export default function TicketView() {
 
             {/* Ticket Details Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              <Label title="Title" value={ticket.title} />
+              <Label title="Title" value={toProperCase(ticket.title)} />
               <Label
                 title="Priority"
                 value={<StatusBadge status={ticket.priority} isInside />}
@@ -219,6 +248,10 @@ export default function TicketView() {
               <Label
                 title="Created At"
                 value={convertToCST(ticket.created_at)}
+              />
+              <Label
+                title="Created By"
+                value={toProperCase(ticket?.created_by?.username)}
               />
               <div className="sm:col-span-2 md:col-span-3">
                 <Label title="Details" value={ticket.details} />
@@ -249,8 +282,38 @@ export default function TicketView() {
               </div>
             )}
 
+            {/* 🔹 Logs Section */}
+            <div className="mt-6">
+              <Typography variant="subtitle2"  color="primary" sx={{ mb: 1, fontWeight: 600 }}>
+                Activity Logs
+              </Typography>
+              <LogsList
+                logs={[
+                  {
+                    username: "John Doe",
+                    action: "Changed status from Pending → Completed",
+                    timestamp: new Date().toISOString(),
+                  },
+                  {
+                    username: "Sarah Smith",
+                    action: "Assigned ticket to Ali Raza",
+                    timestamp: new Date(
+                      Date.now() - 1000 * 60 * 60
+                    ).toISOString(),
+                  },
+                  {
+                    username: "Admin",
+                    action: "Created ticket with priority High",
+                    timestamp: new Date(
+                      Date.now() - 1000 * 60 * 60 * 5
+                    ).toISOString(),
+                  },
+                ]}
+              />
+            </div>
+
             {/* Assign Section */}
-            <div className="mt-10 rounded-xl border border-gray-200 p-4">
+            {/* <div className="mt-10 rounded-xl border border-gray-200 p-4">
               <Typography
                 variant="subtitle1"
                 fontWeight={600}
@@ -265,7 +328,6 @@ export default function TicketView() {
 
               {console.log(ticket.assignees, "ticket.assignees")}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
-                {/* Assigned By */}
                 <FormControl fullWidth size="small" disabled>
                   <InputLabel>Assigned By</InputLabel>
                   <Select
@@ -280,7 +342,6 @@ export default function TicketView() {
                   </Select>
                 </FormControl>
 
-                {/* Assigned To */}
                 {ticket.assignees?.length > 0 ? (
                   <FormControl fullWidth size="small" disabled>
                     <InputLabel>Assigned To</InputLabel>
@@ -358,7 +419,6 @@ export default function TicketView() {
                   />
                 )}
 
-                {/* Assign Button */}
                 {ticket.assignees?.length === 0 && (
                   <div className="flex justify-end">
                     <Button
@@ -384,7 +444,7 @@ export default function TicketView() {
                   </div>
                 )}
               </div>
-            </div>
+            </div> */}
 
             {/* Comments (mobile) */}
             <Box className="mt-6 rounded-xl border border-gray-200 p-4 md:hidden">

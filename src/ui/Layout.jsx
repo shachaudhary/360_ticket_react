@@ -76,9 +76,9 @@ export default function Layout() {
       {!sidebarOpen && (
         <div className="mb-8 flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-500 font-semibold">
-            T
+            S
           </div>
-          <div className="font-semibold">Tickets 360</div>
+          <div className="font-semibold">Support 360</div>
         </div>
       )}
       <nav className="flex flex-col gap-2">
@@ -157,9 +157,9 @@ export default function Layout() {
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-500 font-semibold">
-              T
+              S
             </div>
-            <div className="font-semibold">Tickets 360</div>
+            <div className="font-semibold">Support 360</div>
           </div>
           <button
             onClick={() => setSidebarOpen(false)}

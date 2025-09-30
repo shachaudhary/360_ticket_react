@@ -32,7 +32,7 @@ export default function App() {
   };
 
   useEffect(() => {
-    const defaultTitle = "Tickets 360"; // fallback title
+    const defaultTitle = "Support 360"; // fallback title
     const currentPath = location.pathname;
 
     // Try exact match first
@@ -43,7 +43,7 @@ export default function App() {
       pageTitle = "Ticket Details";
     }
 
-    document.title = pageTitle ? ` Tickets 360 | ${pageTitle}` : defaultTitle;
+    document.title = pageTitle ? ` Support 360 | ${pageTitle}` : defaultTitle;
   }, [location]);
 
   return (

@@ -237,8 +237,7 @@ export default function Tickets() {
         </div>
 
         {/* User Filter + Clear button row */}
-        <div className="col-span-1 sm:col-span-2 lg:col-span-6 flex flex-col lg:flex-row items-stretch lg:items-center gap-2">
-          {/* Filter on the left */}
+        {/* <div className="col-span-1 sm:col-span-2 lg:col-span-6 flex flex-col lg:flex-row items-stretch lg:items-center gap-2">
           <div className="flex-1 lg:flex-initial lg:w-1/6">
             <FormControl size="small" fullWidth>
               <InputLabel>Filter</InputLabel>
@@ -256,7 +255,6 @@ export default function Tickets() {
             </FormControl>
           </div>
 
-          {/* Clear Button on the right */}
           <div className="flex lg:ml-auto lg:w-auto">
             <button
               onClick={() => {
@@ -269,6 +267,61 @@ export default function Tickets() {
                 setPage(0);
               }}
               className={`h-9 shrink-0 rounded-lg px-3 text-xs font-medium focus:outline-none focus:ring-2 transition-all ${
+                query ||
+                statusFilter ||
+                categoryFilter ||
+                startDate ||
+                endDate ||
+                userFilter
+                  ? "border border-red-500 text-red-500 hover:bg-red-50 focus:ring-red-500"
+                  : "border border-[#E5E7EB] hover:border-[#ddd] hover:text-gray-500 text-gray-400 hover:bg-brand-50 focus:ring-gray-500"
+              }`}
+            >
+              Clear
+            </button>
+          </div>
+        </div> */}
+
+        {/* User Filter + Clear button row */}
+        <div className="mb-0.5s col-span-1 sm:col-span-2 lg:col-span-6 flex flex-col lg:flex-row items-stretch lg:items-center gap-2">
+          {/* Filter Buttons */}
+          <div className="flex flex-wrap gap-2">
+            {[
+              { value: "", label: "All" },
+              { value: "assign_to", label: "Assigned" },
+              { value: "assign_by", label: "Created" },
+              { value: "followup", label: "Following" },
+              { value: "tag", label: "Tagged" },
+            ].map((filter) => (
+              <button
+                key={filter.value}
+                onClick={() =>
+                  setUserFilter(userFilter === filter.value ? "" : filter.value)
+                }
+                className={`px-3 py-1.5 !text-xs font-medium rounded-lg border transition-all ${
+                  userFilter === filter.value
+                    ? "bg-brand-500 text-white border-brand-500 hover:bg-brand-600"
+                    : "border border-gray-300 text-gray-600 hover:bg-gray-50"
+                }`}
+              >
+                {filter.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Clear Button on the right */}
+          <div className="flex lg:ml-auto lg:w-auto">
+            <button
+              onClick={() => {
+                setQuery("");
+                setStatusFilter("");
+                setCategoryFilter("");
+                setStartDate(null);
+                setEndDate(null);
+                setUserFilter("");
+                setPage(0);
+              }}
+              className={`px-3 py-1.5 shrink-0 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 transition-all ${
                 query ||
                 statusFilter ||
                 categoryFilter ||
