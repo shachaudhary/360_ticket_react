@@ -363,7 +363,7 @@ export default function Tickets() {
                         {t.id}
                       </td>
                       <td className="px-4 py-3 border-b border-[#E5E7EB]">
-                        {t.title}
+                        {toProperCase(t.title)}
                       </td>
                       {/* <td className="px-4 py-3 border-b border-[#E5E7EB]">
                         {t.details}
@@ -386,7 +386,7 @@ export default function Tickets() {
                         />
                       </td>
                       <td className="px-4 py-3 border-b border-[#E5E7EB]">
-                        {t.category?.name || "—"}
+                        {toProperCase(t.category?.name) || "—"}
                       </td>
                       <td className="px-4 py-3 border-b border-[#E5E7EB]">
                         <DateWithTooltip date={t?.due_date} />
@@ -401,7 +401,7 @@ export default function Tickets() {
                           variant="filled"
                           sx={{
                             fontSize: 12.75,
-                            borderRadius: "4px",
+                            borderRadius: "24px",
                             color: "#333",
                             backgroundColor: "#f6f6f6",
                             height: 27.5,
@@ -431,7 +431,7 @@ export default function Tickets() {
                           variant="filled"
                           sx={{
                             fontSize: 12.75,
-                            borderRadius: "4px",
+                            borderRadius: "24px",
                             color: "#333",
                             backgroundColor: "#f6f6f6",
                             height: 27.5,

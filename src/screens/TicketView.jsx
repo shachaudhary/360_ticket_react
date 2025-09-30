@@ -400,7 +400,13 @@ export default function TicketView() {
       </Box>
 
       {/* Comments Sidebar (desktop) */}
-      <Box className="hidden md:flex flex-col w-[320px] bg-white p-3.5 pr-0 border-l border-gray-200 -mt-4 -mb-4">
+      <Box
+        className="hidden md:flex flex-col w-[320px] bg-white p-3.5 pr-0 border-l border-gray-200 -mt-4 -mb-4"
+        sx={{
+          height: "calc(100vh - 58px)", // full viewport height
+          overflowY: "auto", // enable vertical scroll only in sidebar
+        }}
+      >
         <CommentBox ticketId={ticket.id} onAdd={fetchTicket} />
         <Divider sx={{ my: 2 }} />
         <Typography variant="body2" fontWeight={600} sx={{ mb: 1 }}>

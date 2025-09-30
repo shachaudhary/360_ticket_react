@@ -1,5 +1,11 @@
 import React from "react";
-import { Outlet, NavLink, useNavigate, useLocation } from "react-router-dom";
+import {
+  Outlet,
+  NavLink,
+  useNavigate,
+  useLocation,
+  useParams,
+} from "react-router-dom";
 import { Dropdown, Avatar } from "flowbite-react";
 import {
   Bars3Icon,
@@ -42,6 +48,11 @@ function NavItem({ to, icon: Icon, label, matchChildren = false }) {
 export default function Layout() {
   const { user, sidebarOpen, setSidebarOpen } = useApp();
   const navigate = useNavigate();
+  const { id } = useParams();
+  const location = useLocation();
+
+  const isViewPage = location.pathname === `/tickets/${id}`;
+  console.log("🚀 ~ Layout ~ isViewPage:", `/tickets/${id}`, isViewPage);
 
   const initials = React.useMemo(() => {
     const n = (user?.name || "Admin User").trim();
@@ -183,7 +194,7 @@ export default function Layout() {
 
         {/* Content */}
         <main className="flex-1 overflow-y-auto bg-white border border-gray-100 lg992:rounded-tl-2xl shadow-sm relative">
-          <div className="p-4">
+          <div className={`${isViewPage ? "p-4 pr-2.5" : "p-4"}`}>
             <Outlet />
           </div>
         </main>
