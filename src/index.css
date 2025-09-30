@@ -5,6 +5,30 @@
 :root {
   color-scheme: light;
 }
+
+/* * {
+  scrollbar-width: thin; 
+  scrollbar-color: #2bcb6b #0f1a1c; 
+}
+
+::-webkit-scrollbar {
+  width: 8px; 
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0f1a1c; 
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #2bcb6b;
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #249e56; 
+} */
+
 .badge {
   @apply inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium;
 }
