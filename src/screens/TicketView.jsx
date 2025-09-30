@@ -47,7 +47,7 @@ const CommentsList = ({ comments }) => (
       comments.map((c, idx) => (
         <div
           key={idx}
-          className="rounded-lg border border-gray-200 p-3 text-sm"
+          className="rounded-lg border bg-[#E5E7EB] bg-opacity-10 p-3 text-sm"
         >
           <div className="flex justify-between items-center mb-1">
             <span className="font-semibold text-brand-500">
@@ -154,10 +154,10 @@ export default function TicketView() {
         logs.map((log, idx) => (
           <div
             key={idx}
-            className="rounded-lg border border-gray-200 p-3 text-sm bg-gray-50"
+            className="rounded-lg  border bg-[#E5E7EB] bg-opacity-10  p-3 text-sm"
           >
             <div className="flex justify-between items-center mb-1">
-              <span className="font-semibold text-gray-800">
+              <span className="font-semibold text-gray-700">
                 {toProperCase(log.username)}
               </span>
               <span className="text-xs text-gray-500">
@@ -283,7 +283,7 @@ export default function TicketView() {
             )}
 
             {/* 🔹 Logs Section */}
-            <div className="mt-6">
+            {/* <div className="mt-6">
               <Typography variant="subtitle2"  color="primary" sx={{ mb: 1, fontWeight: 600 }}>
                 Activity Logs
               </Typography>
@@ -310,7 +310,7 @@ export default function TicketView() {
                   },
                 ]}
               />
-            </div>
+            </div> */}
 
             {/* Assign Section */}
             {/* <div className="mt-10 rounded-xl border border-gray-200 p-4">
