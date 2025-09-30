@@ -298,10 +298,10 @@ export default function Tickets() {
                 onClick={() =>
                   setUserFilter(userFilter === filter.value ? "" : filter.value)
                 }
-                className={`px-3 py-1.5 !text-xs font-medium rounded-lg border transition-all ${
+                className={`px-3 py-[6.5px] !text-xs font-medium rounded-lg border transition-all duration-300 ${
                   userFilter === filter.value
                     ? "bg-brand-500 text-white border-brand-500 hover:bg-brand-600"
-                    : "border border-gray-300 text-gray-600 hover:bg-gray-50"
+                    : "border border-[#E5E7EB] text-[#969AA1] hover:bg-gray-50"
                 }`}
               >
                 {filter.label}
@@ -321,7 +321,7 @@ export default function Tickets() {
                 setUserFilter("");
                 setPage(0);
               }}
-              className={`px-3 py-1.5 shrink-0 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 transition-all ${
+              className={`px-3 py-[6.5px] shrink-0 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 transition-all ${
                 query ||
                 statusFilter ||
                 categoryFilter ||

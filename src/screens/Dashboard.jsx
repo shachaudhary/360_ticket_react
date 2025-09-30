@@ -204,12 +204,12 @@ export default function Dashboard() {
           {/* Ticket Trends Chart */}
           <div className="rounded-md border border-gray-100 bg-white p-5 shadow-card">
             <div className="flex justify-between items-center mb-3">
-              <h3 className="text-sm font-medium text-brand-600 capitalize">
+              <h3 className="text-md  text-[#6B7280] capitalize">
                 Tickets Created ({timeView})
               </h3>
 
               {/* View Selector */}
-              <FormControl size="small" sx={{ minWidth: 160 }}>
+              <FormControl size="small"  sx={{ minWidth: 160 }}>
                 <InputLabel id="timeview-label">View</InputLabel>
                 <Select
                   labelId="timeview-label"
@@ -273,7 +273,7 @@ export default function Dashboard() {
 
           {/* Status Pie Chart */}
           <div className="rounded-md border border-gray-100 bg-white p-5 shadow-card">
-            <h3 className="mb-3 text-sm font-medium text-brand-600">
+            <h3 className="mb-3 text-md  text-[#6B7280]">
               Tickets by Status
             </h3>
             <ResponsiveContainer width="100%" height={300}>
