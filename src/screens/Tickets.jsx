@@ -328,8 +328,8 @@ export default function Tickets() {
                 startDate ||
                 endDate ||
                 userFilter
-                  ? "border border-red-500 text-red-500 hover:bg-red-50 focus:ring-red-500"
-                  : "border border-[#E5E7EB] hover:border-[#ddd] hover:text-gray-500 text-gray-400 hover:bg-brand-50 focus:ring-gray-500"
+                  ? "border border-red-500 bg-red-500 text-white hover:bg-red-600 focus:ring-red-500"
+                  : "border border-[#E5E7EB] text-gray-400 hover:border-gray-300 hover:text-gray-600 hover:bg-brand-50 focus:ring-gray-500"
               }`}
             >
               Clear
