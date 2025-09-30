@@ -103,7 +103,7 @@ export default function CategoryModal({ open, onClose, onSaved, category }) {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs" className="cat-page">
       <DialogTitle className="font-semibold text-brand-500 !text-lg flex justify-between items-center">
         {category ? "Edit Category" : "Add Category"}
 
@@ -132,7 +132,62 @@ export default function CategoryModal({ open, onClose, onSaved, category }) {
           />
 
           {/* 🔹 Assignee Autocomplete */}
+          {/* 🔹 Assignee Autocomplete */}
           <Autocomplete
+            fullWidth
+            size="small"
+            open={true}
+            className="cat-list"
+            options={searchResults}
+            loading={searchLoading}
+            filterOptions={(x) => x}
+            getOptionLabel={(option) =>
+              option
+                ? `${toProperCase(option.first_name)} ${toProperCase(
+                    option.last_name
+                  )}`.trim()
+                : ""
+            }
+            renderOption={(props, option) => (
+              <li {...props} key={option.user_id}>
+                <div className="flex flex-col border-bS">
+                  <span className="font-medium text-gray-600">
+                    {toProperCase(option.first_name)}{" "}
+                    {toProperCase(option.last_name)}
+                  </span>
+                  <span className="text-xs text-gray-500">{option.email}</span>
+                </div>
+              </li>
+            )}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Default Assigned To"
+                placeholder="Search team member..."
+                onChange={(e) => setSearchTerm(e.target.value)}
+                InputProps={{
+                  ...params.InputProps,
+                  endAdornment: (
+                    <>
+                      {searchLoading ? <CircularProgress size={20} /> : null}
+                      {params.InputProps.endAdornment}
+                    </>
+                  ),
+                }}
+              />
+            )}
+            noOptionsText={
+              searchLoading
+                ? "Searching..."
+                : searchTerm.trim()
+                ? "No team members found"
+                : "Search to find team member"
+            }
+            value={assignee} // ✅ keep selected object
+            onChange={(e, newValue) => setAssignee(newValue)}
+          />
+
+          {/* <Autocomplete
             fullWidth
             size="small"
             options={searchResults}
@@ -171,7 +226,7 @@ export default function CategoryModal({ open, onClose, onSaved, category }) {
             }
             value={assignee} // ✅ use selected object
             onChange={(e, newValue) => setAssignee(newValue)}
-          />
+          /> */}
         </div>
       </DialogContent>
 
