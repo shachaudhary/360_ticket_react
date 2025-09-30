@@ -149,7 +149,7 @@ export default function TicketView() {
 
   // ✅ Reusable Logs List
   const LogsList = ({ logs }) => (
-    <Box className="space-y-2">
+    <Box className="space-y-2 ">
       {logs?.length > 0 ? (
         logs.map((log, idx) => (
           <div
@@ -211,8 +211,8 @@ export default function TicketView() {
               borderRadius: "16px",
               boxShadow: 0,
               p: 2,
-              height: "calc(100dvh - 144px)",
-              overflowY:"auto"
+              minHeight: "calc(100dvh - 144px)",
+              overflowY: "auto",
             }}
           >
             <TicketHeader ticket={ticket} onUpdate={setTicket} />
@@ -283,34 +283,28 @@ export default function TicketView() {
             )}
 
             {/* 🔹 Logs Section */}
-            {/* <div className="mt-6">
-              <Typography variant="subtitle2"  color="primary" sx={{ mb: 1, fontWeight: 600 }}>
+            <div className="mt-4">
+              <Typography
+                variant="subtitle1"
+                // color="primary"
+                sx={{ mb: 1, fontWeight: 600 }}
+              >
                 Activity Logs
               </Typography>
-              <LogsList
-                logs={[
-                  {
-                    username: "John Doe",
-                    action: "Changed status from Pending → Completed",
-                    timestamp: new Date().toISOString(),
-                  },
-                  {
-                    username: "Sarah Smith",
-                    action: "Assigned ticket to Ali Raza",
-                    timestamp: new Date(
-                      Date.now() - 1000 * 60 * 60
-                    ).toISOString(),
-                  },
-                  {
-                    username: "Admin",
-                    action: "Created ticket with priority High",
-                    timestamp: new Date(
-                      Date.now() - 1000 * 60 * 60 * 5
-                    ).toISOString(),
-                  },
-                ]}
-              />
-            </div> */}
+              <div className="max-h-[27dvh] overflow-y-auto">
+                <LogsList
+                  logs={
+                    ticket.status_logs?.map((log) => ({
+                      username: log.changed_by_username,
+                      action: `Changed status from ${toProperCase(
+                        log.old_status
+                      )} → ${toProperCase(log.new_status)}`,
+                      timestamp: convertToCST(log.changed_at),
+                    })) || []
+                  }
+                />
+              </div>
+            </div>
 
             {/* Assign Section */}
             {/* <div className="mt-10 rounded-xl border border-gray-200 p-4">

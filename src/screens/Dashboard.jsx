@@ -120,17 +120,20 @@ export default function Dashboard() {
     {
       label: "Open Tickets",
       value: 128,
-      icon: <TicketIcon className="h-6 w-6 text-blue-400" />,
+      icon: <TicketIcon className="h-6 w-6 text-blue-500" />,
+      bg: "bg-blue-500", // light blue background
     },
     {
       label: "Urgent Priority",
       value: 15,
-      icon: <ExclamationTriangleIcon className="h-6 w-6 text-red-400" />,
+      icon: <ExclamationTriangleIcon className="h-6 w-6 text-red-500" />,
+      bg: "bg-red-500", // light red background
     },
     {
       label: "Past Due",
       value: 42,
-      icon: <ClockIcon className="h-6 w-6 text-orange-400" />, // ⏰ softer clock
+      icon: <ClockIcon className="h-6 w-6 text-orange-500" />,
+      bg: "bg-orange-500", // light orange background
     },
   ];
 
@@ -155,7 +158,7 @@ export default function Dashboard() {
           {/* Header with Date Filters */}
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <h2 className="text-lg md:text-xl font-semibold">Overview</h2>
-            {/* <div className="w-full md:w-[420px] flex gap-3">
+            <div className="w-full md:w-[420px] flex gap-3">
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DatePicker
                   label="Start Date"
@@ -179,7 +182,7 @@ export default function Dashboard() {
                   }}
                 />
               </LocalizationProvider>
-            </div> */}
+            </div>
           </div>
 
           {/* Stats Grid */}
@@ -187,13 +190,13 @@ export default function Dashboard() {
             {stats.map((s) => (
               <div
                 key={s.label}
-                className="rounded-md border border-gray-100 bg-white p-5 shadow-card flex items-center gap-4"
+                className={`rounded-md border border-gray-100 bg-white text-white p-5 shadow-card flex items-center gap-4  bg-opacity-90 ${s.bg} `}
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gray-50">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gray-50">
                   {s.icon}
                 </div>
                 <div>
-                  <div className="text-sm text-gray-500">{s.label}</div>
+                  <div className="text-sm text-white">{s.label}</div>
                   <div className="mt-1 text-2xl font-bold">{s.value}</div>
                 </div>
               </div>
@@ -209,7 +212,7 @@ export default function Dashboard() {
               </h3>
 
               {/* View Selector */}
-              <FormControl size="small"  sx={{ minWidth: 160 }}>
+              <FormControl size="small" sx={{ minWidth: 160 }}>
                 <InputLabel id="timeview-label">View</InputLabel>
                 <Select
                   labelId="timeview-label"
@@ -273,9 +276,7 @@ export default function Dashboard() {
 
           {/* Status Pie Chart */}
           <div className="rounded-md border border-gray-100 bg-white p-5 shadow-card">
-            <h3 className="mb-3 text-md  text-[#6B7280]">
-              Tickets by Status
-            </h3>
+            <h3 className="mb-3 text- text-[#6B7280]">Tickets by Status</h3>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
