@@ -81,7 +81,7 @@ export default function Layout() {
           <div className="font-semibold">Tickets 360</div>
         </div>
       )}
-      <nav className="flex flex-col gap-1">
+      <nav className="flex flex-col gap-2">
         <NavItem
           to="/dashboard"
           icon={Squares2X2Icon}
@@ -98,7 +98,7 @@ export default function Layout() {
         {/* <NavItem to="/profile" icon={UserCircleIcon} label="Profile" exact /> */}
       </nav>
 
-      <div className="mt-auto pt-6">
+      <div className={`mt-auto pt-6 ${sidebarOpen ? "pb-2" : "!pb-0"}  `}>
         {/* <button
           onClick={() => navigate("/settings")}
           className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
@@ -169,7 +169,7 @@ export default function Layout() {
             <XMarkIcon className="h-5 w-5" />
           </button>
         </div>
-        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto h-[calc(100dvh-92px)]">
           {SidebarContent}
         </div>
       </div>

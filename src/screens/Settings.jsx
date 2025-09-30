@@ -5,6 +5,7 @@ import {
   Tooltip,
   Switch,
   CircularProgress,
+  Chip,
 } from "@mui/material";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import ModeEditSharpIcon from "@mui/icons-material/ModeEditSharp";
@@ -175,7 +176,22 @@ export default function Settings() {
                         {toProperCase(cat.name)}
                       </td>
                       <td className="px-4 py-3 border-b border-[#E5E7EB]">
-                        {toProperCase(cat.assignee_name) || "—"}
+                        {/* {toProperCase(cat.assignee_name) || "—"} */}
+
+                        <Chip
+                          label={toProperCase(cat.assignee_name) || "—"}
+                          variant="filled"
+                          sx={{
+                            fontSize: 12.75,
+                            borderRadius: "24px",
+                            color: "#333",
+                            backgroundColor: "#f6f6f6",
+                            height: 27.5,
+                            "& .MuiChip-label": {
+                              px: "7px !important", // ✅ Correct selector
+                            },
+                          }}
+                        />
                       </td>
                       <td className="px-4 py-3 border-b border-[#E5E7EB]">
                         {cat.created_at ? (
