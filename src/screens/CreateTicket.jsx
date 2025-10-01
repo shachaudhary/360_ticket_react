@@ -39,13 +39,21 @@ export default function TicketForm({ isEdit = false }) {
         try {
           const res = await createAPIEndPoint(`ticket/${id}`).fetchAll();
           const t = res.data;
+
+          // Normalize existing files
+          const existingFiles = (t.files || []).map((f) => ({
+            name: f.name,
+            previewUrl: f.url,
+            isExisting: true, // mark so we don’t re-upload
+          }));
+
           formik.setValues({
             title: t.title || "",
             details: t.details || "",
             category_id: t.category?.id || "",
             due_date: t.due_date ? dayjs(t.due_date) : null,
             priority: t.priority || "Low",
-            file: null,
+            files: existingFiles,
           });
         } catch (err) {
           toast.error("Failed to load ticket");
@@ -104,7 +112,12 @@ export default function TicketForm({ isEdit = false }) {
         const formData = new FormData();
         Object.keys(values).forEach((key) => {
           if (key === "files" && values.files?.length > 0) {
-            values.files.forEach((f) => formData.append("files", f));
+            values.files.forEach((f) => {
+              if (!f.isExisting) {
+                // only append new files, not already existing ones
+                formData.append("files", f);
+              }
+            });
           } else if (key === "due_date" && values.due_date) {
             formData.append(
               "due_date",
@@ -331,59 +344,65 @@ export default function TicketForm({ isEdit = false }) {
 
         {/* Preview Uploaded Files */}
         {formik.values.files && formik.values.files.length > 0 && (
-          <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-            {formik.values.files.map((file, index) => (
-              <div
-                key={index}
-                className="relative flex flex-col items-center border rounded-lg p-2"
-              >
-                {/* Show preview if image */}
-                {file.type.startsWith("image/") ? (
-                  <img
-                    src={URL.createObjectURL(file)}
-                    alt={file.name}
-                    className="h-28 w-full object-cover rounded"
-                  />
-                ) : (
-                  <div className="h-28 w-full flex items-center justify-center bg-gray-100 text-xs text-gray-600 rounded">
-                    {file.name.endsWith(".pdf") ? "📄 PDF File" : file.name}
-                  </div>
-                )}
+          <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+            {formik.values.files.map((file, index) => {
+              const isImage =
+                file.type?.startsWith("image/") ||
+                file.previewUrl?.match(/\.(jpg|jpeg|png|gif|webp)$/i);
 
-                {/* Filename */}
-                <Typography
-                  variant="caption"
-                  className="!mt-1 truncate w-full text-center capitalize"
+              return (
+                <div
+                  key={index}
+                  className="relative flex flex-col items-center border rounded-lg p-2"
                 >
-                  {file.name}
-                </Typography>
+                  {/* Show preview if image */}
+                  {isImage ? (
+                    <img
+                      src={file.previewUrl || URL.createObjectURL(file)}
+                      alt={file.name}
+                      className="h-28 w-full object-cover rounded"
+                    />
+                  ) : (
+                    <div className="h-28 w-full flex items-center justify-center bg-gray-100 text-xs text-gray-600 rounded">
+                      {file.name.endsWith(".pdf") ? "📄 PDF File" : file.name}
+                    </div>
+                  )}
 
-                {/* Remove button */}
-                <Button
-                  size="small"
-                  color="error"
-                  variant="outlined"
-                  onClick={() => {
-                    const updated = [...formik.values.files];
-                    updated.splice(index, 1);
-                    formik.setFieldValue("files", updated);
-                  }}
-                  sx={{
-                    position: "absolute",
-                    top: -8,
-                    right: -8,
-                    minWidth: 0,
-                    width: 24,
-                    height: 24,
-                    borderRadius: "50%",
-                    p: 0,
-                    fontSize: 12,
-                  }}
-                >
-                  ✕
-                </Button>
-              </div>
-            ))}
+                  {/* Filename */}
+                  <Typography
+                    variant="caption"
+                    className="!mt-1 truncate w-full text-center capitalize"
+                  >
+                    {file.name}
+                  </Typography>
+
+                  {/* Remove button */}
+                  <Button
+                    size="small"
+                    color="error"
+                    variant="outlined"
+                    onClick={() => {
+                      const updated = [...formik.values.files];
+                      updated.splice(index, 1);
+                      formik.setFieldValue("files", updated);
+                    }}
+                    sx={{
+                      position: "absolute",
+                      top: -8,
+                      right: -8,
+                      minWidth: 0,
+                      width: 24,
+                      height: 24,
+                      borderRadius: "50%",
+                      p: 0,
+                      fontSize: 12,
+                    }}
+                  >
+                    ✕
+                  </Button>
+                </div>
+              );
+            })}
           </div>
         )}
 
