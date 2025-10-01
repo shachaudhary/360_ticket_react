@@ -63,8 +63,8 @@ select:focus {
   outline: none !important;
 }
 
-.MuiAutocomplete-option {
-  border-bottom: 1px solid #E5E7EB !important;
+.MuiAutocomplete-option:not(:last-child) {
+  border-bottom: 1px solid #e5e7eb !important;
 }
 .MuiPickersOutlinedInput-notchedOutline {
   border-color: #e5e7eb !important;
@@ -154,6 +154,7 @@ table td,
 
 a.active {
   background-color: #2bcb6b !important;
+  color: #fff;
 }
 
 @media (max-width: 992px) {

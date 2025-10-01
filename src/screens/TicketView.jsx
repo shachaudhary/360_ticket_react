@@ -13,8 +13,18 @@ import {
   CircularProgress,
   Autocomplete,
   TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Tooltip,
 } from "@mui/material";
-import { EyeIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowPathIcon,
+  ArrowsRightLeftIcon,
+  EyeIcon,
+  UserPlusIcon,
+} from "@heroicons/react/24/outline";
 import { useParams } from "react-router-dom";
 import { createAPIEndPoint } from "../config/api/api";
 import BackButton from "../components/BackButton";
@@ -81,19 +91,131 @@ const CommentsList = ({ comments }) => (
     )}
   </Box>
 );
+function AssignModal({
+  open,
+  onClose,
+  ticket,
+  assignee,
+  setAssignee,
+  handleAssign,
+  searchResults,
+  searchLoading,
+  setSearchTerm,
+  loading,
+}) {
+  useEffect(() => {
+    if (open && ticket?.assignees?.length > 0) {
+      const first = ticket.assignees[0]; // 👈 first index
+      setAssignee({
+        user_id: first.assign_to,
+        first_name: first.assign_to_username?.split(" ")[0] || "",
+        last_name:
+          first.assign_to_username?.split(" ").slice(1).join(" ") || "",
+      });
+      setSearchTerm(""); // reset search
+    }
+  }, [open, ticket, setAssignee, setSearchTerm]);
+
+  return (
+    <Dialog
+      open={open}
+      onClose={onClose}
+      fullWidth
+      PaperProps={{ style: { maxWidth: "400px" } }}
+    >
+      <DialogTitle color="primary">Update Assignee</DialogTitle>
+      <DialogContent dividers>
+        <Autocomplete
+          size="small"
+          fullWidth
+          options={searchResults}
+          value={assignee} // ✅ current assignee shown first
+          onChange={(e, newValue) => setAssignee(newValue)}
+          isOptionEqualToValue={(option, value) =>
+            option.user_id === value?.user_id
+          }
+          getOptionLabel={(option) =>
+            option
+              ? `${toProperCase(option.first_name)} ${toProperCase(
+                  option.last_name
+                )}`
+              : ""
+          }
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="Assign To"
+              placeholder="Search team member..."
+              onChange={(e) => setSearchTerm(e.target.value)}
+              InputProps={{
+                ...params.InputProps,
+                endAdornment: (
+                  <>
+                    {searchLoading && <CircularProgress size={20} />}
+                    {params.InputProps.endAdornment}
+                  </>
+                ),
+              }}
+            />
+          )}
+          noOptionsText={
+            searchLoading ? "Searching..." : "No team members found"
+          }
+        />
+      </DialogContent>
+      <DialogActions sx={{ px: 3, py: 2.5 }}>
+        <Button
+          onClick={onClose}
+          variant="outlined"
+          sx={{
+            textTransform: "none",
+            borderColor: "#E5E7EB",
+            color: "#6B7270",
+            "&:hover": { borderColor: "#E5E7EB", backgroundColor: "#Fafafa" },
+          }}
+        >
+          Cancel
+        </Button>
+        <Button
+          onClick={async () => {
+            await handleAssign();
+            onClose();
+          }}
+          variant="contained"
+          color="primary"
+          sx={{
+            boxShadow: "none",
+            textTransform: "none",
+            color: "white",
+            minWidth: 90,
+          }}
+          disabled={loading} // disable while loading
+        >
+          {loading ? (
+            <CircularProgress size={20} sx={{ color: "#6B7270" }} />
+          ) : (
+            "Update"
+          )}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
 
 export default function TicketView() {
   const { id } = useParams();
   const { user } = useApp();
   const navigate = useNavigate();
   const [ticket, setTicket] = useState(null);
-  const [assignee, setAssignee] = useState("");
+  const [assignee, setAssignee] = useState(null);
+  console.log("🚀 ~ TicketView ~ assignee:", assignee);
   const [loading, setLoading] = useState(false);
 
   const [searchResults, setSearchResults] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearch = useDebounce(searchTerm, 400);
+  const [assignModalOpen, setAssignModalOpen] = useState(false);
 
   // ✅ Fetch Ticket
   const fetchTicket = useCallback(async () => {
@@ -109,10 +231,23 @@ export default function TicketView() {
     fetchTicket();
   }, [fetchTicket]);
 
-  // ✅ Search Team Members
   useEffect(() => {
     const search = async () => {
-      if (!debouncedSearch) return setSearchResults([]);
+      if (!debouncedSearch) {
+        // keep current assignee in options if exists
+        if (ticket?.assignees?.length > 0) {
+          const current = {
+            user_id: ticket.assignees[0]?.assign_to,
+            first_name: ticket.assignees[0]?.assign_to_first_name,
+            last_name: ticket.assignees[0]?.assign_to_last_name,
+          };
+          setSearchResults([current]);
+        } else {
+          setSearchResults([]);
+        }
+        return;
+      }
+
       setSearchLoading(true);
       try {
         const res = await createAPIEndPointAuth(
@@ -126,21 +261,44 @@ export default function TicketView() {
       }
     };
     search();
-  }, [debouncedSearch]);
+  }, [debouncedSearch, ticket]);
+
+  // ✅ Search Team Members
+  useEffect(() => {
+    if (assignModalOpen && !debouncedSearch) {
+      (async () => {
+        setSearchLoading(true);
+        try {
+          const res = await createAPIEndPointAuth(
+            `clinic_team/search?query=${
+              ticket.assignees[-1]?.assign_to_username
+            }`
+          ).fetchAll();
+          setSearchResults(res?.data?.results || []);
+        } catch (err) {
+          console.error("Failed to fetch team", err);
+        } finally {
+          setSearchLoading(false);
+        }
+      })();
+    }
+  }, [assignModalOpen, debouncedSearch]);
 
   // ✅ Assign Ticket
   const handleAssign = async () => {
     if (!assignee) return toast.error("Please select a team member");
     try {
       setLoading(true);
-      await createAPIEndPoint("assign").createWithJSONFormat({
-        ticket_id: Number(id),
-        assign_to: assignee,
-        assign_by: user?.id,
+      await createAPIEndPoint(`ticket/${id}`).patch({
+        assign_to: assignee?.user_id,
+        // assign_by: user?.id,
+        updated_by: user?.id,
       });
+
       toast.success("Ticket assigned successfully");
-      fetchTicket();
+      fetchTicket(); // refresh ticket after update
     } catch (err) {
+      console.error("Failed to assign ticket", err);
       toast.error("Failed to assign ticket");
     } finally {
       setLoading(false);
@@ -190,16 +348,42 @@ export default function TicketView() {
         <div className="flex justify-between items-center">
           <BackButton self="/tickets" />
 
-          <Button
-            variant="outlined"
-            size="small"
-            startIcon={<PencilSquareIcon className="h-4 w-4" />}
-            onClick={() => navigate(`/tickets/${ticket.id}/edit`)}
-            sx={{ borderRadius: 1.25 }}
-            className="!border !border-[#E5E7EB] hover:!border-[#ddd]  !text-gray-500 hover:!bg-gray-50 focus:!ring-gray-500 !px-1 !py-1.5"
-          >
-            Edit
-          </Button>
+          <div className="flex items-center gap-2 justify-between w-full pl-3">
+            {/* Assigned To */}
+            {ticket.assignees?.length > 0 && (
+              <div className="flex items-center gap-1 !text-[13px] text-gray-500 mr-auto">
+                <span className="font-medium text-sm">Assigned To:</span>
+                <Tooltip title="Change Assignee" arrow>
+                  <Box
+                    onClick={() => {
+                      // 🚀 reset so modal opens empty
+                      setAssignee(null);
+                      setAssignModalOpen(true);
+                    }}
+                    sx={{ borderRadius: 1.25 }}
+                    className="flex justify-center items-center text-brand-500 border border-brand-500 bg-green-50 hover:brightness-[97.5%] py-2 px-2 gap-1 cursor-pointer transition-all"
+                  >
+                    <span className="leading-3 font-semibold">
+                      {toProperCase(ticket.assignees[0]?.assign_to_username)}
+                    </span>
+                    <ArrowsRightLeftIcon className="h-4 w-4 text-brand-500" />
+                  </Box>
+                </Tooltip>
+              </div>
+            )}
+
+            {/* Edit Button */}
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<PencilSquareIcon className="h-4 w-4" />}
+              onClick={() => navigate(`/tickets/${ticket.id}/edit`)}
+              sx={{ borderRadius: 1.25 }}
+              className="!border !border-[#E5E7EB] hover:!border-[#ddd]  !text-gray-500 hover:!bg-gray-50 focus:!ring-gray-500 !px-1 !py-1.5"
+            >
+              Edit
+            </Button>
+          </div>
         </div>
 
         <Container maxWidth="1440px" sx={{ mt: 2, px: "0px !important" }}>
@@ -211,16 +395,20 @@ export default function TicketView() {
               borderRadius: "16px",
               boxShadow: 0,
               p: 2,
-              minHeight: "calc(100dvh - 144px)",
+              height: { xs: "auto", md: "calc(100dvh - 144px)" },
               overflowY: "auto",
             }}
           >
-            <TicketHeader ticket={ticket} onUpdate={setTicket} />
+            <TicketHeader
+              ticket={ticket}
+              onUpdate={setTicket}
+              fetchAgain={fetchTicket}
+            />
 
             <Divider sx={{ my: 2 }} />
 
             {/* Ticket Details Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4">
               <Label title="Title" value={toProperCase(ticket.title)} />
               <Label
                 title="Priority"
@@ -264,26 +452,97 @@ export default function TicketView() {
                 <Typography variant="subtitle2" sx={{ mb: 1 }}>
                   Attached Files
                 </Typography>
-                <ul className="space-y-2">
-                  {ticket.files.map((file, idx) => (
-                    <li key={idx}>
+
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                  {ticket.files.map((file, idx) => {
+                    const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(
+                      file.url
+                    );
+                    const fileName = file.url.split("/").pop();
+
+                    // shorten file name if too long
+                    const shortName =
+                      fileName.length > 15
+                        ? fileName.substring(0, 8) + "..." + fileName.slice(-7)
+                        : fileName;
+
+                    return (
                       <a
+                        key={idx}
                         href={file.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 rounded border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-500 hover:bg-gray-50"
+                        className="group relative flex items-center gap-2 rounded-md border border-gray-200 bg-gray-50 px-1.5 py-1.5 text-xs text-gray-600 hover:bg-white shadow-sm hover:shadow transition-all"
                       >
-                        <EyeIcon className="h-[14px] w-[14px] text-gray-500" />
-                        View
+                        {isImage ? (
+                          <img
+                            src={file.url}
+                            alt={fileName}
+                            className="h-10 w-10 rounded object-cover border border-gray-300"
+                          />
+                        ) : (
+                          <div className="flex h-10 w-10 items-center justify-center rounded bg-gray-200 text-gray-500">
+                            📄
+                          </div>
+                        )}
+                        <span className="truncate">{shortName}</span>
                       </a>
-                    </li>
-                  ))}
-                </ul>
+                    );
+                  })}
+                </div>
               </div>
             )}
 
-            {/* 🔹 Logs Section */}
+            {/* 🔹 Assignment Logs Section */}
             <div className="mt-4">
+              <Typography
+                variant="subtitle1"
+                color="primary"
+                sx={{ mb: 1, fontWeight: 600 }}
+              >
+                Assignment Logs
+              </Typography>
+              <div className="max-h-64 overflow-y-auto">
+                <LogsList
+                  logs={
+                    ticket.assignment_logs?.map((log) => ({
+                      username: log.changed_by_username,
+                      action: `Reassigned from ${toProperCase(
+                        log.old_assign_to_username
+                      )} → ${toProperCase(log.new_assign_to_username)}`,
+                      timestamp: convertToCST(log.changed_at),
+                    })) || []
+                  }
+                />
+              </div>
+            </div>
+
+            {/* 🔹 Status Logs Section */}
+            <div className="mt-4">
+              <Typography
+                variant="subtitle1"
+                color="primary"
+                sx={{ mb: 1, fontWeight: 600 }}
+              >
+                Status Logs
+              </Typography>
+              <div className="max-h-64 overflow-y-auto">
+                <LogsList
+                  logs={
+                    ticket.status_logs?.map((log) => ({
+                      username: log.changed_by_username,
+                      action: `Changed status from ${toProperCase(
+                        log.old_status
+                      )} → ${toProperCase(log.new_status)}`,
+                      timestamp: convertToCST(log.changed_at),
+                    })) || []
+                  }
+                />
+              </div>
+            </div>
+
+            {/* 🔹 Logs Section */}
+            {/* <div className="mt-4">
               <Typography
                 variant="subtitle1"
                 // color="primary"
@@ -304,7 +563,7 @@ export default function TicketView() {
                   }
                 />
               </div>
-            </div>
+            </div> */}
 
             {/* Assign Section */}
             {/* <div className="mt-10 rounded-xl border border-gray-200 p-4">
@@ -468,6 +727,19 @@ export default function TicketView() {
         </Typography>
         <CommentsList comments={ticket.comments} />
       </Box>
+
+      <AssignModal
+        open={assignModalOpen}
+        onClose={() => setAssignModalOpen(false)}
+        ticket={ticket}
+        assignee={assignee}
+        setAssignee={setAssignee}
+        handleAssign={handleAssign}
+        searchResults={searchResults}
+        searchLoading={searchLoading}
+        setSearchTerm={setSearchTerm}
+        loading={loading} // 👈 pass it
+      />
     </Box>
   );
 }

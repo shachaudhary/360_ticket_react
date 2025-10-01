@@ -213,7 +213,7 @@ export default function Dashboard() {
               </div>
 
               {/* Priority Filter */}
-              <div >
+              <div>
                 <FormControl size="small" fullWidth>
                   <InputLabel>Priority</InputLabel>
                   <Select
@@ -233,7 +233,7 @@ export default function Dashboard() {
               </div>
 
               {/* Start Date */}
-              <div >
+              <div>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DatePicker
                     label="Start Date"
@@ -244,7 +244,10 @@ export default function Dashboard() {
                       textField: {
                         size: "small",
                         fullWidth: true,
-                        sx: { minWidth: 200, maxWidth: 200 }, // ✅ apply width constraints here
+                        sx: {
+                          minWidth: 200,
+                          maxWidth: { xs: "auto", md: 200 },
+                        }, // ✅ apply width constraints here
                       },
                     }}
                   />
@@ -263,7 +266,10 @@ export default function Dashboard() {
                       textField: {
                         size: "small",
                         fullWidth: true,
-                        sx: { minWidth: 200, maxWidth: 200 }, // ✅ apply width constraints here
+                        sx: {
+                          minWidth: 200,
+                          maxWidth: { xs: "auto", md: 200 },
+                        }, // ✅ apply width constraints here
                       },
                     }}
                   />

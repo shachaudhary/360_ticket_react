@@ -88,7 +88,7 @@ export default function TicketForm({ isEdit = false }) {
       category_id: "",
       due_date: null,
       priority: "Low",
-      file: null,
+      files: [],
     },
     validationSchema: Yup.object({
       title: Yup.string().required("Ticket title is required").min(3),
@@ -97,14 +97,14 @@ export default function TicketForm({ isEdit = false }) {
       priority: Yup.string().required("Please select a priority"),
       due_date: Yup.date().nullable().required("Please select a due date"),
       // .min(new Date(), "Due date cannot be in the past"),
-      file: Yup.mixed().nullable(),
+      files: Yup.array().nullable(),
     }),
     onSubmit: async (values, { setSubmitting }) => {
       try {
         const formData = new FormData();
         Object.keys(values).forEach((key) => {
-          if (key === "file" && values.file) {
-            formData.append("files", values.file);
+          if (key === "files" && values.files?.length > 0) {
+            values.files.forEach((f) => formData.append("files", f));
           } else if (key === "due_date" && values.due_date) {
             formData.append(
               "due_date",
@@ -114,6 +114,7 @@ export default function TicketForm({ isEdit = false }) {
             formData.append(key, values[key]);
           }
         });
+
         formData.append("user_id", user?.id);
         formData.append("clinic_id", 1);
         formData.append("location_id", 30);
@@ -274,13 +275,24 @@ export default function TicketForm({ isEdit = false }) {
         </LocalizationProvider>
 
         {/* File Upload */}
+        {/* File Upload */}
         <div
           onDragOver={(e) => {
             e.preventDefault();
             setDragActive(true);
           }}
           onDragLeave={() => setDragActive(false)}
-          onDrop={handleDrop}
+          onDrop={(e) => {
+            e.preventDefault();
+            setDragActive(false);
+            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+              const newFiles = Array.from(e.dataTransfer.files);
+              formik.setFieldValue("files", [
+                ...(formik.values.files || []),
+                ...newFiles,
+              ]);
+            }
+          }}
           className={`min-h-36 relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-center transition-all ${
             dragActive
               ? "border-brand-500 bg-green-50 scale-[1.01]"
@@ -290,10 +302,15 @@ export default function TicketForm({ isEdit = false }) {
           <input
             type="file"
             id="fileUpload"
+            multiple
             className="hidden"
-            onChange={(e) =>
-              formik.setFieldValue("file", e.currentTarget.files[0])
-            }
+            onChange={(e) => {
+              const newFiles = Array.from(e.currentTarget.files || []);
+              formik.setFieldValue("files", [
+                ...(formik.values.files || []),
+                ...newFiles,
+              ]);
+            }}
           />
           <label
             htmlFor="fileUpload"
@@ -301,23 +318,74 @@ export default function TicketForm({ isEdit = false }) {
           >
             <ArrowUpTrayIcon
               className={`h-8 w-8 mb-2 transition-colors ${
-                dragActive || formik.values.file
+                dragActive ||
+                (formik.values.files && formik.values.files.length > 0)
                   ? "text-brand-500"
                   : "text-gray-400"
               }`}
             />
-            {formik.values.file ? (
-              <span className="text-gray-500 !text-sm font-medium">
-                {formik.values.file.name}
-              </span>
-            ) : (
-              <>
-                <span className="block">Drag & drop file here</span>
-                <span className="text-gray-400">or click to upload</span>
-              </>
-            )}
+            <span className="block">Drag & drop files here</span>
+            <span className="text-gray-400">or click to upload</span>
           </label>
         </div>
+
+        {/* Preview Uploaded Files */}
+        {formik.values.files && formik.values.files.length > 0 && (
+          <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            {formik.values.files.map((file, index) => (
+              <div
+                key={index}
+                className="relative flex flex-col items-center border rounded-lg p-2"
+              >
+                {/* Show preview if image */}
+                {file.type.startsWith("image/") ? (
+                  <img
+                    src={URL.createObjectURL(file)}
+                    alt={file.name}
+                    className="h-28 w-full object-cover rounded"
+                  />
+                ) : (
+                  <div className="h-28 w-full flex items-center justify-center bg-gray-100 text-xs text-gray-600 rounded">
+                    {file.name.endsWith(".pdf") ? "📄 PDF File" : file.name}
+                  </div>
+                )}
+
+                {/* Filename */}
+                <Typography
+                  variant="caption"
+                  className="!mt-1 truncate w-full text-center capitalize"
+                >
+                  {file.name}
+                </Typography>
+
+                {/* Remove button */}
+                <Button
+                  size="small"
+                  color="error"
+                  variant="outlined"
+                  onClick={() => {
+                    const updated = [...formik.values.files];
+                    updated.splice(index, 1);
+                    formik.setFieldValue("files", updated);
+                  }}
+                  sx={{
+                    position: "absolute",
+                    top: -8,
+                    right: -8,
+                    minWidth: 0,
+                    width: 24,
+                    height: 24,
+                    borderRadius: "50%",
+                    p: 0,
+                    fontSize: 12,
+                  }}
+                >
+                  ✕
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Actions */}
         <div className="flex justify-end gap-2">

@@ -9,7 +9,7 @@ import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import PersonIcon from "@mui/icons-material/Person";
 import { useApp } from "../state/AppContext";
 
-export default function TicketHeader({ ticket, onUpdate }) {
+export default function TicketHeader({ ticket, onUpdate, fetchAgain }) {
   const { user } = useApp();
   const [submitting, setSubmitting] = useState(false);
   const [following, setFollowing] = useState(false); // 🔹 local state for follow
@@ -36,7 +36,7 @@ export default function TicketHeader({ ticket, onUpdate }) {
 
       // ✅ update locally only after API hit succeeds
       onUpdate?.({ ...ticket, status: newStatus });
-
+      fetchAgain?.();
       toast.success(`Ticket marked as ${newStatus.replace("_", " ")}`);
     } catch (err) {
       console.error("Failed to update ticket", err);
@@ -117,7 +117,7 @@ export default function TicketHeader({ ticket, onUpdate }) {
           variant="h6" // ✅ smaller on mobile
           fontWeight="bold"
           color="primary"
-          sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }}
+          // sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }}
         >
           Ticket #{ticket.id}
         </Typography>

@@ -136,7 +136,6 @@ export default function CategoryModal({ open, onClose, onSaved, category }) {
           <Autocomplete
             fullWidth
             size="small"
-            open={true}
             className="cat-list"
             options={searchResults}
             loading={searchLoading}
