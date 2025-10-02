@@ -1,19 +1,16 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import {
   Box,
-  TextField,
   Button,
   Chip,
   CircularProgress,
   Typography,
-  Popover,
-  List,
-  ListItem,
-  ListItemText,
+  Paper,
+  Divider,
 } from "@mui/material";
-import { createAPIEndPointAuth } from "../config/api/apiAuth";
-import { getUserData } from "../utils";
+import { Send as SendIcon } from "@mui/icons-material";
 import { createAPIEndPoint } from "../config/api/api";
+import { getUserData } from "../utils";
 import toast from "react-hot-toast";
 import MentionsInput from "./MentionsInput";
 
@@ -25,7 +22,7 @@ export default function CommentBox({ ticketId, onAdd }) {
 
   const handleSubmit = async () => {
     if (!comment.trim() && mentions.length === 0) {
-      toast.error("Please enter a comment or tag someone before submitting.");
+      toast.error("Please enter a comment or tag someone.");
       return;
     }
 
@@ -55,19 +52,24 @@ export default function CommentBox({ ticketId, onAdd }) {
   };
 
   return (
-    // <div className="mt-6 rounded-xl border border-gray-200 p-3 relative">
-    <div className="w-full relative">
+    <Paper
+      elevation={0}
+      sx={{
+        p: 1.5,
+        // borderRadius: 3,
+        border: "1px solid #e0e0e0",
+        background: "#fafafa",
+      }}
+    >
       <Typography
-        variant="h6"
+        variant="subtitle1"
         fontWeight={600}
-        color="primary"
         gutterBottom
-        className="!mb-3 !text-lg"
+        sx={{ mb: 1 }}
       >
-        Comments
+        Add a Comment
       </Typography>
 
-      {/* 🔹 Integrated MentionsInput */}
       <MentionsInput
         value={comment}
         onChange={setComment}
@@ -75,15 +77,23 @@ export default function CommentBox({ ticketId, onAdd }) {
         setMentions={setMentions}
       />
 
-      {/* Show selected mentions */}
+      {/* Show mentions */}
       {/* {mentions.length > 0 && (
-        <Box sx={{ mt: 1, display: "flex", gap: 1, flexWrap: "wrap" }}>
+        <Box
+          sx={{
+            mt: 1,
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 1,
+          }}
+        >
           {mentions.map((m) => (
             <Chip
               key={m.user_id}
               label={`@${m.first_name} ${m.last_name}`}
               size="small"
               variant="outlined"
+              color="primary"
               onDelete={() =>
                 setMentions((prev) =>
                   prev.filter((mm) => mm.user_id !== m.user_id)
@@ -94,30 +104,31 @@ export default function CommentBox({ ticketId, onAdd }) {
         </Box>
       )} */}
 
-      <Box className="flex justify-end mt-2">
+      <Divider sx={{ my: 2 }} />
+
+      <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
         <Button
           onClick={handleSubmit}
           variant="contained"
-          color="primary"
+          startIcon={
+            submitting ? (
+              <CircularProgress size={16} sx={{ color: "white" }} />
+            ) : (
+              <SendIcon />
+            )
+          }
           disabled={submitting}
           sx={{
             textTransform: "none",
-            color: "white",
-            px: 2.5,
             borderRadius: 2,
-            fontWeight: 500,
-            boxShadow: "none",
-            fontSize: 13,
-            minHeight: 36,
+            fontWeight: 600,
+            px: 3,
+            minHeight: 40,
           }}
         >
-          {submitting ? (
-            <CircularProgress size={20} sx={{ color: "white" }} />
-          ) : (
-            "Add"
-          )}
+          {submitting ? "Posting..." : "Post"}
         </Button>
       </Box>
-    </div>
+    </Paper>
   );
 }
