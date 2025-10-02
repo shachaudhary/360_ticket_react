@@ -729,7 +729,7 @@ export default function TicketView() {
       <Box
         className="hidden md:flex flex-col w-[305px] bg-white p-2.5 pr-0 border-l border-gray-200 -mt-4 -mb-4"
         sx={{
-          height: "calc(100vh - 58px)", // full viewport height
+          height: "calc(100dvh - 58px)", // full viewport height
           overflowY: "auto", // enable vertical scroll only in sidebar
         }}
       >

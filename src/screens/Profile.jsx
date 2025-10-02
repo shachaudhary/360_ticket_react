@@ -83,7 +83,7 @@ export default function ProfileForm() {
   if (loading) {
     return (
       <div className="overflow-hidden">
-        <div className="overflow-auto h-[calc(100vh-92px)] flex items-center justify-center">
+        <div className="overflow-auto h-[calc(100dvh-92px)] flex items-center justify-center">
           <CircularProgress size={40} color="primary" />
         </div>
       </div>

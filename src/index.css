@@ -157,6 +157,18 @@ a.active {
   color: #fff;
 }
 
+/* In your global CSS (e.g., index.css, globals.css) */
+.scroll-width {
+  overflow-y: auto; /* allow scrolling */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+.scroll-width::-webkit-scrollbar {
+  width: 0; /* Chrome, Safari */
+  height: 0; /* optional for horizontal scrollbars */
+}
+
 @media (max-width: 992px) {
   .sidebar-desktop {
     display: none !important;

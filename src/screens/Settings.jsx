@@ -127,13 +127,13 @@ export default function Settings() {
       {/* Table */}
       {loading ? (
         <div className="overflow-hidden rounded-lg border border-[#E5E7EB]">
-          <div className="overflow-auto h-[calc(100vh-139px)] flex items-center justify-center rounded-lg bg-green-50">
+          <div className="overflow-auto h-[calc(100dvh-139px)] flex items-center justify-center rounded-lg bg-green-50">
             <CircularProgress color="primary" />
           </div>
         </div>
       ) : categories.length === 0 ? (
         <div className="overflow-hidden rounded-lg border border-[#E5E7EB]">
-          <div className="h-[calc(100vh-145px)] flex-col gap-1 flex items-center justify-center rounded-lg">
+          <div className="h-[calc(100dvh-145px)] flex-col gap-1 flex items-center justify-center rounded-lg">
             <p className="text-gray-500 font-normal text-md">
               No categories found
             </p>
@@ -142,7 +142,7 @@ export default function Settings() {
       ) : (
         <div className="overflow-x-auto">
           <div className="overflow-hidden rounded-lg border border-[#E5E7EB]">
-            <div className="overflow-auto h-[calc(100vh-209px)]">
+            <div className="overflow-auto h-[calc(100dvh-209px)]">
               <table className="min-w-full divide-y divide-gray-100">
                 <thead className="bg-white sticky top-0 z-10">
                   <tr className="text-left text-xs text-gray-500">

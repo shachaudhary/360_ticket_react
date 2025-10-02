@@ -27,7 +27,7 @@ export default function TicketsTable({
         border: "1px solid #ddd",
         borderRadius: "12px",
         overflow: "hidden",
-        maxHeight: "calc(100vh - 297.75px)",
+        maxHeight: "calc(100dvh - 297.75px)",
       }}
     >
       <Table stickyHeader size="small">

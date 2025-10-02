@@ -11,7 +11,7 @@ export default function DataTable({
 }) {
   return (
     <div className="overflow-hidden rounded-xl border border-[#E5E7EB]">
-      <div className="overflow-auto h-[calc(100vh-307.75px)]">
+      <div className="overflow-auto h-[calc(100dvh-307.75px)]">
         {loading ? (
           <div className="flex items-center justify-center h-40">
             Loading...

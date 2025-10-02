@@ -194,7 +194,7 @@ export default function Layout() {
 
         {/* Content */}
         <main className="flex-1 overflow-y-auto bg-white border border-gray-100 lg992:rounded-tl-2xl shadow-sm relative">
-          <div className={`${isViewPage ? "p-4 pr-2.5" : "p-4"}`}>
+          <div className={`${isViewPage ? "p-4 pr-2.5" : "p-4 scroll-width h-[calc(100dvh-58px)]"}`}>
             <Outlet />
           </div>
         </main>

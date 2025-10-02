@@ -77,7 +77,7 @@ export default function ActivityFeed() {
       <div className="space-y-4">
         <h2 className="text-lg md:text-xl font-semibold">Notifications</h2>
         <div className="overflow-hidden rounded-lg border border-[#E5E7EB]">
-          <div className="h-[calc(100vh-135px)] flex items-center justify-center bg-green-50">
+          <div className="h-[calc(100dvh-135px)] flex items-center justify-center bg-green-50">
             <CircularProgress size={28} />
           </div>
         </div>
@@ -113,7 +113,7 @@ export default function ActivityFeed() {
         }}
       >
         {activities.length === 0 ? (
-          <Box className="p-6 text-center h-[calc(100vh-140px)]   flex items-center justify-center text-gray-500 text-sm">
+          <Box className="p-6 text-center h-[calc(100dvh-140px)]   flex items-center justify-center text-gray-500 text-sm">
             No notifications found
           </Box>
         ) : (
