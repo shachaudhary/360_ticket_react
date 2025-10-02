@@ -121,10 +121,12 @@ function AssignModal({
       open={open}
       onClose={onClose}
       fullWidth
-      PaperProps={{ style: { maxWidth: "400px" } }}
+      PaperProps={{ style: { maxWidth: "360px" } }}
     >
-      <DialogTitle color="primary">Update Assignee</DialogTitle>
-      <DialogContent dividers>
+      <DialogTitle color="primary" sx={{ px: 2 }}>
+        Update Assignee
+      </DialogTitle>
+      <DialogContent dividers sx={{ px: 2 }}>
         <Autocomplete
           size="small"
           fullWidth
@@ -163,7 +165,7 @@ function AssignModal({
           }
         />
       </DialogContent>
-      <DialogActions sx={{ px: 3, py: 2.5 }}>
+      <DialogActions sx={{ px: 2, py: 1.5 }}>
         <Button
           onClick={onClose}
           variant="outlined"
@@ -397,13 +399,22 @@ export default function TicketView() {
               p: 2,
               height: { xs: "auto", md: "calc(100dvh - 144px)" },
               overflowY: "auto",
+
+              // Hide scrollbar
+              "&::-webkit-scrollbar": {
+                width: 0, // for Chrome, Safari
+              },
+              scrollbarWidth: "none", // for Firefox
+              msOverflowStyle: "none", // for IE & Edge
             }}
           >
-            <TicketHeader
-              ticket={ticket}
-              onUpdate={setTicket}
-              fetchAgain={fetchTicket}
-            />
+            <div>
+              <TicketHeader
+                ticket={ticket}
+                onUpdate={setTicket}
+                fetchAgain={fetchTicket}
+              />
+            </div>
 
             <Divider sx={{ my: 2 }} />
 
@@ -493,51 +504,53 @@ export default function TicketView() {
               </div>
             )}
 
-            {/* 🔹 Assignment Logs Section */}
-            <div className="mt-4">
-              <Typography
-                variant="subtitle1"
-                color="primary"
-                sx={{ mb: 1, fontWeight: 600 }}
-              >
-                Assignment Logs
-              </Typography>
-              <div className="max-h-64 overflow-y-auto">
-                <LogsList
-                  logs={
-                    ticket.assignment_logs?.map((log) => ({
-                      username: log.changed_by_username,
-                      action: `Reassigned from ${toProperCase(
-                        log.old_assign_to_username
-                      )} → ${toProperCase(log.new_assign_to_username)}`,
-                      timestamp: convertToCST(log.changed_at),
-                    })) || []
-                  }
-                />
+            <div className="grid md:grid-cols-1 gap-5">
+              {/* 🔹 Assignment Logs Section */}
+              <div className="mt-4">
+                <Typography
+                  variant="subtitle1"
+                  color="primary"
+                  sx={{ mb: 1, fontWeight: 600 }}
+                >
+                  Assignment Logs
+                </Typography>
+                <div className="max-h-64 overflow-y-auto">
+                  <LogsList
+                    logs={
+                      ticket.assignment_logs?.map((log) => ({
+                        username: log.changed_by_username,
+                        action: `Reassigned from ${toProperCase(
+                          log.old_assign_to_username
+                        )} → ${toProperCase(log.new_assign_to_username)}`,
+                        timestamp: convertToCST(log.changed_at),
+                      })) || []
+                    }
+                  />
+                </div>
               </div>
-            </div>
 
-            {/* 🔹 Status Logs Section */}
-            <div className="mt-4">
-              <Typography
-                variant="subtitle1"
-                color="primary"
-                sx={{ mb: 1, fontWeight: 600 }}
-              >
-                Status Logs
-              </Typography>
-              <div className="max-h-64 overflow-y-auto">
-                <LogsList
-                  logs={
-                    ticket.status_logs?.map((log) => ({
-                      username: log.changed_by_username,
-                      action: `Changed status from ${toProperCase(
-                        log.old_status
-                      )} → ${toProperCase(log.new_status)}`,
-                      timestamp: convertToCST(log.changed_at),
-                    })) || []
-                  }
-                />
+              {/* 🔹 Status Logs Section */}
+              <div className="mt-4">
+                <Typography
+                  variant="subtitle1"
+                  color="primary"
+                  sx={{ mb: 1, fontWeight: 600 }}
+                >
+                  Status Logs
+                </Typography>
+                <div className="max-h-64 overflow-y-auto">
+                  <LogsList
+                    logs={
+                      ticket.status_logs?.map((log) => ({
+                        username: log.changed_by_username,
+                        action: `Changed status from ${toProperCase(
+                          log.old_status
+                        )} → ${toProperCase(log.new_status)}`,
+                        timestamp: convertToCST(log.changed_at),
+                      })) || []
+                    }
+                  />
+                </div>
               </div>
             </div>
 
@@ -714,7 +727,7 @@ export default function TicketView() {
 
       {/* Comments Sidebar (desktop) */}
       <Box
-        className="hidden md:flex flex-col w-[320px] bg-white p-3.5 pr-0 border-l border-gray-200 -mt-4 -mb-4"
+        className="hidden md:flex flex-col w-[305px] bg-white p-2.5 pr-0 border-l border-gray-200 -mt-4 -mb-4"
         sx={{
           height: "calc(100vh - 58px)", // full viewport height
           overflowY: "auto", // enable vertical scroll only in sidebar

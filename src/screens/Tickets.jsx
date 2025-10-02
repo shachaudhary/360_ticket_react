@@ -283,7 +283,7 @@ export default function Tickets() {
         </div> */}
 
         {/* User Filter + Clear button row */}
-        <div className="mb-0.5s col-span-1 sm:col-span-2 lg:col-span-6 flex flex-col lg:flex-row items-stretch lg:items-center gap-2">
+        <div className="mb-0.5 col-span-1 sm:col-span-2 lg:col-span-6 flex flex-col lg:flex-row items-stretch lg:items-center gap-2">
           {/* Filter Buttons */}
           <div className="flex flex-wrap gap-2">
             {[
