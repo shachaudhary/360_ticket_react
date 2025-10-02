@@ -87,9 +87,10 @@ export default function MentionsInput({
         value={value}
         onChange={handleChange}
         placeholder="Type @ to mention a team member..."
-        className="w-full rounded-md focus:!border-2 border-[#E5E7EB] focus:!border-brand-500 focus:ring-2 focus:ring-blue-500 p-3 text-sm shadow-sm resize-y outline-none"
-        rows={5}
-        // rows={4}
+        // className="w-full rounded-md focus:!border-2 border-[#E5E7EB] focus:!border-brand-500 focus:ring-2 focus:ring-blue-500 p-3 text-sm shadow-sm resize-y outline-none"
+        className="w-full rounded-md  border-none bg-transparent  p-3 text-sm resize-none"
+        // rows={5}
+        rows={4}
       />
 
       {showSuggestions && (

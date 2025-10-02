@@ -157,6 +157,12 @@ a.active {
   color: #fff;
 }
 
+.dashbaord-pg .MuiPickersSectionList-root {
+  padding-top: 6px;
+  padding-bottom: 6px;
+  font-size: 14px !important;
+}
+
 /* In your global CSS (e.g., index.css, globals.css) */
 .scroll-width {
   overflow-y: auto; /* allow scrolling */

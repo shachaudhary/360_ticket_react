@@ -55,80 +55,93 @@ export default function CommentBox({ ticketId, onAdd }) {
     <Paper
       elevation={0}
       sx={{
-        p: 1.5,
+        // p: 1.5,
         // borderRadius: 3,
-        border: "1px solid #e0e0e0",
-        background: "#fafafa",
+        // border: "1px solid #e0e0e0",
+        // background: "#fafafa",
       }}
     >
       <Typography
         variant="subtitle1"
         fontWeight={600}
         gutterBottom
+        color="primary"
         sx={{ mb: 1 }}
       >
         Add a Comment
       </Typography>
 
-      <MentionsInput
-        value={comment}
-        onChange={setComment}
-        mentions={mentions}
-        setMentions={setMentions}
-      />
+      <div className="border bg-white rounded-md">
+        <MentionsInput
+          value={comment}
+          onChange={setComment}
+          mentions={mentions}
+          setMentions={setMentions}
+        />
 
-      {/* Show mentions */}
-      {/* {mentions.length > 0 && (
+        {/* Show mentions */}
+        {/* {mentions.length > 0 && (
         <Box
-          sx={{
-            mt: 1,
-            display: "flex",
-            flexWrap: "wrap",
-            gap: 1,
+        sx={{
+          mt: 1,
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 1,
           }}
-        >
+          >
           {mentions.map((m) => (
             <Chip
-              key={m.user_id}
-              label={`@${m.first_name} ${m.last_name}`}
-              size="small"
-              variant="outlined"
-              color="primary"
-              onDelete={() =>
-                setMentions((prev) =>
-                  prev.filter((mm) => mm.user_id !== m.user_id)
-                )
-              }
-            />
-          ))}
-        </Box>
-      )} */}
-
-      <Divider sx={{ my: 2 }} />
-
-      <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-        <Button
-          onClick={handleSubmit}
-          variant="contained"
-          startIcon={
-            submitting ? (
-              <CircularProgress size={16} sx={{ color: "white" }} />
-            ) : (
-              <SendIcon />
+            key={m.user_id}
+            label={`@${m.first_name} ${m.last_name}`}
+            size="small"
+            variant="outlined"
+            color="primary"
+            onDelete={() =>
+              setMentions((prev) =>
+                prev.filter((mm) => mm.user_id !== m.user_id)
             )
-          }
-          disabled={submitting}
+            }
+            />
+            ))}
+            </Box>
+            )} */}
+
+        {/* <Divider sx={{ my: 2 }} /> */}
+
+        <Box
           sx={{
-            textTransform: "none",
-            borderRadius: 2,
-            fontWeight: 600,
-            px: 3,
-            minHeight: 40,
+            display: "flex",
+            justifyContent: "flex-end",
+            pr: "12px",
+            pb: "12px",
           }}
         >
-          {submitting ? "Posting..." : "Post"}
-        </Button>
-      </Box>
+          <Button
+            onClick={handleSubmit}
+            variant="contained"
+            startIcon={
+              submitting ? (
+                <CircularProgress size={16} sx={{ color: "white" }} />
+              ) : (
+                <SendIcon style={{fontSize:15}} />
+              )
+            }
+            disabled={submitting}
+            sx={{
+              textTransform: "none",
+              color: "white",
+              px: 1.5,
+              borderRadius: 1,
+              fontWeight: 500,
+              boxShadow: "none",
+              fontSize: 13,
+              minHeight: 36,
+            }}
+          >
+            {submitting ? "Posting..." : "Post"}
+          </Button>
+        </Box>
+      </div>
     </Paper>
   );
 }

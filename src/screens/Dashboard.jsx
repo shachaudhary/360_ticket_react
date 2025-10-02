@@ -3,21 +3,12 @@ import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import {
   TicketIcon,
-  ExclamationTriangleIcon,
-  UserGroupIcon,
   CheckCircleIcon,
   WrenchScrewdriverIcon,
-  ExclamationCircleIcon,
-  ClockIcon,
 } from "@heroicons/react/24/outline";
 import { checkTokenAndAuth } from "../utils/checkTokenAndAuth";
 import { useNavigate } from "react-router-dom";
 import CircularProgress from "@mui/material/CircularProgress";
-
-// MUI
-import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
-
-// Recharts
 import {
   LineChart,
   Line,
@@ -29,11 +20,12 @@ import {
   PieChart,
   Pie,
   Cell,
-  Legend,
 } from "recharts";
 import dayjs from "dayjs";
 import { createAPIEndPoint } from "../config/api/api";
 import moment from "moment-timezone";
+import { toProperCase } from "../utils/formatting";
+import Divider from "@mui/material/Divider";
 
 const url = `/dashboard`;
 
@@ -42,14 +34,9 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [statsData, setStatsData] = useState(null);
   const [loadingStats, setLoadingStats] = useState(false);
-  const [startDate, setStartDate] = useState(dayjs()); // today
-  const [endDate, setEndDate] = useState(dayjs().add(7, "day")); // +7 days
-  const [timeView, setTimeView] = useState("week");
-  const [categories, setCategories] = useState([]);
-  const [categoryFilter, setCategoryFilter] = useState("");
-  const [priorityFilter, setPriorityFilter] = useState("");
-
-  const priorities = ["Low", "High", "Urgent"]; // 🔹 static options
+  const [startDate, setStartDate] = useState(dayjs());
+  const [endDate, setEndDate] = useState(dayjs());
+  const [timeView, setTimeView] = useState("today");
 
   useEffect(() => {
     const fetchAuth = async () => {
@@ -63,27 +50,11 @@ export default function Dashboard() {
     fetchAuth();
   }, [navigate]);
 
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const res = await createAPIEndPoint("category").fetchAll();
-        setCategories(res.data || []);
-      } catch (err) {
-        console.error("Error fetching categories:", err);
-      }
-    };
-    fetchCategories();
-  }, []);
-
-  // helper function to decide which chart data to show
-  const getChartData = () => {
-    return (
-      statsData?.daily_ticket_stats?.map((d) => ({
-        name: moment(d.date).format("MM/DD/YYYY"),
-        tickets: d.count,
-      })) || []
-    );
-  };
+  const getChartData = () =>
+    statsData?.daily_ticket_stats?.map((d) => ({
+      name: moment(d.date).format("MM/DD/YYYY"),
+      tickets: d.count,
+    })) || [];
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -91,10 +62,19 @@ export default function Dashboard() {
         setLoadingStats(true);
 
         let apiUrl = "tickets/stats";
-        const params = [];
-        if (categoryFilter) params.push(`category_id=${categoryFilter}`);
-        if (priorityFilter) params.push(`priority=${priorityFilter}`);
-        if (params.length > 0) apiUrl += "?" + params.join("&");
+
+        // build query by timeView
+        if (timeView === "today") {
+          apiUrl += "?timeframe=today";
+        } else if (timeView === "week") {
+          apiUrl += "?timeframe=last_7_days&clinic_id=2";
+        } else if (timeView === "month") {
+          apiUrl += "?timeframe=last_30_days";
+        } else if (timeView === "custom") {
+          apiUrl += `?start_date=${startDate.format(
+            "YYYY-MM-DD"
+          )}&end_date=${endDate.format("YYYY-MM-DD")}`;
+        }
 
         const res = await createAPIEndPoint(apiUrl).fetchAll();
         setStatsData(res.data || null);
@@ -105,251 +85,147 @@ export default function Dashboard() {
       }
     };
     fetchStats();
-  }, [categoryFilter, priorityFilter]);
+  }, [timeView, startDate, endDate]);
 
-  const ticketTrends = {
-    week: [
-      { name: "Mon", tickets: 8 },
-      { name: "Tue", tickets: 14 },
-      { name: "Wed", tickets: 10 },
-      { name: "Thu", tickets: 20 },
-      { name: "Fri", tickets: 12 },
-      { name: "Sat", tickets: 5 },
-      { name: "Sun", tickets: 7 },
-    ],
-    month: [
-      { name: "Jan", tickets: 120 },
-      { name: "Feb", tickets: 160 },
-      { name: "Mar", tickets: 90 },
-      { name: "Apr", tickets: 200 },
-      { name: "May", tickets: 150 },
-      { name: "Jun", tickets: 180 },
-      { name: "Jul", tickets: 140 },
-      { name: "Aug", tickets: 170 },
-      { name: "Sep", tickets: 110 },
-      { name: "Oct", tickets: 190 },
-      { name: "Nov", tickets: 130 },
-      { name: "Dec", tickets: 220 },
-    ],
-    custom: [
-      { date: "2025-09-01", tickets: 5 },
-      { date: "2025-09-05", tickets: 12 },
-      { date: "2025-09-10", tickets: 8 },
-      { date: "2025-09-15", tickets: 15 },
-      { date: "2025-09-20", tickets: 10 },
-      { date: "2025-09-25", tickets: 20 },
-    ],
-  };
-
+  // Pie chart data
   const statusData = Object.entries(statsData?.by_status || {})
     .map(([name, value]) => ({ name, value }))
-    .filter((item) => item.value > 0);
+    .filter((i) => i.value > 0);
+
+  const priorityData = Object.entries(statsData?.by_priority || {})
+    .map(([name, value]) => ({ name, value }))
+    .filter((i) => i.value > 0);
+
+  const PRIORITY_COLORS = {
+    Low: "#3B82F6", // Blue
+    High: "#F59E0B", // Amber/Orange
+    Urgent: "#EF4444", // Red
+  };
 
   const COLORS = ["#60a5fa", "#fbbf24", "#34d399", "#f87171"];
 
   const stats = [
     {
       label: "Open Tickets",
-      value: statsData?.pending_count ?? 0,
+      value: statsData?.by_status?.Pending ?? 0,
       icon: <TicketIcon className="h-6 w-6 text-blue-400" />,
     },
     {
       label: "In Progress",
-      value: statsData?.in_progress_count ?? 0,
+      value: statsData?.by_status?.["In Progress"] ?? 0,
       icon: <WrenchScrewdriverIcon className="h-6 w-6 text-yellow-400" />,
     },
     {
       label: "Completed",
-      value: statsData?.completed_count ?? 0,
+      value: statsData?.by_status?.Completed ?? 0,
       icon: <CheckCircleIcon className="h-6 w-6 text-green-400" />,
     },
   ];
 
   return (
-    <>
+    <div className="dashbaord-pg">
       {loading ? (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            backgroundColor: "rgba(255,255,255,1)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            zIndex: 9999,
-          }}
-        >
+        <div className="fixed inset-0 flex items-center justify-center bg-white z-50">
           <CircularProgress size={60} thickness={4} sx={{ color: "#2bcb6b" }} />
         </div>
       ) : (
         <div className="space-y-6">
           {/* Header with Date Filters */}
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             {/* Left: Heading */}
-            <h2 className="text-lg md:text-xl font-semibold whitespace-nowrap">
-              Overview
-            </h2>
+            <h2 className="text-lg md:text-xl font-semibold">Overview</h2>
 
             {/* Right: Filters */}
-            <div className="flex flex-col sm:flex-row flex-wrap gap-3 justify-end w-full">
-              {/* Category Filter */}
-              <div>
-                <FormControl size="small" fullWidth>
-                  <InputLabel>Category</InputLabel>
-                  <Select
-                    value={categoryFilter}
-                    label="Category"
-                    onChange={(e) => setCategoryFilter(e.target.value)}
-                    sx={{ minWidth: 200 }}
-                  >
-                    <MenuItem value="">All</MenuItem>
-                    {categories.map((c) => (
-                      <MenuItem key={c.id} value={c.id}>
-                        {c.name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </div>
+            <div className="flex flex-row flex-wrap gap-3 w-auto justify-start md:justify-end items-stretch sm:items-center">
+              {/* Quick Filters */}
+              {["today", "week", "month", "custom"].map((view) => (
+                <button
+                  key={view}
+                  onClick={() => setTimeView(view)}
+                  className={`px-3 py-[6.15px] text-xs font-medium rounded-lg border transition-all duration-300
+          ${
+            timeView === view
+              ? "bg-brand-500 text-white border-brand-500 hover:bg-brand-600"
+              : "border border-gray-200 text-gray-500 hover:bg-gray-50"
+          }
+        `}
+                >
+                  {toProperCase(view)}
+                </button>
+              ))}
 
-              {/* Priority Filter */}
-              <div>
-                <FormControl size="small" fullWidth>
-                  <InputLabel>Priority</InputLabel>
-                  <Select
-                    value={priorityFilter}
-                    label="Priority"
-                    onChange={(e) => setPriorityFilter(e.target.value)}
-                    sx={{ minWidth: 200 }}
-                  >
-                    <MenuItem value="">All</MenuItem>
-                    {priorities.map((p) => (
-                      <MenuItem key={p} value={p}>
-                        {p}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </div>
-
-              {/* Start Date */}
-              <div>
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <DatePicker
-                    label="Start Date"
-                    value={startDate}
-                    onChange={(date) => setStartDate(date)}
-                    maxDate={endDate}
-                    slotProps={{
-                      textField: {
-                        size: "small",
-                        fullWidth: true,
-                        sx: {
-                          minWidth: 200,
-                          maxWidth: { xs: "auto", md: 200 },
-                        }, // ✅ apply width constraints here
-                      },
-                    }}
-                  />
-                </LocalizationProvider>
-              </div>
-
-              {/* End Date */}
-              <div>
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <DatePicker
-                    label="End Date"
-                    value={endDate}
-                    onChange={(date) => setEndDate(date)}
-                    minDate={startDate}
-                    slotProps={{
-                      textField: {
-                        size: "small",
-                        fullWidth: true,
-                        sx: {
-                          minWidth: 200,
-                          maxWidth: { xs: "auto", md: 200 },
-                        }, // ✅ apply width constraints here
-                      },
-                    }}
-                  />
-                </LocalizationProvider>
-              </div>
+              {/* Show DatePickers only if custom */}
+              {timeView === "custom" && (
+                <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DatePicker
+                      label="Start Date"
+                      value={startDate}
+                      onChange={(date) => setStartDate(date)}
+                      maxDate={endDate}
+                      slotProps={{
+                        textField: {
+                          size: "small",
+                          fullWidth: true,
+                          sx: {
+                            minWidth: { xs: "100%", sm: 200 },
+                            maxWidth: { md: 150 },
+                          },
+                        },
+                      }}
+                    />
+                  </LocalizationProvider>
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DatePicker
+                      label="End Date"
+                      value={endDate}
+                      onChange={(date) => setEndDate(date)}
+                      minDate={startDate}
+                      slotProps={{
+                        textField: {
+                          size: "small",
+                          fullWidth: true,
+                          sx: {
+                            minWidth: { xs: "100%", sm: 200 },
+                            maxWidth: { md: 150 },
+                          },
+                        },
+                      }}
+                    />
+                  </LocalizationProvider>
+                </div>
+              )}
             </div>
           </div>
+
+          {/* Show raw data for debugging */}
+          {/* {statsData && (
+            <pre className="bg-gray-50 text-xs p-3 rounded border border-gray-200 overflow-x-auto">
+              {JSON.stringify(statsData, null, 2)}
+            </pre>
+          )} */}
 
           {/* Stats Grid */}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {stats.map((s) => (
               <div
                 key={s.label}
-                className={`rounded-md border border-gray-100 bg-white  p-5 shadow-card flex items-center gap-4  bg-opacity-90 ${s.bg} `}
+                className="rounded-md border border-gray-100 bg-white p-5 shadow-card flex items-center gap-4"
               >
                 <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gray-50">
                   {s.icon}
                 </div>
                 <div>
                   <div className="text-sm text-gray-500">{s.label}</div>
-                  <div className="mt-1 text-2xl font-bold ">{s.value}</div>
+                  <div className="mt-1 text-2xl font-bold">{s.value}</div>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Ticket Trends Chart */}
-          {/* Ticket Trends Chart */}
+          {/* Ticket Trends Line Chart */}
           <div className="rounded-md border border-gray-100 bg-white p-5 shadow-card">
-            <div className="flex justify-between items-center mb-3">
-              <h3 className="text-md  text-[#6B7280] capitalize">
-                Tickets Created ({timeView})
-              </h3>
-
-              {/* View Selector */}
-              <FormControl size="small" sx={{ minWidth: 160 }}>
-                <InputLabel id="timeview-label">View</InputLabel>
-                <Select
-                  labelId="timeview-label"
-                  value={timeView}
-                  onChange={(e) => setTimeView(e.target.value)}
-                  label="View"
-                >
-                  <MenuItem value="week">By Week</MenuItem>
-                  <MenuItem value="month">By Month</MenuItem>
-                  <MenuItem value="custom">Custom</MenuItem>
-                </Select>
-              </FormControl>
-            </div>
-
-            {/* Show date pickers only when "Custom" is selected */}
-            {timeView === "custom" && (
-              <div className="flex flex-col md:flex-row gap-3 mb-4">
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <DatePicker
-                    label="Start Date"
-                    value={startDate}
-                    onChange={(date) => setStartDate(date)}
-                    maxDate={endDate}
-                    slotProps={{
-                      textField: { size: "small", fullWidth: true },
-                    }}
-                  />
-                </LocalizationProvider>
-
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <DatePicker
-                    label="End Date"
-                    value={endDate}
-                    onChange={(date) => setEndDate(date)}
-                    minDate={startDate}
-                    slotProps={{
-                      textField: { size: "small", fullWidth: true },
-                    }}
-                  />
-                </LocalizationProvider>
-              </div>
-            )}
-
-            {/* Chart */}
+            <h3 className="mb-3 text-md text-gray-600">Tickets Created</h3>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={getChartData()}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -367,40 +243,79 @@ export default function Dashboard() {
             </ResponsiveContainer>
           </div>
 
-          {/* Status Pie Chart */}
-          <div className="rounded-md border border-gray-100 bg-white p-5 shadow-card">
-            <h3 className="mb-3 text- text-[#6B7280]">Tickets by Status</h3>
-            {statusData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={statusData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, value }) => `${name}: ${value}`}
-                    outerRadius={100}
-                    dataKey="value"
-                  >
-                    {statusData.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={COLORS[index % COLORS.length]}
-                      />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                  {/* <Legend /> */}
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="text-center text-gray-400 mb-6 mt-6">
-                No status data available
-              </div>
-            )}
+          <div className="grid md:grid-cols-2 gap-5">
+            {/* Status Pie Chart */}
+            <div className="rounded-md border border-gray-100 bg-white p-5 shadow-card">
+              <h3 className="mb-3 text-gray-600">Tickets by Status</h3>
+              {statusData.length > 0 ? (
+                <ResponsiveContainer
+                  width="100%"
+                  height={300}
+                  style={{ border: "1px solid #E5E7EB", borderRadius: "2px" }}
+                >
+                  <PieChart>
+                    <Pie
+                      data={statusData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, value }) => `${name}: ${value}`}
+                      outerRadius={100}
+                      dataKey="value"
+                    >
+                      {statusData.map((_, i) => (
+                        <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="text-center text-gray-400 border p-2 rounded-lg">
+                  No status data
+                </div>
+              )}
+            </div>
+
+            {/* Priority Pie Chart */}
+            <div className="rounded-md border border-gray-100 bg-white p-5 shadow-card">
+              <h3 className="mb-3 text-gray-600">Tickets by Priority</h3>
+
+              {priorityData.length > 0 ? (
+                <ResponsiveContainer
+                  width="100%"
+                  height={300}
+                  style={{ border: "1px solid #E5E7EB", borderRadius: "2px" }}
+                >
+                  <PieChart>
+                    <Pie
+                      data={priorityData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, value }) => `${name}: ${value}`}
+                      outerRadius={100}
+                      dataKey="value"
+                    >
+                      {priorityData.map((entry, i) => (
+                        <Cell
+                          key={`priority-${i}`}
+                          fill={PRIORITY_COLORS[entry.name] || "#9CA3AF"}
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="text-center text-gray-400 border p-2 rounded-lg">
+                  No priority data
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }

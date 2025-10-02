@@ -1,14 +1,14 @@
 import { Box, Typography } from "@mui/material";
 import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
 import CircleIcon from "@mui/icons-material/Circle";
-import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward"; 
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ChangeHistoryIcon from "@mui/icons-material/ChangeHistory";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import LowPriorityIcon from "@mui/icons-material/LowPriority";
 import HorizontalRuleIcon from "@mui/icons-material/HorizontalRule";
-
-import TrendingDownIcon from '@mui/icons-material/TrendingDown';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
+import TrendingDownIcon from "@mui/icons-material/TrendingDown";
+import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 
 export const statusColors = {
   // Payment Statuses
@@ -189,9 +189,14 @@ export const shortenStatus = (status) => {
 const getPriorityIcon = (status, color) => {
   switch (status) {
     case "urgent":
-      return <PriorityHighIcon fontSize="inherit" sx={{ color, mr: 0.25 }} />;
+      return <WarningAmberIcon fontSize="inherit" sx={{ color, mr: 0.25 }} />;
     case "high":
-      return <TrendingUpIcon fontSize="inherit" sx={{ color, mr: 0.25 }} />;
+      return (
+        <LowPriorityIcon
+          fontSize="inherit"
+          sx={{ color, mr: 0.25, rotate: "180deg", transform: "scaleX(-1)" }}
+        />
+      );
     case "low":
       return <LowPriorityIcon fontSize="inherit" sx={{ color, mr: 0.25 }} />;
     default:
