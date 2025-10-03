@@ -389,9 +389,9 @@ export default function Tickets() {
                     <th className="px-4 py-3 border-r border-b border-[#E5E7EB] !font-medium">
                       Category
                     </th>
-                    <th className="px-4 py-3 border-r border-b border-[#E5E7EB] !font-medium">
+                    {/* <th className="px-4 py-3 border-r border-b border-[#E5E7EB] !font-medium">
                       Due Date
-                    </th>
+                    </th> */}
                     <th className="px-4 py-3 border-r border-b border-[#E5E7EB] !font-medium">
                       Status
                     </th>
@@ -441,9 +441,9 @@ export default function Tickets() {
                       <td className="px-4 py-3 border-b border-[#E5E7EB]">
                         {toProperCase(t.category?.name) || "—"}
                       </td>
-                      <td className="px-4 py-3 border-b border-[#E5E7EB]">
+                      {/* <td className="px-4 py-3 border-b border-[#E5E7EB]">
                         <DateWithTooltip date={t?.due_date} />
-                      </td>
+                      </td> */}
                       <td className="px-4 py-3 border-b border-[#E5E7EB]">
                         <StatusBadge isInside status={t.status} />
                       </td>
