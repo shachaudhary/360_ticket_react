@@ -285,11 +285,22 @@ export default function Login() {
                 sx={{ mt: 2, width: "100%" }}
               >
                 {qrCodeUrl && (
-                  <Box mb={2}>
+                  <Box
+                    mb={2}
+                    sx={{
+                      width: "100%",
+                      maxWidth: "205px",
+                    }}
+                  >
                     <img
                       src={qrCodeUrl}
                       alt="QR Code"
-                      style={{ width: "150px", height: "150px" }}
+                      style={{
+                        display: "block",
+                        objectFit: "contain",
+                        width: "100%",
+                        height: "auto",
+                      }}
                     />
                   </Box>
                 )}

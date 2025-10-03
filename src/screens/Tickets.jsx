@@ -134,7 +134,9 @@ export default function Tickets() {
       {/* Header */}
       <div className="flex items-center justify-between">
         {/* <h2 className="text-xl font-semibold text-brand-600">Tickets</h2> */}
-        <h2 className="text-lg md:text-xl font-semibold text-sidebar">Tickets</h2>
+        <h2 className="text-lg md:text-xl font-semibold text-sidebar">
+          Tickets
+        </h2>
         <button
           onClick={() => navigate("new")}
           className="flex items-center gap-1 rounded-lg bg-brand-500 px-3 py-2 text-sm font-semibold text-white hover:bg-brand-600 transition-all"
@@ -439,7 +441,22 @@ export default function Tickets() {
                         />
                       </td>
                       <td className="px-4 py-3 border-b border-[#E5E7EB]">
-                        {toProperCase(t.category?.name) || "—"}
+                        <Chip
+                          label={toProperCase(t.category?.name) || "—"}
+                          variant="filled"
+                          sx={{
+                            fontSize: 11.75,
+                            fontWeight:500,
+                            borderRadius: "6px",
+                            color: "#6B7280",
+                            border: "1px solid #E5E7EB",
+                            background: "white",
+                            height: 27.5,
+                            "& .MuiChip-label": {
+                              px: "7px !important", // ✅ Correct selector
+                            },
+                          }}
+                        />
                       </td>
                       {/* <td className="px-4 py-3 border-b border-[#E5E7EB]">
                         <DateWithTooltip date={t?.due_date} />
