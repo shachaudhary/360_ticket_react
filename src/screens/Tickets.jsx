@@ -467,7 +467,7 @@ export default function Tickets() {
                       <td className="px-4 py-3 text-gray-700 border-b border-[#E5E7EB]">
                         {/* {toProperCase(t.created_by?.username) || "—"} */}
                         <Chip
-                          label={toProperCase(t.created_by?.username) || "—"}
+                          label={toProperCase(t.created_by?.username) || "N/A"}
                           variant="filled"
                           sx={{
                             fontSize: 12.75,

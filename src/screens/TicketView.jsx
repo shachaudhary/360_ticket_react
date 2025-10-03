@@ -61,7 +61,7 @@ const CommentsList = ({ comments }) => (
         >
           <div className="flex justify-between items-center mb-1">
             <span className="font-semibold text-brand-500">
-              {toProperCase(c.username)}
+              {toProperCase(c.username) || "N/A"}
             </span>
             <span className="text-xs text-gray-500">
               {convertToCST(c.created_at)}
@@ -521,7 +521,7 @@ export default function TicketView() {
                   <LogsList
                     logs={
                       ticket.assignment_logs?.map((log) => ({
-                        username: log.changed_by_username,
+                        username: log.changed_by_username || "N/A",
                         action: `Reassigned from ${toProperCase(
                           log.old_assign_to_username
                         )} → ${toProperCase(log.new_assign_to_username)}`,
@@ -545,7 +545,7 @@ export default function TicketView() {
                   <LogsList
                     logs={
                       ticket.status_logs?.map((log) => ({
-                        username: log.changed_by_username,
+                        username: log.changed_by_username || "N/A",
                         action: `Changed status from ${toProperCase(
                           log.old_status
                         )} → ${toProperCase(log.new_status)}`,
