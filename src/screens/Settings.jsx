@@ -98,7 +98,7 @@ export default function Settings() {
     <div className="space-y-4">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-        <h2 className="text-lg md:text-xl font-semibold">Categories</h2>
+        <h2 className="text-lg md:text-xl font-semibold text-sidebar">Categories</h2>
 
         {/* Search Input */}
         <div className="md:ml-auto md:mr-2.5 md:max-w-64 w-full">

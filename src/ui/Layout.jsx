@@ -21,6 +21,7 @@ import ProfilePopover from "../components/ProfilePopover.jsx";
 import AppMenu from "../components/AppMenu.jsx";
 import { Box } from "@mui/material";
 import { logoutUser } from "../utils/index.js";
+import favicon from "../assets/favicon.png";
 
 function NavItem({ to, icon: Icon, label, matchChildren = false }) {
   const location = useLocation();
@@ -73,14 +74,19 @@ export default function Layout() {
 
   const SidebarContent = (
     <>
-      {!sidebarOpen && (
-        <div className="mb-8 flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-500 font-semibold">
+      {/* {!sidebarOpen && ( */}
+      <div className="mb-8  items-center gap-2 lg992:flex hidden">
+        {/* <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-500 font-semibold">
             S
-          </div>
-          <div className="font-semibold">Support 360</div>
-        </div>
-      )}
+          </div> */}
+        <img
+          src={favicon}
+          alt="Support 360"
+          className="flex h-8 w-8 rounded-lg"
+        />
+        <div className="font-semibold">Support 360</div>
+      </div>
+      {/* )} */}
       <nav className="flex flex-col gap-2">
         <NavItem
           to="/dashboard"
@@ -155,10 +161,15 @@ export default function Layout() {
         }`}
       >
         <div className="mb-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-500 font-semibold">
+          <div className="flex items-center gap-2 ">
+            {/* <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-500 font-semibold">
               S
-            </div>
+            </div> */}
+            <img
+              src={favicon}
+              alt="Support 360"
+              className="flex h-8 w-8 rounded-lg"
+            />
             <div className="font-semibold">Support 360</div>
           </div>
           <button
@@ -194,7 +205,13 @@ export default function Layout() {
 
         {/* Content */}
         <main className="flex-1 overflow-y-auto bg-white border border-gray-100 lg992:rounded-tl-2xl shadow-sm relative">
-          <div className={`${isViewPage ? "p-4 pr-2.5" : "p-4 scroll-width h-[calc(100dvh-58px)]"}`}>
+          <div
+            className={`${
+              isViewPage
+                ? "p-4 pr-2.5"
+                : "p-4 scroll-width h-[calc(100dvh-58px)]"
+            }`}
+          >
             <Outlet />
           </div>
         </main>

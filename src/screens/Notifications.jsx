@@ -75,7 +75,7 @@ export default function ActivityFeed() {
   if (loading) {
     return (
       <div className="space-y-4">
-        <h2 className="text-lg md:text-xl font-semibold">Notifications</h2>
+        <h2 className="text-lg md:text-xl font-semibold text-sidebar">Notifications</h2>
         <div className="overflow-hidden rounded-lg border border-[#E5E7EB]">
           <div className="h-[calc(100dvh-135px)] flex items-center justify-center bg-green-50">
             <CircularProgress size={28} />
@@ -89,7 +89,7 @@ export default function ActivityFeed() {
     <div className="space-y-4">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h2 className="text-lg md:text-xl font-semibold">Notifications</h2>
+        <h2 className="text-lg md:text-xl font-semibold text-sidebar">Notifications</h2>
         {/* {activities.length > 0 && (
           <button
             onClick={handleClearAll}

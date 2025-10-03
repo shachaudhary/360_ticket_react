@@ -189,7 +189,7 @@ export default function TicketForm({ isEdit = false }) {
       <BackButton self={isEdit ? -1 : "/tickets"} />
 
       <div className="space-y-4 mt-4 border-0">
-        <h2 className="text-lg md:text-xl font-semibold mb-1">
+        <h2 className="text-lg md:text-xl font-semibold text-sidebar mb-1">
           {isEdit ? "Edit Ticket" : "Create New Ticket"}
         </h2>
 

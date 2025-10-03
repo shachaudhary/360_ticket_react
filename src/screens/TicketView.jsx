@@ -73,8 +73,7 @@ const CommentsList = ({ comments }) => (
                 key={i}
                 className={
                   word.startsWith("@")
-                    ? // ? "mr-1 text-blue-600 font-medium"
-                      "mr-1"
+                    ? "mr-1 text-blue-500 font-medium under"
                     : "mr-1"
                 }
               >
@@ -123,7 +122,11 @@ function AssignModal({
       fullWidth
       PaperProps={{ style: { maxWidth: "360px" } }}
     >
-      <DialogTitle color="primary" sx={{ px: 2 }}>
+      <DialogTitle
+        color="primary"
+        sx={{ px: 2 }}
+        className="!text-lg md:text-xl font-semibold text-sidebar"
+      >
         Update Assignee
       </DialogTitle>
       <DialogContent dividers sx={{ px: 2 }}>
@@ -716,7 +719,12 @@ export default function TicketView() {
             <Box className="mt-6 rounded-xl border border-gray-200 p-4 md:hidden">
               <CommentBox ticketId={ticket.id} onAdd={fetchTicket} />
               <Divider sx={{ my: 2 }} />
-              <Typography variant="body2" fontWeight={600} sx={{ mb: 1 }}>
+              <Typography
+                variant="body2"
+                fontWeight={600}
+                sx={{ mb: 1 }}
+                className="!text-sidebar"
+              >
                 Previous Comments
               </Typography>
               <CommentsList comments={ticket.comments} />
@@ -730,15 +738,31 @@ export default function TicketView() {
         className="hidden md:flex flex-col w-[305px] bg-white p-2.5 pr-0 border-l border-gray-200 -mt-4 -mb-4"
         sx={{
           height: "calc(100dvh - 58px)", // full viewport height
-          overflowY: "auto", // enable vertical scroll only in sidebar
+          overflowY: "hidden", // enable vertical scroll only in sidebar
+          // Hide scrollbar
+          "&::-webkit-scrollbar": {
+            width: 0, // for Chrome, Safari
+          },
+          scrollbarWidth: "none", // for Firefox
+          msOverflowStyle: "none", // for IE & Edge
         }}
       >
         <CommentBox ticketId={ticket.id} onAdd={fetchTicket} />
         <Divider sx={{ my: 2 }} />
-        <Typography variant="body2" fontWeight={600} sx={{ mb: 1 }}>
+        <Typography
+          variant="subtitle1"
+          fontWeight={600}
+          sx={{ mb: 1, mt: -0.5 }}
+        >
           Previous Comments
         </Typography>
-        <CommentsList comments={ticket.comments} />
+        <Box
+          sx={{
+            overflowY: "auto",
+          }}
+        >
+          <CommentsList comments={ticket.comments} />
+        </Box>
       </Box>
 
       <AssignModal

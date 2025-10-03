@@ -133,7 +133,9 @@ export default function Dashboard() {
           {/* Header with Date Filters */}
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             {/* Left: Heading */}
-            <h2 className="text-lg md:text-xl font-semibold">Overview</h2>
+            <h2 className="text-lg md:text-xl font-semibold text-sidebar">
+              Overview
+            </h2>
 
             {/* Right: Filters */}
             <div className="flex flex-row flex-wrap gap-3 w-auto justify-start md:justify-end items-stretch sm:items-center">
@@ -225,9 +227,11 @@ export default function Dashboard() {
 
           {/* Ticket Trends Line Chart */}
           <div className="rounded-md border border-gray-100 bg-white p-5 shadow-card">
-            <h3 className="mb-3 text-md text-gray-600">Tickets Created</h3>
+            <h3 className="mb-3 text-md font-medium text-sidebar">
+              Tickets Created
+            </h3>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={getChartData()}>
+              <LineChart data={getChartData()} >
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                 <XAxis dataKey="name" />
                 <YAxis />
@@ -246,7 +250,9 @@ export default function Dashboard() {
           <div className="grid md:grid-cols-2 gap-5">
             {/* Status Pie Chart */}
             <div className="rounded-md border border-gray-100 bg-white p-5 shadow-card">
-              <h3 className="mb-3 text-gray-600">Tickets by Status</h3>
+              <h3 className="mb-4 text-sidebar font-medium">
+                Tickets by Status
+              </h3>
               {statusData.length > 0 ? (
                 <ResponsiveContainer
                   width="100%"
@@ -271,15 +277,35 @@ export default function Dashboard() {
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="text-center text-gray-400 border p-2 rounded-lg">
-                  No status data
+                <div className="flex flex-col items-center justify-center gap-2 p-6 rounded-xl border border-gray-200 bg-gray-50 bg-opacity-75 text-center shadow-sm">
+                  {/* <div className="flex items-center justify-center w-10 h-10 rounded-full bg-red-100 text-red-500">
+                    <svg
+                      className="w-6 h-6"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                  </div> */}
+                  <p className="text-sm font-medium text-gray-600">
+                    No status data
+                  </p>
+                  {/* <p className="text-xs text-gray-400">
+                    There’s nothing to display right now.
+                  </p> */}
                 </div>
               )}
             </div>
 
             {/* Priority Pie Chart */}
             <div className="rounded-md border border-gray-100 bg-white p-5 shadow-card">
-              <h3 className="mb-3 text-gray-600">Tickets by Priority</h3>
+              <h3 className="mb-4 text-sidebar font-medium">Tickets by Priority</h3>
 
               {priorityData.length > 0 ? (
                 <ResponsiveContainer
@@ -308,8 +334,10 @@ export default function Dashboard() {
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="text-center text-gray-400 border p-2 rounded-lg">
-                  No priority data
+                <div className="flex flex-col items-center justify-center gap-2 p-6 rounded-xl border border-gray-200 bg-gray-50 bg-opacity-75  text-center shadow-sm">
+                  <p className="text-sm font-medium text-gray-600">
+                    No priority data
+                  </p>
                 </div>
               )}
             </div>

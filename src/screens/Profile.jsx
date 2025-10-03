@@ -99,7 +99,7 @@ export default function ProfileForm() {
       <BackButton self={"/dashboard"} />
 
       <div className="space-y-4 mt-4">
-        <h2 className="text-lg md:text-xl font-semibold mb-1">Edit Profile</h2>
+        <h2 className="text-lg md:text-xl font-semibold text-sidebar mb-1">Edit Profile</h2>
 
         {/* First Name */}
         <TextField

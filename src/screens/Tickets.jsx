@@ -134,7 +134,7 @@ export default function Tickets() {
       {/* Header */}
       <div className="flex items-center justify-between">
         {/* <h2 className="text-xl font-semibold text-brand-600">Tickets</h2> */}
-        <h2 className="text-lg md:text-xl font-semibold">Tickets</h2>
+        <h2 className="text-lg md:text-xl font-semibold text-sidebar">Tickets</h2>
         <button
           onClick={() => navigate("new")}
           className="flex items-center gap-1 rounded-lg bg-brand-500 px-3 py-2 text-sm font-semibold text-white hover:bg-brand-600 transition-all"
@@ -411,8 +411,8 @@ export default function Tickets() {
                 </thead>
                 <tbody className="divide-y divide-gray-100 bg-white text-sm">
                   {currentItems.map((t, idx) => (
-                    <tr key={t.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 border-b border-[#E5E7EB]">
+                    <tr key={t.id} className="hover:bg-gray-50 ">
+                      <td className="px-4 py-3 border-b border-[#E5E7EB] ">
                         {page * rowsPerPage + idx + 1}
                       </td>
                       <td className="px-4 py-3 border-b border-[#E5E7EB]">

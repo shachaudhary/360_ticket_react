@@ -52,6 +52,27 @@ export default function MentionsInput({
     }
   };
 
+  const addMention = (member) => {
+    // normalize username: lowercase + remove spaces
+    const username = `@${(member.first_name + member.last_name)
+      .toLowerCase()
+      .replace(/\s+/g, "")}`;
+
+    const words = value.split(" ");
+    words[words.length - 1] = username;
+
+    onChange(words.join(" ") + " ");
+    setMentions((prev) => [
+      ...prev,
+      {
+        ...member,
+        display_name: username, // keep normalized username for later use
+      },
+    ]);
+    setShowSuggestions(false);
+    inputRef.current.focus();
+  };
+
   // const handleChange = (e) => {
   //   const text = e.target.value;
   //   onChange(text); // lift state up
@@ -71,14 +92,14 @@ export default function MentionsInput({
   //   }
   // };
 
-  const addMention = (member) => {
-    const words = value.split(" ");
-    words[words.length - 1] = `@${member.first_name} ${member.last_name}`;
-    onChange(words.join(" ") + " ");
-    setMentions((prev) => [...prev, member]);
-    setShowSuggestions(false);
-    inputRef.current.focus();
-  };
+  // const addMention = (member) => {
+  //   const words = value.split(" ");
+  //   words[words.length - 1] = `@${member.first_name} ${member.last_name}`;
+  //   onChange(words.join(" ") + " ");
+  //   setMentions((prev) => [...prev, member]);
+  //   setShowSuggestions(false);
+  //   inputRef.current.focus();
+  // };
 
   return (
     <div className="relative w-full ">

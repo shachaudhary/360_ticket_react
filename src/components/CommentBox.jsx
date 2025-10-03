@@ -54,12 +54,14 @@ export default function CommentBox({ ticketId, onAdd }) {
   return (
     <Paper
       elevation={0}
-      sx={{
-        // p: 1.5,
-        // borderRadius: 3,
-        // border: "1px solid #e0e0e0",
-        // background: "#fafafa",
-      }}
+      sx={
+        {
+          // p: 1.5,
+          // borderRadius: 3,
+          // border: "1px solid #e0e0e0",
+          // background: "#fafafa",
+        }
+      }
     >
       <Typography
         variant="subtitle1"
@@ -67,6 +69,7 @@ export default function CommentBox({ ticketId, onAdd }) {
         gutterBottom
         color="primary"
         sx={{ mb: 1 }}
+        className="!text-lg"
       >
         Add a Comment
       </Typography>
@@ -123,19 +126,19 @@ export default function CommentBox({ ticketId, onAdd }) {
               submitting ? (
                 <CircularProgress size={16} sx={{ color: "white" }} />
               ) : (
-                <SendIcon style={{fontSize:15}} />
+                <SendIcon style={{ fontSize: 14, marginBottom: -1.25 }} />
               )
             }
-            disabled={submitting}
+            // disabled={submitting}
             sx={{
               textTransform: "none",
               color: "white",
               px: 1.5,
-              borderRadius: 1,
+              borderRadius: 0.75,
               fontWeight: 500,
               boxShadow: "none",
               fontSize: 13,
-              minHeight: 36,
+              maxHeight: 32,
             }}
           >
             {submitting ? "Posting..." : "Post"}
