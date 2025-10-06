@@ -4,6 +4,7 @@ import {
   Button,
   CircularProgress,
   FormControl,
+  InputAdornment,
   InputLabel,
   MenuItem,
   Select,
@@ -26,6 +27,20 @@ export default function ProfileForm() {
 
   const [user, setUser] = useState({});
   const [loading, setLoading] = useState(true);
+
+  // 🔹 Format phone number (US format)
+  const formatPhoneNumber = (value) => {
+    const cleaned = value.replace(/\D/g, ""); // Remove non-numeric characters
+    const match = cleaned.match(/^(\d{0,3})(\d{0,3})(\d{0,4})$/);
+
+    if (!match) return value;
+
+    const formatted = !match[2]
+      ? match[1]
+      : `(${match[1]}) ${match[2]}${match[3] ? `-${match[3]}` : ""}`;
+
+    return formatted.length > 14 ? formatted.slice(0, 14) : formatted;
+  };
 
   // Fetch user profile
   useEffect(() => {
@@ -76,6 +91,12 @@ export default function ProfileForm() {
     },
   });
 
+  // 🔹 Handle phone input formatting
+  const handlePhoneChange = (e) => {
+    const formatted = formatPhoneNumber(e.target.value);
+    formik.setFieldValue("phone", formatted);
+  };
+
   const handleCancel = () => {
     navigate(-1);
   };
@@ -91,15 +112,13 @@ export default function ProfileForm() {
   }
 
   return (
-    <Box
-      component="form"
-      onSubmit={formik.handleSubmit}
-      className="bg-white"
-    >
+    <Box component="form" onSubmit={formik.handleSubmit} className="bg-white">
       <BackButton self={"/dashboard"} />
 
       <div className="space-y-4 mt-4">
-        <h2 className="text-lg md:text-xl font-semibold text-sidebar mb-1">Edit Profile</h2>
+        <h2 className="text-lg md:text-xl font-semibold text-sidebar mb-1">
+          Edit Profile
+        </h2>
 
         {/* First Name */}
         <TextField
@@ -141,9 +160,21 @@ export default function ProfileForm() {
           name="phone"
           fullWidth
           size="small"
-          {...formik.getFieldProps("phone")}
+          value={formik.values.phone}
+          onChange={handlePhoneChange}
           error={formik.touched.phone && Boolean(formik.errors.phone)}
           helperText={formik.touched.phone && formik.errors.phone}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <span style={{ color: "#111827", fontSize: 14 }}>+1</span>
+              </InputAdornment>
+            ),
+          }}
+          inputProps={{
+            inputMode: "numeric",
+            maxLength: 14,
+          }}
         />
 
         {/* Address */}

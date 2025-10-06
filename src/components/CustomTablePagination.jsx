@@ -25,6 +25,7 @@ const CustomTablePagination = ({
       display="flex"
       justifyContent="space-between"
       alignItems="center"
+      flexDirection={{ xs: "column",sm:"row" }}
       mt={2}
       px={1.5}
       py={1}
@@ -68,8 +69,8 @@ const CustomTablePagination = ({
       </Box>
 
       {/* Pagination controls */}
-      <Box display="flex" alignItems="center" gap={1}>
-        <Typography variant="body2" color="text.secondary">
+      <Box display="flex" alignItems="center" gap={1} width={{ xs: "100%",sm:"auto" }} >
+        <Typography variant="body2" color="text.secondary" marginRight={{ xs: "auto",sm:"unset" }}>
           {start}-{end} of {totalCount}
         </Typography>
 

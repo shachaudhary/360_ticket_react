@@ -36,7 +36,7 @@ const AppMenu = () => {
       ).fetchById(userId);
 
       const filteredDashboards = response.data.dashboards.filter(
-        (dashboard) => dashboard.name !== "connect"
+        (dashboard) => dashboard.name !== "support"
       );
 
       setApps(filteredDashboards || []);

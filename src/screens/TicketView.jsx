@@ -25,6 +25,7 @@ import {
   EyeIcon,
   UserPlusIcon,
 } from "@heroicons/react/24/outline";
+import { motion, AnimatePresence } from "framer-motion";
 import { useParams } from "react-router-dom";
 import { createAPIEndPoint } from "../config/api/api";
 import BackButton from "../components/BackButton";
@@ -50,39 +51,46 @@ function useDebounce(value, delay = 400) {
   return debouncedValue;
 }
 
-// ✅ Reusable Comments List
+// ✅ Reusable Comments List with transitions
 const CommentsList = ({ comments }) => (
   <Box className="space-y-2">
     {comments?.length > 0 ? (
-      comments.map((c, idx) => (
-        <div
-          key={idx}
-          className="rounded-lg border bg-[#E5E7EB] bg-opacity-10 p-3 text-sm"
-        >
-          <div className="flex justify-between items-center mb-1">
-            <span className="font-semibold text-brand-500">
-              {toProperCase(c.username) || "N/A"}
-            </span>
-            <span className="text-xs text-gray-500">
-              {convertToCST(c.created_at)}
-            </span>
-          </div>
-          <div className="text-gray-700 break-words">
-            {c.comment.split(" ").map((word, i) => (
-              <span
-                key={i}
-                className={
-                  word.startsWith("@")
-                    ? "mr-1 text-blue-500 font-medium under"
-                    : "mr-1"
-                }
-              >
-                {word}
+      <AnimatePresence>
+        {comments.map((c, idx) => (
+          <motion.div
+            key={c.id || idx} // 🔑 use stable id if available
+            initial={{ opacity: 0, y: 0 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 0 }}
+            transition={{ duration: 0.25 }}
+            layout // enables smooth reordering
+            className="rounded-lg border bg-[#E5E7EB] bg-opacity-10 p-3 text-sm"
+          >
+            <div className="flex justify-between items-center mb-1">
+              <span className="font-semibold text-brand-500">
+                {toProperCase(c.username) || "N/A"}
               </span>
-            ))}
-          </div>
-        </div>
-      ))
+              <span className="text-xs text-gray-500">
+                {convertToCST(c.created_at)}
+              </span>
+            </div>
+            <div className="text-gray-700 break-words">
+              {c.comment.split(" ").map((word, i) => (
+                <span
+                  key={i}
+                  className={
+                    word.startsWith("@")
+                      ? "mr-1 text-blue-500 font-medium underline"
+                      : "mr-1"
+                  }
+                >
+                  {word}
+                </span>
+              ))}
+            </div>
+          </motion.div>
+        ))}
+      </AnimatePresence>
     ) : (
       <Typography variant="body2" color="text.secondary">
         No comments yet
@@ -90,6 +98,7 @@ const CommentsList = ({ comments }) => (
     )}
   </Box>
 );
+
 function AssignModal({
   open,
   onClose,
@@ -788,7 +797,7 @@ const Label = ({ title, value }) => (
       {title}
     </Typography>
     <Typography variant="body2" sx={{ fontWeight: 500, color: "#2d3436" }}>
-      {value || "--"}
+      {value || "N/A"}
     </Typography>
   </div>
 );
