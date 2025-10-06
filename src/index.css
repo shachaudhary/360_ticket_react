@@ -64,7 +64,7 @@ select:focus {
 }
 
 .MuiAutocomplete-option:not(:last-child) {
-  border-bottom: 1px solid #e5e7eb !important;
+  border-bottom: 1px solid #f3f3f3 !important;
 }
 .MuiPickersOutlinedInput-notchedOutline {
   border-color: #e5e7eb !important;

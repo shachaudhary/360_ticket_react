@@ -1,12 +1,10 @@
 import { useEffect, useState } from "react";
 import {
   Grid,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
+  TextField,
   FormHelperText,
-  Stack,
+  Autocomplete,
+  CircularProgress,
 } from "@mui/material";
 
 const TimeZoneSelect = ({
@@ -17,69 +15,79 @@ const TimeZoneSelect = ({
   errors,
 }) => {
   const [timeZones, setTimeZones] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchTimeZones = async () => {
+      setLoading(true);
       try {
         const response = await fetch(
           `http://api.timezonedb.com/v2.1/list-time-zone?key=IDU0ZFRYGTHL&format=json`
         );
         const data = await response.json();
         if (data.status === "OK") {
-          setTimeZones(data.zones);
+          const formatted = data.zones.map((tz) => ({
+            label: `${tz.zoneName} (GMT${tz.gmtOffset >= 0 ? "+" : ""}${
+              tz.gmtOffset / 3600
+            })`,
+            value: tz.zoneName,
+          }));
+          setTimeZones(formatted);
         } else {
           console.error("Error fetching time zones:", data.message);
         }
       } catch (error) {
         console.error("Error fetching time zones:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchTimeZones();
   }, []);
 
-  console.log(values.timezone, "TIMEZONE");
-
   return (
     <Grid item xs={12}>
-      {/* <FormControl fullWidth> */}
-      <InputLabel>Time Zone</InputLabel>
-      <Stack>
-        <Select
-          // labelId="timezone-label"
-          size="small"
-          id="timezone"
-          value={values.timezone}
-          name="timezone"
-          onChange={handleChange}
-          onBlur={handleBlur}
-          fullWidth
-          error={Boolean(touched.timezone && errors.timezone)}
-          sx={{
-            mt: "8px",
-            width: "100%",
-            backgroundColor: "transparent",
+      <Autocomplete
+        fullWidth
+        size="small"
+        loading={loading}
+        options={timeZones}
+        getOptionLabel={(option) => option.label || ""}
+        value={timeZones.find((tz) => tz.value === values.timezone) || null}
+        onChange={(event, newValue) => {
+          handleChange({
+            target: { name: "timezone", value: newValue ? newValue.value : "" },
+          });
+        }}
+        onBlur={handleBlur}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            label="Time Zone"
+            variant="outlined"
+            error={Boolean(touched.timezone && errors.timezone)}
+            helperText={touched.timezone && errors.timezone}
+            InputProps={{
+              ...params.InputProps,
+              endAdornment: (
+                <>
+                  {loading ? <CircularProgress size={18} /> : null}
+                  {params.InputProps.endAdornment}
+                </>
+              ),
+            }}
+          />
+        )}
+        sx={{
+          "& .MuiOutlinedInput-root": {
             borderRadius: "8px",
             "& fieldset": { borderColor: "#e4e4e7" },
-            "&:hover fieldset": { borderColor: "secondary.main" },
-            "&.Mui-focused fieldset": {
-              borderColor: "#1785C6 !important",
-            },
-          }}
-        >
-          {timeZones.length > 0 ? (
-            timeZones.map((tz) => (
-              <MenuItem key={tz.zoneName} value={tz.zoneName}>
-                {tz.zoneName} (GMT{tz.gmtOffset >= 0 ? "+" : ""}
-                {tz.gmtOffset / 3600})
-              </MenuItem>
-            ))
-          ) : (
-            <MenuItem disabled>Loading time zones...</MenuItem>
-          )}
-        </Select>
-      </Stack>
-      {/* </FormControl> */}
+            "&:hover fieldset": { borderColor: "#1785C6" },
+            "&.Mui-focused fieldset": { borderColor: "#1785C6 !important" },
+          },
+        }}
+      />
       {touched.timezone && errors.timezone && (
         <FormHelperText error>{errors.timezone}</FormHelperText>
       )}

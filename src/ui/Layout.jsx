@@ -72,6 +72,10 @@ export default function Layout() {
     return () => window.removeEventListener("keydown", onKey);
   }, [setSidebarOpen, sidebarOpen]);
 
+  React.useEffect(() => {
+    setSidebarOpen(false);
+  }, [navigate]);
+
   const SidebarContent = (
     <>
       {/* {!sidebarOpen && ( */}
