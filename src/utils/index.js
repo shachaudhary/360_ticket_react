@@ -27,7 +27,18 @@ export const logoutUser = (navigate) => {
   localStorage.removeItem('access_token');
   localStorage.removeItem('user_profile');
   localStorage.removeItem("callDirection");
-  navigate('/auth/sign-in');
+  localStorage.removeItem("user_role");
+  window.location.href = "https://dashboard.dental360grp.com/auth/sign-in";
+  // navigate('/auth/sign-in');
+};
+
+export const handleLogout = () => {
+  localStorage.removeItem('access_token');
+  localStorage.removeItem('user_profile');
+  localStorage.removeItem("callDirection");
+  localStorage.removeItem("user_role");
+  window.location.href = "https://dashboard.dental360grp.com/auth/sign-in";
+  // navigate("/auth/sign-in");
 };
 
 export const formatDate = (dateString) => {

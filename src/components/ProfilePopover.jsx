@@ -16,6 +16,7 @@ import NotificationsIcon from "@mui/icons-material/Notifications"; // 🔔
 import { useNavigate } from "react-router-dom";
 import { getUserData } from "../state/AppContext";
 import { toProperCase } from "../utils/formatting";
+import { handleLogout } from "../utils";
 
 // ✅ avatar with initials
 const ColorAvatar = ({ name }) => {
@@ -72,12 +73,12 @@ const ProfilePopover = ({ isMobile = false }) => {
     setAnchorEl(null);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("user_profile");
-    localStorage.removeItem("user_role");
-    navigate("/auth/sign-in");
-  };
+  // const handleLogout = () => {
+  //   localStorage.removeItem("access_token");
+  //   localStorage.removeItem("user_profile");
+  //   localStorage.removeItem("user_role");
+  //   navigate("/auth/sign-in");
+  // };
 
   return (
     <ClickAwayListener onClickAway={handleClose}>
