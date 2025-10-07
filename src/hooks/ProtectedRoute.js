@@ -9,7 +9,7 @@ function ProtectedRoute({ children }) {
     const [accessToken, setAccessToken] = useState(localStorage.getItem("access_token"));
     const toastShown = useRef(false);
 
-    // 🔹 Validate token
+    // ✅ Validate token with API
     const validateToken = async () => {
         if (!accessToken) return;
 
@@ -37,18 +37,18 @@ function ProtectedRoute({ children }) {
         }
     };
 
-    // 🔹 Validate on route change
+    // 🔹 Validate when route changes
     useEffect(() => {
         validateToken();
     }, [location.pathname, accessToken]);
 
-    // 🔹 Background check every 5 minutes
+    // 🔹 Background validation every 5 min
     useEffect(() => {
         const interval = setInterval(validateToken, 5 * 60 * 1000);
         return () => clearInterval(interval);
     }, [accessToken]);
 
-    // 🔹 Handle token in URL (first login redirect)
+    // 🔹 Handle token passed in URL (after auth redirect)
     useEffect(() => {
         const urlParams = new URLSearchParams(location.search);
         const tokenFromUrl = urlParams.get("token");
@@ -56,6 +56,10 @@ function ProtectedRoute({ children }) {
         if (tokenFromUrl) {
             localStorage.setItem("access_token", tokenFromUrl);
             setAccessToken(tokenFromUrl);
+
+            // Clean the URL after saving token
+            const cleanUrl = window.location.origin + window.location.pathname;
+            window.history.replaceState({}, document.title, cleanUrl);
         } else if (!accessToken && !toastShown.current) {
             toast.error("Unauthorized access. Please log in.");
             toastShown.current = true;
@@ -63,12 +67,16 @@ function ProtectedRoute({ children }) {
         }
     }, [location.search, accessToken]);
 
-    // 🔹 Redirect if needed
+    // 🔹 Redirect safely if invalid
     useEffect(() => {
         if (shouldRedirect) {
-            window.location.href = "https://dashboard.dental360grp.com/auth/sign-in";
+            // 👇 Correct URL — no /auth-sign-in
+            window.location.href = "https://dashboard.dental360grp.com/";
         }
     }, [shouldRedirect]);
+
+    // 🔹 Prevent rendering before auth ready
+    if (!accessToken && !shouldRedirect) return null;
 
     return accessToken ? children : null;
 }
