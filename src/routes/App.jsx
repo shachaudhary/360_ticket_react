@@ -61,9 +61,10 @@ export default function App() {
             </ProtectedRoute>
           }
         >
-          <Route index element={<Navigate to="/dashboard" replace />} />
+          {/* <Route index element={<Navigate to="/dashboard" replace />} /> */}
+
           <Route
-            path="dashboard"
+            path="/dashboard"
             element={
               <PageTransition>
                 <Dashboard />
@@ -71,7 +72,7 @@ export default function App() {
             }
           />
           <Route
-            path="tickets"
+            path="/tickets"
             element={
               <PageTransition>
                 <Tickets />
@@ -79,7 +80,7 @@ export default function App() {
             }
           />
           <Route
-            path="tickets/new"
+            path="/tickets/new"
             element={
               <PageTransition>
                 <TicketForm />
@@ -91,7 +92,7 @@ export default function App() {
             element={<TicketForm isEdit={true} />}
           />
           <Route
-            path="tickets/:id"
+            path="/tickets/:id"
             element={
               <PageTransition>
                 <TicketView />
