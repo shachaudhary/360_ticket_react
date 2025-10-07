@@ -32,141 +32,99 @@ export default function App() {
   };
 
   useEffect(() => {
-    const defaultTitle = "Support 360";
+    const defaultTitle = "Support 360"; // fallback title
     const currentPath = location.pathname;
+
+    // Try exact match first
     let pageTitle = routeTitles[currentPath];
 
-    // Handle dynamic ticket details
+    // Handle dynamic routes (like /tickets/:id)
     if (!pageTitle && currentPath.startsWith("/tickets/")) {
       pageTitle = "Ticket Details";
     }
 
-    document.title = pageTitle ? `Support 360 | ${pageTitle}` : defaultTitle;
+    document.title = pageTitle ? ` Support 360 | ${pageTitle}` : defaultTitle;
   }, [location]);
 
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
-        {/* 🔹 Auth Routes (optional for future use) */}
         {/* <Route path="/auth/sign-in" element={<Login />} />
         <Route path="/auth/forgot-password" element={<ForgotPassword />} />
         <Route path="/auth/reset-password" element={<ResetPassword />} /> */}
-
-        {/* 🔹 Redirect root to dashboard */}
-        <Route index element={<Navigate to="/dashboard" replace />} />
-
-        {/* 🔒 Protected Dashboard */}
+        
         <Route
-          path="/dashboard"
+          path="/"
           element={
             <ProtectedRoute>
-              <Layout>
-                <PageTransition>
-                  <Dashboard />
-                </PageTransition>
-              </Layout>
+              <Layout />
             </ProtectedRoute>
           }
-        />
+        >
+          <Route index element={<Navigate to="dashboard" />} />
+          <Route
+            path="dashboard"
+            element={
+              <PageTransition>
+                <Dashboard />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="tickets"
+            element={
+              <PageTransition>
+                <Tickets />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="tickets/new"
+            element={
+              <PageTransition>
+                <TicketForm />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="tickets/:id/edit"
+            element={<TicketForm isEdit={true} />}
+          />
+          <Route
+            path="tickets/:id"
+            element={
+              <PageTransition>
+                <TicketView />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="profile"
+            element={
+              <PageTransition>
+                <Profile />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="notifications"
+            element={
+              <PageTransition>
+                <Notifications />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="settings"
+            element={
+              <PageTransition>
+                <Settings />
+              </PageTransition>
+            }
+          />
+        </Route>
 
-        {/* 🔒 Protected Tickets List */}
-        <Route
-          path="/tickets"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <PageTransition>
-                  <Tickets />
-                </PageTransition>
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
-
-        {/* 🔒 Protected New Ticket */}
-        <Route
-          path="/tickets/new"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <PageTransition>
-                  <TicketForm />
-                </PageTransition>
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
-
-        {/* 🔒 Protected Edit Ticket */}
-        <Route
-          path="/tickets/:id/edit"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <TicketForm isEdit={true} />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
-
-        {/* 🔒 Protected Ticket Details */}
-        <Route
-          path="/tickets/:id"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <PageTransition>
-                  <TicketView />
-                </PageTransition>
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
-
-        {/* 🔒 Protected Profile */}
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <PageTransition>
-                  <Profile />
-                </PageTransition>
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
-
-        {/* 🔒 Protected Notifications */}
-        <Route
-          path="/notifications"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <PageTransition>
-                  <Notifications />
-                </PageTransition>
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
-
-        {/* 🔒 Protected Settings */}
-        <Route
-          path="/settings"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <PageTransition>
-                  <Settings />
-                </PageTransition>
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
-
-        {/* 🔁 Catch-all fallback */}
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AnimatePresence>
   );

@@ -96,7 +96,7 @@ export default function Layout() {
           to="/dashboard"
           icon={Squares2X2Icon}
           label="Dashboard"
-          // exact
+          exact
         />
         <NavItem to="/tickets" icon={TicketIcon} label="Tickets" />
         {/* <NavItem
