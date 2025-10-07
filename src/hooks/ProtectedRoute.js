@@ -5,60 +5,50 @@ import axios from "axios";
 
 function ProtectedRoute({ children }) {
     const location = useLocation();
-    const [isAuthChecked, setIsAuthChecked] = useState(false);
+    const [shouldRedirect, setShouldRedirect] = useState(false);
     const [accessToken, setAccessToken] = useState(localStorage.getItem("access_token"));
-    const redirecting = useRef(false);
     const toastShown = useRef(false);
 
-    // ✅ Validate token (safe + debounced)
+    // 🔹 Validate token
     const validateToken = async () => {
-        const token = localStorage.getItem("access_token");
-        if (!token) return setIsAuthChecked(true); // no token → no redirect yet
+        if (!accessToken) return;
 
         try {
             const res = await axios.get("https://api.dental360grp.com/validate_token", {
-                headers: { Authorization: `Bearer ${token}` },
+                headers: { Authorization: `Bearer ${accessToken}` },
             });
 
-            if (res?.data?.success) {
-                setAccessToken(token);
-                setIsAuthChecked(true);
-            } else {
-                handleLogout("Session expired. Please log in again.");
+            if (!res.data.success) {
+                localStorage.removeItem("access_token");
+                if (!toastShown.current) {
+                    toast.error("Session expired. Please log in again.");
+                    toastShown.current = true;
+                }
+                setShouldRedirect(true);
             }
         } catch (err) {
-            console.warn("Token validation error:", err?.message);
-            handleLogout("Authentication error. Please log in again.");
+            console.error("Token validation error:", err);
+            localStorage.removeItem("access_token");
+            if (!toastShown.current) {
+                toast.error("Authentication error. Please log in again.");
+                toastShown.current = true;
+            }
+            setShouldRedirect(true);
         }
     };
 
-    // ✅ Single logout + redirect handler
-    const handleLogout = (message) => {
-        if (redirecting.current) return;
-        redirecting.current = true;
-
-        localStorage.removeItem("access_token");
-        if (!toastShown.current) {
-            toast.error(message);
-            toastShown.current = true;
-        }
-
-        // Safe redirect to dashboard root, not /auth-sign-in
-        window.location.href = "https://dashboard.dental360grp.com/";
-    };
-
-    // 🔹 Validate once on mount
+    // 🔹 Validate on route change
     useEffect(() => {
         validateToken();
-    }, []);
+    }, [location.pathname, accessToken]);
 
-    // 🔹 Background validation every 5 minutes
+    // 🔹 Background check every 5 minutes
     useEffect(() => {
         const interval = setInterval(validateToken, 5 * 60 * 1000);
         return () => clearInterval(interval);
-    }, []);
+    }, [accessToken]);
 
-    // 🔹 Handle token in URL after auth redirect
+    // 🔹 Handle token in URL (first login redirect)
     useEffect(() => {
         const urlParams = new URLSearchParams(location.search);
         const tokenFromUrl = urlParams.get("token");
@@ -66,23 +56,21 @@ function ProtectedRoute({ children }) {
         if (tokenFromUrl) {
             localStorage.setItem("access_token", tokenFromUrl);
             setAccessToken(tokenFromUrl);
-
-            // clean URL once token saved
-            const cleanUrl = window.location.origin + window.location.pathname;
-            window.history.replaceState({}, document.title, cleanUrl);
-
-            // reload only once after login redirect
-            window.location.reload();
+        } else if (!accessToken && !toastShown.current) {
+            toast.error("Unauthorized access. Please log in.");
+            toastShown.current = true;
+            setShouldRedirect(true);
         }
-    }, [location.search]);
+    }, [location.search, accessToken]);
 
-    // 🧩 Don’t render until auth check is complete
-    if (!isAuthChecked) return null;
+    // 🔹 Redirect if needed
+    useEffect(() => {
+        if (shouldRedirect) {
+            window.location.href = "https://dashboard.dental360grp.com/auth/sign-in";
+        }
+    }, [shouldRedirect]);
 
-    // 🔒 If no valid token → redirect handled in handleLogout()
-    if (!accessToken) return null;
-
-    return children;
+    return accessToken ? children : null;
 }
 
 export default ProtectedRoute;
