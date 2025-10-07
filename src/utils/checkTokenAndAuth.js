@@ -28,7 +28,7 @@ export const checkTokenAndAuth = async (navigate, url) => {
     } catch (err) {
       if (err?.response?.data?.error?.includes("Invalid Bearer token")) {
         toast.error("❌ Invalid or expired token. Please login again.");
-        logoutUser(navigate);
+        // logoutUser(navigate);
       } else {
         console.error("❌ Error fetching profile:", err);
         toast.error("Failed to load profile.");
