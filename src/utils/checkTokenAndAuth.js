@@ -23,7 +23,7 @@ export const checkTokenAndAuth = async (navigate, url) => {
       localStorage.setItem("user_role", profile.user_role);
       console.log("✅ Auth Profile Loaded:", profile);
 
-      navigate(url, { replace: true });
+      // navigate(url, { replace: true });
       return { success: true, profile };
     } catch (err) {
       if (err?.response?.data?.error?.includes("Invalid Bearer token")) {
