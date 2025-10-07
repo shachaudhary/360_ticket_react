@@ -23,12 +23,16 @@ export const checkTokenAndAuth = async (navigate, url) => {
       localStorage.setItem("user_role", profile.user_role);
       console.log("✅ Auth Profile Loaded:", profile);
 
-      // navigate(url, { replace: true });
+      navigate(url, { replace: true });
+      // ✅ Give React Router a short delay before reloading
+      setTimeout(() => {
+        window.location.reload();
+      }, 300);
       return { success: true, profile };
     } catch (err) {
       if (err?.response?.data?.error?.includes("Invalid Bearer token")) {
         toast.error("❌ Invalid or expired token. Please login again.");
-        // logoutUser(navigate);
+        logoutUser(navigate);
       } else {
         console.error("❌ Error fetching profile:", err);
         toast.error("Failed to load profile.");
