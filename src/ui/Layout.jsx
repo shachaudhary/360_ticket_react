@@ -96,8 +96,9 @@ export default function Layout() {
           to="/dashboard"
           icon={Squares2X2Icon}
           label="Dashboard"
-          exact
+          onClick={() => (window.location.href = "/dashboard")} // 🔁 hard reload
         />
+
         <NavItem to="/tickets" icon={TicketIcon} label="Tickets" />
         {/* <NavItem
           to="/tickets/new"
