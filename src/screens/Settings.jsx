@@ -98,7 +98,9 @@ export default function Settings() {
     <div className="space-y-4">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-        <h2 className="text-lg md:text-xl font-semibold text-sidebar">Categories</h2>
+        <h2 className="text-lg md:text-xl font-semibold text-sidebar">
+          Categories
+        </h2>
 
         {/* Search Input */}
         <div className="md:ml-auto md:mr-2.5 md:max-w-64 w-full">
@@ -173,7 +175,22 @@ export default function Settings() {
                         {page * rowsPerPage + idx + 1}
                       </td>
                       <td className="px-4 py-3 border-b border-[#E5E7EB]">
-                        {toProperCase(cat.name)}
+                        <Chip
+                          label={toProperCase(cat.name) || "—"}
+                          variant="filled"
+                          sx={{
+                            fontSize: 11.75,
+                            fontWeight: 500,
+                            borderRadius: "6px",
+                            color: "#6B7280",
+                            border: "1px solid #E5E7EB",
+                            background: "white",
+                            height: 27.5,
+                            "& .MuiChip-label": {
+                              px: "7px !important", // ✅ Correct selector
+                            },
+                          }}
+                        />
                       </td>
                       <td className="px-4 py-3 border-b border-[#E5E7EB]">
                         {/* {toProperCase(cat.assignee_name) || "—"} */}
