@@ -40,13 +40,14 @@ export default function Dashboard() {
 
   useEffect(() => {
     const fetchAuth = async () => {
-      try {
-        setLoading(true);
-        await checkTokenAndAuth(navigate, url);
-      } finally {
-        setLoading(false);
-      }
+      setLoading(true);
+      const result = await checkTokenAndAuth(navigate, url);
+      setLoading(false);
+
+      // Optional: log state
+      console.log("Auth check result:", result);
     };
+
     fetchAuth();
   }, [navigate]);
 
@@ -231,7 +232,7 @@ export default function Dashboard() {
               Tickets Created
             </h3>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={getChartData()} >
+              <LineChart data={getChartData()}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                 <XAxis dataKey="name" />
                 <YAxis />
@@ -305,7 +306,9 @@ export default function Dashboard() {
 
             {/* Priority Pie Chart */}
             <div className="rounded-md border border-gray-100 bg-white p-5 shadow-card">
-              <h3 className="mb-4 text-sidebar font-medium">Tickets by Priority</h3>
+              <h3 className="mb-4 text-sidebar font-medium">
+                Tickets by Priority
+              </h3>
 
               {priorityData.length > 0 ? (
                 <ResponsiveContainer
