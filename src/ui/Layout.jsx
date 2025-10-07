@@ -96,7 +96,7 @@ export default function Layout() {
           to="/dashboard"
           icon={Squares2X2Icon}
           label="Dashboard"
-          onClick={() => (window.location.href = "/dashboard")} // 🔁 hard reload
+          // onClick={() => (window.location.href = "/dashboard")} // 🔁 hard reload
         />
 
         <NavItem to="/tickets" icon={TicketIcon} label="Tickets" />
