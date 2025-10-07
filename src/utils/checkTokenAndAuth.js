@@ -1,5 +1,6 @@
 // utils/checkTokenAndAuth.js
 import { createAPIEndPointAuth } from "../config/api/apiAuth";
+import { logoutUser } from "./index";
 import toast from "react-hot-toast";
 
 /**
@@ -25,27 +26,16 @@ export const checkTokenAndAuth = async (navigate, url) => {
       navigate(url, { replace: true });
       return { success: true, profile };
     } catch (err) {
-      console.error("❌ Error fetching profile:", err);
-
-      // 🔹 Handle invalid or expired token
       if (err?.response?.data?.error?.includes("Invalid Bearer token")) {
-        toast.error("❌ Invalid or expired token. Redirecting to login...");
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("user_profile");
-        localStorage.removeItem("user_role");
-
-        // 🔹 Redirect to third-party login
-        window.location.href = "https://dashboard.dental360grp.com/auth/sign-in";
+        toast.error("❌ Invalid or expired token. Please login again.");
+        logoutUser(navigate);
       } else {
-        toast.error("Failed to load profile. Please try again.");
+        console.error("❌ Error fetching profile:", err);
+        toast.error("Failed to load profile.");
       }
-
       return { success: false };
     }
   }
 
-  // 🔹 No token in URL → redirect as well
-  toast.error("Unauthorized access. Redirecting to login...");
-  window.location.href = "https://dashboard.dental360grp.com/auth-sign-in";
   return { success: false };
 };
