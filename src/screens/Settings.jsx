@@ -201,11 +201,11 @@ export default function Settings() {
                           sx={{
                             fontSize: 12.75,
                             borderRadius: "24px",
-                            color: "#333",
-                            backgroundColor: "#f6f6f6",
+                            color: "#353b48",
+                            backgroundColor: "#f5f6fa",
                             height: 27.5,
                             "& .MuiChip-label": {
-                              px: "7px !important", // ✅ Correct selector
+                              px: "7px !important",
                             },
                           }}
                         />

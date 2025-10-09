@@ -175,6 +175,19 @@ a.active {
   height: 0; /* optional for horizontal scrollbars */
 }
 
+/* Only text-like inputs, NOT checkboxes */
+.dental360-form input:not([type="checkbox"]) {
+  border: none;
+  border-bottom: 2px solid #d1d5db;
+  transition: all 0.3s ease;
+  caret-color: #1c64f2 !important;
+}
+
+/* Focus style, still excluding checkboxes */
+.dental360-form input:not([type="checkbox"]):focus {
+  border-color: #1c64f2 !important;
+}
+
 @media (max-width: 992px) {
   .sidebar-desktop {
     display: none !important;

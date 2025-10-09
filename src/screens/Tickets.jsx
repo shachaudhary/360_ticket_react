@@ -446,7 +446,7 @@ export default function Tickets() {
                           variant="filled"
                           sx={{
                             fontSize: 11.75,
-                            fontWeight:500,
+                            fontWeight: 500,
                             borderRadius: "6px",
                             color: "#6B7280",
                             border: "1px solid #E5E7EB",
@@ -472,11 +472,11 @@ export default function Tickets() {
                           sx={{
                             fontSize: 12.75,
                             borderRadius: "24px",
-                            color: "#333",
-                            backgroundColor: "#f6f6f6",
+                            color: "#353b48",
+                            backgroundColor: "#f5f6fa",
                             height: 27.5,
                             "& .MuiChip-label": {
-                              px: "7px !important", // ✅ Correct selector
+                              px: "7px !important",
                             },
                           }}
                         />
@@ -502,11 +502,11 @@ export default function Tickets() {
                           sx={{
                             fontSize: 12.75,
                             borderRadius: "24px",
-                            color: "#333",
-                            backgroundColor: "#f6f6f6",
+                            color: "#353b48",
+                            backgroundColor: "#f5f6fa",
                             height: 27.5,
                             "& .MuiChip-label": {
-                              px: "7px !important", // ✅ Correct selector
+                              px: "7px !important",
                             },
                           }}
                         />

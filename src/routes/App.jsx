@@ -14,6 +14,12 @@ import PageTransition from "../components/PageTransition.jsx";
 import Settings from "../screens/Settings.jsx";
 import Notifications from "../screens/Notifications.jsx";
 import TicketForm from "../screens/CreateTicket.jsx";
+import Careers from "../screens/Careers.jsx";
+import FormEntriesListing from "../screens/FormEntriesListing.jsx";
+
+// ✅ Add your favicon paths (public/ folder ke relative)
+const DEFAULT_FAVICON = "/favicon.ico";
+const CAREERS_FAVICON = "/careers-favicon.ico"; // e.g. put this file in /public
 
 export default function App() {
   const location = useLocation();
@@ -29,6 +35,7 @@ export default function App() {
     "/auth/sign-in": "Sign In",
     "/auth/forgot-password": "Forgot Password",
     "/auth/reset-password": "Reset Password",
+    "/careers": "Careers", // ✅ add careers
   };
 
   useEffect(() => {
@@ -52,7 +59,7 @@ export default function App() {
         {/* <Route path="/auth/sign-in" element={<Login />} />
         <Route path="/auth/forgot-password" element={<ForgotPassword />} />
         <Route path="/auth/reset-password" element={<ResetPassword />} /> */}
-        
+
         <Route
           path="/"
           element={
@@ -87,6 +94,32 @@ export default function App() {
               </PageTransition>
             }
           />
+          <Route
+            path="/form/submissions"
+            element={
+              <PageTransition>
+                <FormEntriesListing />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="/new-form"
+            element={
+              <PageTransition>
+                <Careers />
+              </PageTransition>
+            }
+          />
+          
+          <Route
+            path="/form_entries/edit/:id"
+            element={
+              <PageTransition>
+                <Careers isEditMode={true} />
+              </PageTransition>
+            }
+          />
+
           <Route
             path="/tickets/:id/edit"
             element={<TicketForm isEdit={true} />}
@@ -124,7 +157,6 @@ export default function App() {
             }
           />
         </Route>
-
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AnimatePresence>

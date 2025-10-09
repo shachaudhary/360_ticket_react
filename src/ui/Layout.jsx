@@ -15,6 +15,7 @@ import {
   UserCircleIcon,
   XMarkIcon,
   Cog6ToothIcon,
+  ClipboardDocumentListIcon,
 } from "@heroicons/react/24/outline";
 import { useApp } from "../state/AppContext.jsx";
 import ProfilePopover from "../components/ProfilePopover.jsx";
@@ -53,6 +54,9 @@ export default function Layout() {
   const location = useLocation();
 
   const isViewPage = location.pathname === `/tickets/${id}`;
+  const isFormPage =
+    location.pathname === `/new-form` ||
+    location.pathname.includes("form_entries");
   console.log("🚀 ~ Layout ~ isViewPage:", `/tickets/${id}`, isViewPage);
 
   const initials = React.useMemo(() => {
@@ -83,11 +87,17 @@ export default function Layout() {
         {/* <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-500 font-semibold">
             S
           </div> */}
-        <img
+
+        {/* <img
           src={favicon}
           alt="Support 360"
           className="flex h-8 w-8 rounded-lg"
-        />
+        /> */}
+
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-500 font-semibold">
+          <TicketIcon style={{ width: 21 }} />
+        </div>
+
         <div className="font-semibold">Support 360</div>
       </div>
       {/* )} */}
@@ -100,6 +110,15 @@ export default function Layout() {
         />
 
         <NavItem to="/tickets" icon={TicketIcon} label="Tickets" />
+        {/* <NavItem to="/careers" icon={PlusCircleIcon} label="New Hire Form" /> */}
+        {user?.is_form_access && (
+          <NavItem
+            to="/form/submissions"
+            icon={ClipboardDocumentListIcon}
+            label="Form Submissions"
+            matchChildren
+          />
+        )}
         {/* <NavItem
           to="/tickets/new"
           icon={PlusCircleIcon}
@@ -209,12 +228,14 @@ export default function Layout() {
         </header>
 
         {/* Content */}
-        <main className="flex-1 overflow-y-auto bg-white border border-gray-100 lg992:rounded-tl-2xl shadow-sm relative">
+        <main className="flex-1 overflow-y-auto bg-white  lg992:rounded-tl-2xl shadow-sm relative">
           <div
             className={`${
               isViewPage
-                ? "p-4 pr-2.5"
-                : "p-4 scroll-width h-[calc(100dvh-58px)]"
+                ? "p-4 pr-2.5 scroll-width h-[calc(100dvh-58px)] border border-gray-100"
+                : isFormPage
+                ? "p-0 scroll-width h-[calc(100dvh-58px)]"
+                : "p-4 scroll-width h-[calc(100dvh-58px)] border border-gray-100"
             }`}
           >
             <Outlet />

@@ -33,9 +33,10 @@ const ColorAvatar = ({ name }) => {
         height: 36,
         borderRadius: "50%",
         // bgcolor: "primary.main",
-        // bgcolor: "#F3F4F6",
-        bgcolor: "#2bcb6b",
-        color: "#FFF",
+        bgcolor: "#F3F4F6",
+        // bgcolor: "#2bcb6b",
+        // color: "#FFF",
+        color: "#0F1A1C",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -93,9 +94,11 @@ const ProfilePopover = ({ isMobile = false }) => {
             // badgeContent={3}
             color="error"
             sx={{ mr: 1 }}
-
           >
-            <NotificationsIcon fontSize="medium" className="!text-[30px] !text-[#2BCB6B] !text-opacity-100 brightness-150 !bg-white !bg-opacity-10 hover:!bg-opacity-25 p-[5px] rounded-full" />
+            <NotificationsIcon
+              fontSize="medium"
+              className="!text-[30px] !text-[#2BCB6B] !text-opacity-100 brightness-150 !bg-white !bg-opacity-10 hover:!bg-opacity-25 p-[5px] rounded-full"
+            />
           </Badge>
         </IconButton>
 
