@@ -317,7 +317,7 @@ export default function FormEntries() {
 
                         {/* ✅ Form Type */}
                         <td className="px-4 py-3 border-b border-[#E5E7EB]">
-                          {toProperCase(entry.form_type) || "N/A"}
+                          {toProperCase(entry.form_type_name) || "N/A"}
                         </td>
 
                         {/* ✅ Submitted By */}
