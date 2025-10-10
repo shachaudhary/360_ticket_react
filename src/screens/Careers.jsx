@@ -8,6 +8,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useApp } from "../state/AppContext";
 import { createAPIEndPointAuth } from "../config/api/apiAuth";
 import { toProperCase } from "../utils/formatting";
+import BackButton from "../components/BackButton";
 dayjs.extend(isSameOrBefore);
 dayjs.extend(isSameOrAfter);
 
@@ -562,6 +563,10 @@ const NewHireForm = () => {
         <div className="dental360-form relative bg-white">
           <div className="bg-red text-white p-8 lg:p-12 rounded-t-2xl relative overflow-hidden border">
             <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-700 rounded-full -translate-x-1/3 translate-y-1/3 opacity-50"></div>
+
+            <div className="flex absolute top-5 left-5">
+              <BackButton self="/forms" />
+            </div>
 
             <div className="relative z-10">
               {/* <h2 className="text-2xl font-bold mb-1 text-indigo-300">

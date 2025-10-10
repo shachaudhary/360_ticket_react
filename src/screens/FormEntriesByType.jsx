@@ -6,6 +6,7 @@ import {
   Chip,
   IconButton,
   Tooltip,
+  Typography,
 } from "@mui/material";
 import ClearIcon from "@mui/icons-material/Clear";
 import { EyeIcon } from "@heroicons/react/24/outline";
@@ -91,13 +92,26 @@ export default function FormEntriesByType() {
         <div className="flex">
           <div className="flex gap-2 items-center">
             <BackButton self="/forms" />
-            <h2 className="text-lg md:text-xl font-semibold text-sidebar">
+            {/* <h2 className="text-lg md:text-xl font-semibold text-sidebar">
               {formTypeName
                 ? `${toProperCase(formTypeName)} Form Submissions`
                 : formName
                 ? `${toProperCase(formName)} Form Submissions`
                 : "Form Submissions"}
-            </h2>
+            </h2> */}
+
+            <Typography
+              variant="h6"
+              className="!text-sidebar"
+              fontWeight={700}
+              color="primary"
+            >
+              {formTypeName
+                ? `${toProperCase(formTypeName)} Form Submissions`
+                : formName
+                ? `${toProperCase(formName)} Form Submissions`
+                : "Form Submissions"}
+            </Typography>
           </div>
 
           {/* <p className="text-gray-500 text-sm">
