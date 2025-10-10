@@ -17,6 +17,7 @@ import { convertToCST } from "../utils";
 import { toProperCase } from "../utils/formatting";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import { createAPIEndPointAuth } from "../config/api/apiAuth";
+import BackButton from "../components/BackButton";
 
 export default function FormEntriesByType() {
   const navigate = useNavigate();
@@ -87,14 +88,17 @@ export default function FormEntriesByType() {
     <div className="space-y-3">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-lg md:text-xl font-semibold text-sidebar">
-            {formTypeName
-              ? `${toProperCase(formTypeName)} Form Submissions`
-              : formName
-              ? `${toProperCase(formName)} Form Submissions`
-              : "Form Submissions"}
-          </h2>
+        <div className="flex">
+          <div className="flex gap-2 items-center">
+            <BackButton self="/forms" />
+            <h2 className="text-lg md:text-xl font-semibold text-sidebar">
+              {formTypeName
+                ? `${toProperCase(formTypeName)} Form Submissions`
+                : formName
+                ? `${toProperCase(formName)} Form Submissions`
+                : "Form Submissions"}
+            </h2>
+          </div>
 
           {/* <p className="text-gray-500 text-sm">
             View all submissions for this form type
@@ -154,7 +158,7 @@ export default function FormEntriesByType() {
                   <tr className="text-left text-xs text-gray-500">
                     <th className="px-4 py-3 border-b border-[#E5E7EB]">#</th>
                     <th className="px-4 py-3 border-b border-[#E5E7EB]">
-                      Submitted By
+                      Created By
                     </th>
                     <th className="px-4 py-3 border-b border-[#E5E7EB]">
                       Notify Users

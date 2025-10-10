@@ -264,7 +264,7 @@ export default function FormEntries() {
                       Form Type
                     </th>
                     <th className="px-4 py-3 border-b border-r border-[#E5E7EB]">
-                      Submitted By
+                      Created By
                     </th>
                     <th className="px-4 py-3 border-b border-r border-[#E5E7EB] !font-medium">
                       Employee Info
