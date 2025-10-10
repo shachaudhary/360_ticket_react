@@ -308,7 +308,7 @@ export default function TicketForm({ isEdit = false }) {
           }}
           className={`min-h-36 relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-center transition-all ${
             dragActive
-              ? "border-brand-500 bg-green-50 scale-[1.01]"
+              ? "border-brand-500 bg-purple-50 scale-[1.01]"
               : "border-[#D1D5DB] bg-[#FFF]"
           }`}
         >

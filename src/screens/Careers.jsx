@@ -74,11 +74,15 @@ const NewHireForm = () => {
         const data = res.data?.locations || [];
 
         // 🧹 Clean / Filter any unwanted entries
-        const filtered = data.filter(
-          (loc) =>
+        const filtered = data.filter((loc) => {
+          const name = (loc.location_name || "").trim().toLowerCase();
+          return (
             loc.id !== 25 &&
-            (loc.location_name || "").trim().toLowerCase() !== "sales team"
-        );
+            loc.id !== 28 &&
+            name !== "sales team" &&
+            name !== "insurance"
+          );
+        });
 
         setLocations(filtered);
       } catch (err) {
@@ -564,7 +568,7 @@ const NewHireForm = () => {
                 Dental 360 & Associates
               </h2> */}
 
-              <h1 className="text-4xl text-center font-extrabold mb-6 text-[#004AAD] ">
+              <h1 className="text-4xl text-center font-extrabold mb-6 text-brand-700">
                 NEW HIRE FORM
               </h1>
 
@@ -611,7 +615,7 @@ const NewHireForm = () => {
               <div
                 className={`mb-6 p-4 rounded-md ${
                   submitStatus.type === "success"
-                    ? "bg-green-50 border border-green-200 text-green-800"
+                    ? "bg-purple-50 border border-green-200 text-green-800"
                     : "bg-red-50 border border-red-200 text-red-800"
                 }`}
               >

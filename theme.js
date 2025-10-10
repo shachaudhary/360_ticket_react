@@ -1,7 +1,7 @@
 import { createTheme } from "@mui/material/styles";
 
 const sidebar = "#0F1A1C";
-const brand = "#2bcb6b";
+const brand = "#9C6BFF";
 
 const theme = createTheme({
   palette: {

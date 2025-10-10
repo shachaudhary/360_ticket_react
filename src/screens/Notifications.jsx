@@ -77,7 +77,7 @@ export default function ActivityFeed() {
       <div className="space-y-4">
         <h2 className="text-lg md:text-xl font-semibold text-sidebar">Notifications</h2>
         <div className="overflow-hidden rounded-lg border border-[#E5E7EB]">
-          <div className="h-[calc(100dvh-135px)] flex items-center justify-center bg-green-50">
+          <div className="h-[calc(100dvh-135px)] flex items-center justify-center bg-purple-50">
             <CircularProgress size={28} />
           </div>
         </div>

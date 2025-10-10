@@ -125,7 +125,7 @@ export default function FormEntries() {
           Form Submissions
         </h2>
         <button
-          onClick={() => navigate("/new-form")}
+          onClick={() => navigate("/new-hire-form")}
           className="flex items-center gap-1 rounded-lg bg-brand-500 px-3 py-2 text-sm font-semibold text-white hover:bg-brand-600 transition-all"
         >
           <PlusIcon className="h-4 w-4 text-white stroke-[2.5]" />
@@ -238,7 +238,7 @@ export default function FormEntries() {
       {/* Table */}
       {loading ? (
         <div className="overflow-hidden rounded-lg border border-[#E5E7EB]">
-          <div className="h-[calc(100dvh-240px)] flex items-center justify-center rounded-lg bg-green-50">
+          <div className="h-[calc(100dvh-240px)] flex items-center justify-center rounded-lg bg-purple-50">
             <CircularProgress color="primary" />
           </div>
         </div>
@@ -360,7 +360,7 @@ export default function FormEntries() {
 
                         {/* ✅ Action */}
                         <td className="px-4 py-3 text-center border-b border-[#E5E7EB]">
-                          {/* <Tooltip title="View Form Entry">
+                          <Tooltip title="View Form Entry">
                             <IconButton
                               size="small"
                               onClick={() => handleViewEntry(entry.id)}
@@ -370,7 +370,7 @@ export default function FormEntries() {
                                 className="text-gray-500"
                               />
                             </IconButton>
-                          </Tooltip> */}
+                          </Tooltip>
 
                           <Tooltip title="Edit Form Entry">
                             <IconButton

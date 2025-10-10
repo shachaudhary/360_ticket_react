@@ -34,7 +34,7 @@ const ColorAvatar = ({ name }) => {
         borderRadius: "50%",
         // bgcolor: "primary.main",
         bgcolor: "#F3F4F6",
-        // bgcolor: "#2bcb6b",
+        // bgcolor: "#9C6BFF",
         // color: "#FFF",
         color: "#0F1A1C",
         display: "flex",
@@ -97,7 +97,7 @@ const ProfilePopover = ({ isMobile = false }) => {
           >
             <NotificationsIcon
               fontSize="medium"
-              className="!text-[30px] !text-[#2BCB6B] !text-opacity-100 brightness-150 !bg-white !bg-opacity-10 hover:!bg-opacity-25 p-[5px] rounded-full"
+              className="!text-[30px] !text-[#B694FF] !text-opacity-100 brightness-150 !bg-white !bg-opacity-10 hover:!bg-opacity-25 p-[5px] rounded-full"
             />
           </Badge>
         </IconButton>
@@ -195,7 +195,7 @@ const ProfilePopover = ({ isMobile = false }) => {
               "&:hover": { backgroundColor: "rgba(0,0,0,0.04)" },
             }}
           >
-            <PersonIcon sx={{ mr: 1, color: "#1fb058" }} />
+            <PersonIcon sx={{ mr: 1, color: "#824EF2" }} />
             <Typography variant="body2">Profile</Typography>
           </MenuItem>
 
@@ -212,7 +212,7 @@ const ProfilePopover = ({ isMobile = false }) => {
               "&:hover": { backgroundColor: "rgba(0,0,0,0.04)" },
             }}
           >
-            <LockIcon sx={{ mr: 1, color: "#1fb058" }} />
+            <LockIcon sx={{ mr: 1, color: "#824EF2" }} />
             <Typography variant="body2">Account</Typography>
           </MenuItem> */}
 

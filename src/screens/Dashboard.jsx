@@ -127,7 +127,7 @@ export default function Dashboard() {
     <div className="dashbaord-pg">
       {loading ? (
         <div className="fixed inset-0 flex items-center justify-center bg-white z-50">
-          <CircularProgress size={60} thickness={4} sx={{ color: "#2bcb6b" }} />
+          <CircularProgress size={60} thickness={4} sx={{ color: "#9C6BFF" }} />
         </div>
       ) : (
         <div className="space-y-6">
@@ -240,7 +240,7 @@ export default function Dashboard() {
                 <Line
                   type="monotone"
                   dataKey="tickets"
-                  stroke="#2bcb6b"
+                  stroke="#9C6BFF"
                   strokeWidth={2}
                   activeDot={{ r: 6, fill: "#186f3c" }}
                 />

@@ -11,9 +11,12 @@ export default {
       colors: {
         sidebar: "#0F1A1C",
         brand: {
-          500: "#2bcb6b",
-          600: "#1fb058"
+          400: "#B694FF",
+          500: "#9C6BFF", // main accent
+          600: "#824EF2",
+          700: "#653BCC",
         }
+
       },
       boxShadow: {
         card: "0 2px 8px rgba(0,0,0,0.06)"

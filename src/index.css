@@ -8,7 +8,7 @@
 
 /* * {
   scrollbar-width: thin; 
-  scrollbar-color: #2bcb6b #0f1a1c; 
+  scrollbar-color: #9C6BFF #0f1a1c; 
 }
 
 ::-webkit-scrollbar {
@@ -21,7 +21,7 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #2bcb6b;
+  background-color: #9C6BFF;
   border-radius: 6px;
 }
 
@@ -94,7 +94,7 @@ select:focus {
 }
 
 .otp-input input:focus {
-  outline: 2px solid #2bcb6b !important;
+  outline: 2px solid #9C6BFF !important;
   background-color: #e9fcf0;
   border: none !important;
 }
@@ -153,7 +153,7 @@ table td,
 }
 
 a.active {
-  background-color: #2bcb6b !important;
+  background-color: #9C6BFF !important;
   color: #fff;
 }
 

@@ -109,7 +109,7 @@ export default function SettingsFormTypes() {
       {/* Table */}
       {loading ? (
         <div className="overflow-hidden rounded-lg border border-[#E5E7EB]">
-          <div className="overflow-auto h-[calc(100dvh-139px)] flex items-center justify-center bg-green-50">
+          <div className="overflow-auto h-[calc(100dvh-139px)] flex items-center justify-center bg-purple-50">
             <CircularProgress color="primary" />
           </div>
         </div>

@@ -31,12 +31,12 @@ ReactDOM.createRoot(document.getElementById("root")).render(
                 },
                 success: {
                   style: {
-                    background: "#2bcb6b",
+                    background: "#9C6BFF",
                     color: "#fff",
                   },
                   iconTheme: {
                     primary: "#fff",
-                    secondary: "#2bcb6b",
+                    secondary: "#9C6BFF",
                   },
                 },
                 error: {

@@ -349,7 +349,7 @@ export default function TicketView() {
 
   if (!ticket) {
     return (
-      <Box className="absolute inset-0 flex items-center justify-center bg-green-50">
+      <Box className="absolute inset-0 flex items-center justify-center bg-purple-50">
         <CircularProgress color="primary" />
       </Box>
     );
@@ -375,7 +375,7 @@ export default function TicketView() {
                       setAssignModalOpen(true);
                     }}
                     sx={{ borderRadius: 1.25 }}
-                    className="flex justify-center items-center text-brand-500 border border-brand-500 bg-green-50 hover:brightness-[97.5%] py-2 px-2 gap-1 cursor-pointer transition-all"
+                    className="flex justify-center items-center text-brand-500 border border-brand-500 bg-purple-50 hover:brightness-[97.5%] py-2 px-2 gap-1 cursor-pointer transition-all"
                   >
                     <span className="leading-3 font-semibold">
                       {toProperCase(ticket.assignees[0]?.assign_to_username)}

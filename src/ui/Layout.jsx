@@ -57,8 +57,8 @@ export default function Layout() {
 
   const isViewPage = location.pathname === `/tickets/${id}`;
   const isFormPage =
-    location.pathname === `/new-form` ||
-    location.pathname.includes("form_entries");
+    location.pathname === `/new-hire-form` ||
+    location.pathname.includes("form_entries/edit");
   const [settingsOpen, setSettingsOpen] = React.useState(false);
 
   // Check if any settings child route is active
@@ -111,7 +111,7 @@ export default function Layout() {
           <TicketIcon style={{ width: 21 }} />
         </div>
 
-        <div className="font-semibold">Support 360</div>
+        <div className="font-semibold -mt-1">Support 360</div>
       </div>
       {/* )} */}
       <nav className="flex flex-col gap-2">

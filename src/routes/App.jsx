@@ -17,6 +17,7 @@ import Careers from "../screens/Careers.jsx";
 import FormEntriesListing from "../screens/FormEntriesListing.jsx";
 import SettingsCategories from "../screens/SettingsCategories.jsx";
 import SettingsFormTypes from "../screens/SettingsFormTypes.jsx";
+import FormEntryView from "../screens/FormEntryView.jsx";
 
 // ✅ Add your favicon paths (public/ folder ke relative)
 const DEFAULT_FAVICON = "/favicon.ico";
@@ -37,6 +38,7 @@ export default function App() {
     "/auth/forgot-password": "Forgot Password",
     "/auth/reset-password": "Reset Password",
     "/careers": "Careers", // ✅ add careers
+    "/new-hire-form": "New Hire Form", // ✅ add careers
   };
 
   useEffect(() => {
@@ -104,7 +106,7 @@ export default function App() {
             }
           />
           <Route
-            path="/new-form"
+            path="/new-hire-form"
             element={
               <PageTransition>
                 <Careers />
@@ -117,6 +119,15 @@ export default function App() {
             element={
               <PageTransition>
                 <Careers isEditMode={true} />
+              </PageTransition>
+            }
+          />
+
+          <Route
+            path="/form_entries/:id"
+            element={
+              <PageTransition>
+                <FormEntryView />
               </PageTransition>
             }
           />
