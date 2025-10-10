@@ -1161,8 +1161,8 @@ const NewHireForm = () => {
                       ? "Updating..."
                       : "Submitting..."
                     : isEditMode
-                    ? "Update Form"
-                    : "Submit Form"}
+                    ? "Update"
+                    : "Submit"}
                 </button>
               </div>
             </div>
