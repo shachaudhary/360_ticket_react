@@ -174,7 +174,9 @@ const NewHireForm = () => {
     if (isEditMode && id) {
       (async () => {
         try {
-          const res = await createAPIEndPoint(`form_entries/details/${id}`).fetchAll();
+          const res = await createAPIEndPoint(
+            `form_entries/details/${id}`
+          ).fetchAll();
           const entry = res.data;
           if (!entry) return;
 
@@ -574,7 +576,8 @@ const NewHireForm = () => {
               </h2> */}
 
               <h1 className="text-4xl text-center font-extrabold mb-6 text-brand-700">
-                NEW HIRE FORM
+                {/* NEW HIRE FORM */}
+                {isEditMode ? "Edit HIRE FORM" : "NEW HIRE FORM"}
               </h1>
 
               <img
