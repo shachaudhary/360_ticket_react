@@ -126,9 +126,9 @@ export default function Layout() {
         {/* <NavItem to="/careers" icon={PlusCircleIcon} label="New Hire Form" /> */}
         {user?.is_form_access && (
           <NavItem
-            to="/form/submissions"
+            to="/forms"
             icon={ClipboardDocumentListIcon}
-            label="Form Submissions"
+            label="Forms"
             matchChildren
           />
         )}

@@ -18,6 +18,8 @@ import FormEntriesListing from "../screens/FormEntriesListing.jsx";
 import SettingsCategories from "../screens/SettingsCategories.jsx";
 import SettingsFormTypes from "../screens/SettingsFormTypes.jsx";
 import FormEntryView from "../screens/FormEntryView.jsx";
+import FormTypesList from "../screens/FormTypesList.jsx";
+import FormEntriesByType from "../screens/FormEntriesByType.jsx";
 
 // ✅ Add your favicon paths (public/ folder ke relative)
 const DEFAULT_FAVICON = "/favicon.ico";
@@ -72,7 +74,6 @@ export default function App() {
           }
         >
           <Route index element={<Navigate to="/dashboard" />} />
-
           <Route
             path="/dashboard"
             element={
@@ -98,13 +99,22 @@ export default function App() {
             }
           />
           <Route
-            path="/form/submissions"
+            path="/forms"
             element={
               <PageTransition>
-                <FormEntriesListing />
+                <FormTypesList />
               </PageTransition>
             }
           />
+          <Route
+            path="/forms/:form_type_id/submissions"
+            element={
+              <PageTransition>
+                <FormEntriesByType />
+              </PageTransition>
+            }
+          />
+          F
           <Route
             path="/new-hire-form"
             element={
@@ -113,7 +123,6 @@ export default function App() {
               </PageTransition>
             }
           />
-
           <Route
             path="/form_entries/edit/:id"
             element={
@@ -122,16 +131,14 @@ export default function App() {
               </PageTransition>
             }
           />
-
           <Route
-            path="/form_entries/:id"
+            path="/form_entries/details/:id"
             element={
               <PageTransition>
                 <FormEntryView />
               </PageTransition>
             }
           />
-
           <Route
             path="/tickets/:id/edit"
             element={<TicketForm isEdit={true} />}

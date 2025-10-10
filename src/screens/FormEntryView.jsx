@@ -38,14 +38,16 @@ const Label = ({ title, value }) => (
 
 export default function FormEntryView() {
   const { id } = useParams();
-  console.log("🚀 ~ FormEntryView ~ id:", id)
+  console.log("🚀 ~ FormEntryView ~ id:", id);
   const navigate = useNavigate();
   const [entry, setEntry] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const fetchFormEntry = useCallback(async () => {
     try {
-      const res = await createAPIEndPoint(`form_entries/${id}`).fetchAll();
+      const res = await createAPIEndPoint(
+        `form_entries/details/${id}`
+      ).fetchAll();
       setEntry(res.data);
     } catch (err) {
       console.error("Failed to fetch form entry:", err);
@@ -136,7 +138,10 @@ export default function FormEntryView() {
               {/* <Label title="Form ID" value={`#${entry.id}`} /> */}
               <Label title="Submitted By" value={toProperCase(submittedBy)} />
               <Label title="Email" value={entry.submitted_by?.email} />
-              <Label title="Phone" value={formatUSPhoneNumber(entry.submitted_by?.phone)} />
+              <Label
+                title="Phone"
+                value={formatUSPhoneNumber(entry.submitted_by?.phone)}
+              />
               <Label title="Created At" value={createdAt} />
               {/* <Label title="Updated At" value={updatedAt} /> */}
             </div>

@@ -426,7 +426,7 @@ const NewHireForm = () => {
         // form_type: formData.form_type,
         // form_type_id:
         //   formTypes.find((t) => t.name === formData.form_type)?.id || null,
-        form_type: "Hire",
+        form_type: "hire",
         form_type_id: 1, // since we are skipping dynamic types
         submitted_by_id,
         clinic_id,
@@ -490,7 +490,7 @@ const NewHireForm = () => {
         });
       }
 
-      navigate("/form/submissions");
+      navigate("/forms");
 
       window.scrollTo({ top: 0, behavior: "smooth" }); // scroll up for success too (nice UX)
 

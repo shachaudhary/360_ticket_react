@@ -13,6 +13,7 @@ import FormTypeModal from "../components/FormTypeModal";
 import DateWithTooltip from "../components/DateWithTooltip";
 import { toProperCase } from "../utils/formatting";
 import CustomTablePagination from "../components/CustomTablePagination";
+import { createAPIEndPointAuth } from "../config/api/apiAuth";
 
 function useDebounce(value, delay = 400) {
   const [debounced, setDebounced] = useState(value);
@@ -42,7 +43,7 @@ export default function SettingsFormTypes() {
   const fetchFormTypes = async () => {
     try {
       setLoading(true);
-      const res = await createAPIEndPoint(
+      const res = await createAPIEndPointAuth(
         `form_types?page=${
           page + 1
         }&per_page=${rowsPerPage}&search=${debouncedQuery}`

@@ -16,7 +16,6 @@ export default {
           600: "#824EF2",
           700: "#653BCC",
         }
-
       },
       boxShadow: {
         card: "0 2px 8px rgba(0,0,0,0.06)"

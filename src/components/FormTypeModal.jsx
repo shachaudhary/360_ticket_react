@@ -9,7 +9,6 @@ import {
   CircularProgress,
   Autocomplete,
   IconButton,
-  Typography,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { createAPIEndPoint } from "../config/api/api";
@@ -40,12 +39,14 @@ export default function FormTypeModal({ open, onClose, onSaved, formType }) {
     if (formType) {
       setName(formType.name || "");
       setDescription(formType.description || "");
+
+      // ✅ Use assign_users instead of users
       setSelectedUsers(
-        formType.users?.map((u) => ({
+        formType.assign_users?.map((u) => ({
           user_id: u.id,
-          first_name: u.first_name,
-          last_name: u.last_name,
-          email: u.email,
+          first_name: u.username?.split(" ")[0] || "",
+          last_name: u.username?.split(" ")[1] || "",
+          email: u.email || "",
         })) || []
       );
     } else {
@@ -87,13 +88,13 @@ export default function FormTypeModal({ open, onClose, onSaved, formType }) {
         clinic_id: 1,
         location_id: 30,
         user_ids: selectedUsers.map((u) => u.user_id),
-        user_id: selectedUsers[0]?.user_id || null,
+        user_id: selectedUsers[0]?.user_id || null, // primary owner
       };
 
       if (formType?.id) {
-        await createAPIEndPoint(`form_types/${formType.id}`).patch(payload);
+        await createAPIEndPointAuth(`form_types/`).update(formType.id, payload);
       } else {
-        await createAPIEndPoint("form_types").createWithJSONFormat(payload);
+        await createAPIEndPointAuth("form_types").create(payload);
       }
       onSaved();
     } catch (err) {
@@ -106,7 +107,7 @@ export default function FormTypeModal({ open, onClose, onSaved, formType }) {
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle className="font-semibold text-brand-500 !text-lg flex justify-between items-center">
-        {formType ? "Edit Form Type" : "Add Form Type"}
+        {formType ? "Edit Form" : "Add Form"}
         <IconButton
           aria-label="close"
           onClick={onClose}
@@ -140,68 +141,57 @@ export default function FormTypeModal({ open, onClose, onSaved, formType }) {
             size="small"
           />
 
-          {/* 🔔 Notify Users Section */}
-          <div className="space-y-1">
-            <Autocomplete
-              multiple
-              fullWidth
-              size="small"
-              options={searchResults}
-              loading={searchLoading}
-              value={selectedUsers}
-              onChange={(e, newValue) => setSelectedUsers(newValue)}
-              filterOptions={(x) => x}
-              getOptionLabel={(option) =>
-                option
+          <Autocomplete
+            multiple
+            fullWidth
+            size="small"
+            options={searchResults}
+            loading={searchLoading}
+            value={selectedUsers}
+            onChange={(e, newValue) => setSelectedUsers(newValue)}
+            filterOptions={(x) => x}
+            getOptionLabel={(option) =>
+              option
+                ? option.first_name
                   ? `${toProperCase(option.first_name)} ${toProperCase(
-                      option.last_name
+                      option.last_name || ""
                     )}`.trim()
-                  : ""
-              }
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Notify These Members"
-                  placeholder="Search and select members..."
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  InputProps={{
-                    ...params.InputProps,
-                    endAdornment: (
-                      <>
-                        {searchLoading ? <CircularProgress size={20} /> : null}
-                        {params.InputProps.endAdornment}
-                      </>
-                    ),
-                  }}
-                />
-              )}
-              renderOption={(props, option) => (
-                <li {...props} key={option.user_id}>
-                  <div className="flex flex-col">
-                    <span className="font-medium text-gray-600">
-                      {toProperCase(option.first_name)}{" "}
-                      {toProperCase(option.last_name)}
-                    </span>
-                    <span className="text-xs text-gray-500">
-                      {option.email}
-                    </span>
-                  </div>
-                </li>
-              )}
-            />
-
-            <Typography
-              variant="caption"
-              sx={{ color: "text.secondary", fontSize: "0.78rem" }}
-            >
-              These team members will receive notifications when forms of this
-              type are submitted or updated.
-            </Typography>
-          </div>
+                  : toProperCase(option.username || "")
+                : ""
+            }
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Assign to Users"
+                placeholder="Search team members..."
+                onChange={(e) => setSearchTerm(e.target.value)}
+                InputProps={{
+                  ...params.InputProps,
+                  endAdornment: (
+                    <>
+                      {searchLoading ? <CircularProgress size={20} /> : null}
+                      {params.InputProps.endAdornment}
+                    </>
+                  ),
+                }}
+              />
+            )}
+            renderOption={(props, option) => (
+              <li {...props} key={option.user_id}>
+                <div className="flex flex-col">
+                  <span className="font-medium text-gray-600">
+                    {toProperCase(option.first_name)}{" "}
+                    {toProperCase(option.last_name)}
+                  </span>
+                  <span className="text-xs text-gray-500">{option.email}</span>
+                </div>
+              </li>
+            )}
+          />
         </div>
       </DialogContent>
 
-      <DialogActions>
+      <DialogActions className="!py-[16px] !px-[24px]">
         <Button
           variant="outlined"
           onClick={onClose}

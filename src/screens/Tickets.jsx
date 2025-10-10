@@ -24,6 +24,7 @@ import ClearIcon from "@mui/icons-material/Clear";
 import { convertToCST } from "../utils";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import { toProperCase } from "../utils/formatting";
+import { EyeIcon } from "@heroicons/react/24/outline";
 
 export default function Tickets() {
   const navigate = useNavigate();
@@ -524,10 +525,11 @@ export default function Tickets() {
                               window.open(`/tickets/${t.id}`, "_blank")
                             }
                           >
-                            <LaunchIcon
+                            {/* <LaunchIcon
                               fontSize="small"
                               className="text-gray-500"
-                            />
+                            /> */}
+                            <EyeIcon className="h-5 w-5 text-gray-500 hover:text-brand-500 transition-colors" />
                           </IconButton>
                         </Tooltip>
                       </td>
