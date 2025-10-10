@@ -11,11 +11,12 @@ import ResetPassword from "../screens/ResetPassword.jsx";
 import ProtectedRoute from "../hooks/ProtectedRoute.js";
 import { AnimatePresence } from "framer-motion";
 import PageTransition from "../components/PageTransition.jsx";
-import Settings from "../screens/Settings.jsx";
 import Notifications from "../screens/Notifications.jsx";
 import TicketForm from "../screens/CreateTicket.jsx";
 import Careers from "../screens/Careers.jsx";
 import FormEntriesListing from "../screens/FormEntriesListing.jsx";
+import SettingsCategories from "../screens/SettingsCategories.jsx";
+import SettingsFormTypes from "../screens/SettingsFormTypes.jsx";
 
 // ✅ Add your favicon paths (public/ folder ke relative)
 const DEFAULT_FAVICON = "/favicon.ico";
@@ -110,7 +111,7 @@ export default function App() {
               </PageTransition>
             }
           />
-          
+
           <Route
             path="/form_entries/edit/:id"
             element={
@@ -149,10 +150,19 @@ export default function App() {
             }
           />
           <Route
-            path="settings"
+            // path="/settings/categories"
+            path="/settings"
             element={
               <PageTransition>
-                <Settings />
+                <SettingsCategories />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="/settings/form-types"
+            element={
+              <PageTransition>
+                <SettingsFormTypes />
               </PageTransition>
             }
           />

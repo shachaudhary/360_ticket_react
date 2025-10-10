@@ -46,17 +46,21 @@ const NewHireForm = () => {
   const [formTypes, setFormTypes] = useState([]);
 
   // 🔹 Fetch Form Types (dynamic)
+  // useEffect(() => {
+  //   const fetchFormTypes = async () => {
+  //     try {
+  //       const res = await createAPIEndPoint("form_types").fetchAll();
+  //       const data = res.data?.form_types || [];
+  //       setFormTypes(data);
+  //     } catch (err) {
+  //       console.error("Error fetching form types:", err);
+  //     }
+  //   };
+  //   fetchFormTypes();
+  // }, []);
+
   useEffect(() => {
-    const fetchFormTypes = async () => {
-      try {
-        const res = await createAPIEndPoint("form_types").fetchAll();
-        const data = res.data?.form_types || [];
-        setFormTypes(data);
-      } catch (err) {
-        console.error("Error fetching form types:", err);
-      }
-    };
-    fetchFormTypes();
+    setFormData((prev) => ({ ...prev, form_type: "Hire" }));
   }, []);
 
   // 🔹 Fetch Locations
@@ -415,9 +419,11 @@ const NewHireForm = () => {
       const location_id = 2;
 
       const payload = {
-        form_type: formData.form_type,
-        form_type_id:
-          formTypes.find((t) => t.name === formData.form_type)?.id || null,
+        // form_type: formData.form_type,
+        // form_type_id:
+        //   formTypes.find((t) => t.name === formData.form_type)?.id || null,
+        form_type: "Hire",
+        form_type_id: 1, // since we are skipping dynamic types
         submitted_by_id,
         clinic_id,
         location_id,
@@ -557,13 +563,19 @@ const NewHireForm = () => {
               {/* <h2 className="text-2xl font-bold mb-1 text-indigo-300">
                 Dental 360 & Associates
               </h2> */}
+
+              <h1 className="text-4xl text-center font-extrabold mb-6 text-[#004AAD] ">
+                NEW HIRE FORM
+              </h1>
+
               <img
                 src={brandLogo}
                 alt="Dental 360 & Associates"
-                className="h-20 w-full object-contain"
+                className="h-16 w-full object-contain"
               />
-
-              {/* <h1 className="text-4xl font-bold mb-6">NEW HIRE FORM</h1> */}
+              {/* <h1 className="text-4xl font-extrabold tracking-tight text-center text-[#004AAD] mb-2 uppercase">
+                NEW HIRE FORM
+              </h1> */}
 
               <p className="text-sm text-gray-700 mt-5 mb-3 text-center">
                 To be completed by Regional Manager or Office Manager and
@@ -666,11 +678,11 @@ const NewHireForm = () => {
               </div> */}
 
               {/* 🆕 FORM TYPE SELECTION SECTION */}
-              <h3 className="text-2xl font-bold mb-6 text-gray-800 border-b pb-2">
+              {/* <h3 className="text-2xl font-bold mb-6 text-gray-800 border-b pb-2">
                 Form Type
-              </h3>
+              </h3> */}
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {/* <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="sm:col-span-2">
                   <label className="block text-sm font-bold text-gray-800 mb-2">
                     Select Form Type <Asterisk />
@@ -713,7 +725,6 @@ const NewHireForm = () => {
                     </p>
                   )}
 
-                  {/* 👇 Optional input for “Other” (still supported dynamically) */}
                   {formData.form_type === "Other" && (
                     <div className="mt-3">
                       <label
@@ -743,7 +754,7 @@ const NewHireForm = () => {
                     </div>
                   )}
                 </div>
-              </div>
+              </div> */}
 
               <h3 className="text-2xl font-bold mb-6 pt-4 text-gray-800 border-b pb-2">
                 Position Details

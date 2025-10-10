@@ -16,7 +16,9 @@ import {
   XMarkIcon,
   Cog6ToothIcon,
   ClipboardDocumentListIcon,
+  TagIcon,
 } from "@heroicons/react/24/outline";
+
 import { useApp } from "../state/AppContext.jsx";
 import ProfilePopover from "../components/ProfilePopover.jsx";
 import AppMenu from "../components/AppMenu.jsx";
@@ -57,7 +59,13 @@ export default function Layout() {
   const isFormPage =
     location.pathname === `/new-form` ||
     location.pathname.includes("form_entries");
-  console.log("🚀 ~ Layout ~ isViewPage:", `/tickets/${id}`, isViewPage);
+  const [settingsOpen, setSettingsOpen] = React.useState(false);
+
+  // Check if any settings child route is active
+  const isSettingsActive =
+    location.pathname.startsWith("/settings/categories") ||
+    location.pathname.startsWith("/settings/form-types");
+
 
   const initials = React.useMemo(() => {
     const n = (user?.name || "Admin User").trim();
@@ -68,6 +76,11 @@ export default function Layout() {
       .join("")
       .toUpperCase();
   }, [user?.name]);
+
+  // Automatically open Settings menu when on a child route
+  // React.useEffect(() => {
+  //   if (isSettingsActive) setSettingsOpen(true);
+  // }, [isSettingsActive]);
 
   // Close mobile sidebar with ESC
   React.useEffect(() => {
@@ -129,13 +142,78 @@ export default function Layout() {
       </nav>
 
       <div className={`mt-auto pt-6 ${sidebarOpen ? "pb-2" : "!pb-0"}  `}>
-        {/* <button
-          onClick={() => navigate("/settings")}
-          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
-        >
-          <Cog6ToothIcon className="h-5 w-5" />
-          Settings
-        </button> */}
+        {/* 🔽 Settings Dropdown Above Main Settings */}
+        {/* <div className="relative mb-2">
+          <button
+            onClick={() => setSettingsOpen(!settingsOpen)}
+            className={`flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all ${
+              settingsOpen || isSettingsActive
+                ? "bg-gray-800 text-white"
+                : "text-gray-300 hover:bg-gray-800 hover:text-white"
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <Cog6ToothIcon className="h-5 w-5" />
+              <span>Settings</span>
+            </div>
+            <svg
+              className={`h-4 w-4 transition-transform duration-300 ${
+                settingsOpen ? "rotate-180" : "rotate-0"
+              }`}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </button>
+
+          <div
+            className={`mt-1 flex flex-col gap-1 overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] rounded-lg ${
+              settingsOpen
+                ? // ? "max-h-40 opacity-100 bg-gradient-to-b from-gray-900/90 to-gray-800/90 backdrop-blur-sm border border-gray-700/40 shadow-inner"
+                  "max-h-40 opacity-100 bg-gradient-to-b bg-gray-900 backdrop-blur-sm border border-gray-700/40 shadow-inner"
+                : "max-h-0 opacity-0"
+            }`}
+          >
+            <NavLink
+              to="/settings/categories"
+              className={({ isActive }) =>
+                [
+                  "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-all duration-200 mx-2 mt-1",
+                  isActive
+                    ? "bg-gray-800 text-white shadow-sm"
+                    : "text-gray-300 hover:bg-gray-800/60 hover:text-white",
+                ].join(" ")
+              }
+            >
+              <TagIcon className="h-5 w-5 text-gray-400 group-hover:text-gray-200 transition-colors duration-200" />
+              <span>Categories</span>
+            </NavLink>
+
+            <NavLink
+              to="/settings/form-types"
+              className={({ isActive }) =>
+                [
+                  "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-all duration-200 mx-2 mb-2",
+                  isActive
+                    ? "bg-gray-800 text-white shadow-sm"
+                    : "text-gray-300 hover:bg-gray-800/60 hover:text-white",
+                ].join(" ")
+              }
+            >
+              <ClipboardDocumentListIcon className="h-5 w-5 text-gray-400 group-hover:text-gray-200 transition-colors duration-200" />
+              <span>Form Types</span>
+            </NavLink>
+          </div>
+        </div> */}
+
+        {/* Main Settings link (kept for reference or remove if redundant) */}
         <NavItem to="/settings" icon={Cog6ToothIcon} label="Settings" />
       </div>
 

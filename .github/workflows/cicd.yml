@@ -53,7 +53,7 @@ jobs:
           -e VITE_APP_BASE_URL=${{ secrets.VITE_APP_BASE_URL }} \
           -e VITE_APP_BASE_URL_AUTH=${{ secrets.VITE_APP_BASE_URL_AUTH }} \
           -e VITE_APP_X_API_Key=${{ secrets.VITE_APP_X_API_Key }} \
-          -e VITE_APP_X_API_Key_AUTH=${{ secrets.VITE_APP_X_API_Key_AUTH }} \
+          -e VITE_APP_X_API_KEY_V2=${{ secrets.VITE_APP_X_API_KEY_V2 }} \
           ${{ secrets.DOCKER_USERNAME }}/ticket-react:latest
 
       - name: Check Running Containers
