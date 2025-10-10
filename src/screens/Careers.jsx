@@ -6,6 +6,8 @@ import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import { useNavigate, useParams } from "react-router-dom";
 import { useApp } from "../state/AppContext";
+import { createAPIEndPointAuth } from "../config/api/apiAuth";
+import { toProperCase } from "../utils/formatting";
 dayjs.extend(isSameOrBefore);
 dayjs.extend(isSameOrAfter);
 
@@ -28,7 +30,7 @@ const NewHireForm = () => {
     hireType: "",
     department: "",
     location: "",
-    locationOther: "",
+    // locationOther: "",
     payType: "",
     payRate: "",
     supervisor: "",
@@ -40,6 +42,47 @@ const NewHireForm = () => {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
+  const [locations, setLocations] = useState([]);
+  const [formTypes, setFormTypes] = useState([]);
+
+  // 🔹 Fetch Form Types (dynamic)
+  useEffect(() => {
+    const fetchFormTypes = async () => {
+      try {
+        const res = await createAPIEndPoint("form_types").fetchAll();
+        const data = res.data?.form_types || [];
+        setFormTypes(data);
+      } catch (err) {
+        console.error("Error fetching form types:", err);
+      }
+    };
+    fetchFormTypes();
+  }, []);
+
+  // 🔹 Fetch Locations
+  useEffect(() => {
+    const fetchLocations = async () => {
+      try {
+        const res = await createAPIEndPointAuth(
+          `clinic_locations/get_all/${user?.clinic_id}`
+        ).fetchAll();
+
+        const data = res.data?.locations || [];
+
+        // 🧹 Clean / Filter any unwanted entries
+        const filtered = data.filter(
+          (loc) =>
+            loc.id !== 25 &&
+            (loc.location_name || "").trim().toLowerCase() !== "sales team"
+        );
+
+        setLocations(filtered);
+      } catch (err) {
+        console.error("Error fetching locations:", err);
+      }
+    };
+    if (user?.clinic_id) fetchLocations();
+  }, [user?.clinic_id]);
 
   useEffect(() => {
     if (formData.jobTitle === "Other" && jobTitleOtherRef.current) {
@@ -62,15 +105,6 @@ const NewHireForm = () => {
     }
   }, [formData.form_type]);
 
-  const formTypeOptions = [
-    "New Hire",
-    "Transfer",
-    "Termination",
-    "Promotion",
-    "Status Change",
-    "Other",
-  ];
-
   const jobTitleOptions = [
     "Receptionist",
     "TX Coordinator",
@@ -85,33 +119,33 @@ const NewHireForm = () => {
   const departments = ["General", "Ortho", "Pedo", "Management"];
   const payTypes = ["Hourly", "Salary", "Per Diem"];
 
-  const ilLocations = [
-    "Mundelein",
-    "Clark",
-    "Kimball",
-    "Armitage",
-    "Logan Square",
-    "Irving Park",
-    "Belmont",
-    "North Ave",
-    "Bucktown",
-    "Lawndale",
-    "Cermak",
-    "Berwyn",
-    "Little Village",
-    "California",
-    "Pulaski",
-  ];
+  // const ilLocations = [
+  //   "Mundelein",
+  //   "Clark",
+  //   "Kimball",
+  //   "Armitage",
+  //   "Logan Square",
+  //   "Irving Park",
+  //   "Belmont",
+  //   "North Ave",
+  //   "Bucktown",
+  //   "Lawndale",
+  //   "Cermak",
+  //   "Berwyn",
+  //   "Little Village",
+  //   "California",
+  //   "Pulaski",
+  // ];
 
-  const wiLocations = [
-    "Kenosha",
-    "Oak Creek",
-    "Mitchell",
-    "Greenfield Village",
-    "Marion",
-    "Waukesha",
-    "Sussex",
-  ];
+  // const wiLocations = [
+  //   "Kenosha",
+  //   "Oak Creek",
+  //   "Mitchell",
+  //   "Greenfield Village",
+  //   "Marion",
+  //   "Waukesha",
+  //   "Sussex",
+  // ];
 
   // 🧠 Converts backend snake_case form_type_name → UI label
   const normalizeFormType = (backendType) => {
@@ -159,18 +193,22 @@ const NewHireForm = () => {
             department: mapped["department"] || "",
             requestDate: mapped["request_date"] || dayjs().format("YYYY-MM-DD"),
             email: mapped["email"] || "",
-            location:
-              ilLocations.includes(mapped["location"]) ||
-              wiLocations.includes(mapped["location"])
-                ? mapped["location"]
-                : mapped["location"]
-                ? "Other"
-                : "",
-            locationOther:
-              !ilLocations.includes(mapped["location"]) &&
-              !wiLocations.includes(mapped["location"])
-                ? mapped["location"]
-                : "",
+            location: locations.some(
+              (l) =>
+                l.location_name.toLowerCase() ===
+                mapped["location"]?.toLowerCase()
+            )
+              ? mapped["location"]
+              : mapped["location"]
+              ? "Other"
+              : "",
+            // locationOther: !locations.some(
+            //   (l) =>
+            //     l.location_name.toLowerCase() ===
+            //     mapped["location"]?.toLowerCase()
+            // )
+            //   ? mapped["location"]
+            //   : "",
             hireType: mapped["hire_type"] || "",
             payType: mapped["pay_type"] || "",
             payRate: mapped["pay_rate"] || "",
@@ -273,9 +311,9 @@ const NewHireForm = () => {
       newErrors.location = "Please select an office location";
     }
 
-    if (formData.location === "Other" && !formData.locationOther.trim()) {
-      newErrors.locationOther = "Please enter a custom location";
-    }
+    // if (formData.location === "Other" && !formData.locationOther.trim()) {
+    //   newErrors.locationOther = "Please enter a custom location";
+    // }
 
     if (!formData.payType) {
       newErrors.payType = "Please select a pay rate basis";
@@ -326,9 +364,9 @@ const NewHireForm = () => {
     setFormData((prev) => ({
       ...prev,
       [name]: value,
-      ...(name === "location" && value !== "Other"
-        ? { locationOther: "" }
-        : {}),
+      // ...(name === "location" && value !== "Other"
+      //   ? { locationOther: "" }
+      //   : {}),
     }));
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
@@ -378,7 +416,8 @@ const NewHireForm = () => {
 
       const payload = {
         form_type: formData.form_type,
-        form_type_id: 1, // ✅ correct column (not "form_type")
+        form_type_id:
+          formTypes.find((t) => t.name === formData.form_type)?.id || null,
         submitted_by_id,
         clinic_id,
         location_id,
@@ -405,12 +444,13 @@ const NewHireForm = () => {
           ),
           toField("requestor_name", formData.requestorName),
           toField("email", formData.email),
-          toField(
-            "location",
-            formData.location === "Other"
-              ? formData.locationOther
-              : formData.location
-          ),
+          toField("location", formData.location),
+          // toField(
+          //   "location",
+          //   formData.location === "Other"
+          //     ? formData.locationOther
+          //     : formData.location
+          // ),
           toField("hire_type", formData.hireType),
           toField("pay_type", formData.payType),
           toField("pay_rate", formData.payRate),
@@ -459,7 +499,7 @@ const NewHireForm = () => {
         hireType: "",
         department: "",
         location: "",
-        locationOther: "",
+        // locationOther: "",
         payType: "",
         payRate: "",
         supervisor: "",
@@ -635,35 +675,45 @@ const NewHireForm = () => {
                   <label className="block text-sm font-bold text-gray-800 mb-2">
                     Select Form Type <Asterisk />
                   </label>
+
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    {formTypeOptions.map((type) => (
-                      <label
-                        key={type}
-                        className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all duration-200 ${
-                          formData.form_type === type
-                            ? "ring-2 ring-blue-500 border-blue-500 bg-indigo-50"
-                            : "border-gray-300 hover:border-indigo-300"
-                        }`}
-                      >
-                        <input
-                          type="radio"
-                          checked={formData.form_type === type}
-                          onChange={() => handleRadioChange("form_type", type)}
-                          className="sr-only"
-                        />
-                        <span className="text-sm font-medium text-gray-700">
-                          {type}
-                        </span>
-                      </label>
-                    ))}
+                    {formTypes.length === 0 ? (
+                      <p className="text-sm text-gray-500 italic">
+                        Loading form types...
+                      </p>
+                    ) : (
+                      formTypes.map((type) => (
+                        <label
+                          key={type.id}
+                          className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all duration-200 ${
+                            formData.form_type === type.name
+                              ? "ring-2 ring-blue-500 border-blue-500 bg-indigo-50"
+                              : "border-gray-300 hover:border-indigo-300"
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            checked={formData.form_type === type.name}
+                            onChange={() =>
+                              handleRadioChange("form_type", type.name)
+                            }
+                            className="sr-only"
+                          />
+                          <span className="text-sm font-medium text-gray-700 text-center">
+                            {toProperCase(type.name)}
+                          </span>
+                        </label>
+                      ))
+                    )}
                   </div>
+
                   {errors.form_type && (
                     <p className="mt-1 text-sm text-red-600">
                       {errors.form_type}
                     </p>
                   )}
 
-                  {/* 👇 Optional input for “Other” form type */}
+                  {/* 👇 Optional input for “Other” (still supported dynamically) */}
                   {formData.form_type === "Other" && (
                     <div className="mt-3">
                       <label
@@ -877,121 +927,102 @@ const NewHireForm = () => {
                   )}
                 </div>
               </div>
-
               <div className="sm:col-span-2">
                 <label className="block text-sm font-bold text-gray-800 mb-2">
-                  Office Location (Select One) *
+                  Office Location (Select One) <Asterisk />
                 </label>
+
                 <div className="space-y-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
-                  <div className="border-b pb-3">
-                    <span className="block text-xs font-semibold uppercase text-gray-500 mb-2">
-                      IL Locations
-                    </span>
-                    <div className="grid grid-cols-3 md:grid-cols-4 gap-3">
-                      {ilLocations.map((loc) => (
+                  {locations.length === 0 ? (
+                    <p className="text-sm text-gray-500 italic">
+                      Loading locations...
+                    </p>
+                  ) : (
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                      {locations.map((loc) => (
                         <label
-                          key={loc}
+                          key={loc.id}
                           className={`flex items-center p-2 border rounded-lg cursor-pointer transition-all duration-200 ${
-                            formData.location === loc
+                            formData.location === loc.location_name
                               ? "ring-2 ring-blue-500 border-blue-500 bg-indigo-50"
                               : "border-gray-300 bg-white hover:border-indigo-300"
                           }`}
                         >
                           <input
                             type="radio"
-                            checked={formData.location === loc}
-                            onChange={() => handleRadioChange("location", loc)}
+                            checked={formData.location === loc.location_name}
+                            onChange={() =>
+                              handleRadioChange("location", loc.location_name)
+                            }
                             className="sr-only"
                           />
                           <span className="text-sm font-medium text-gray-700 w-full text-center">
-                            {loc}
+                            {loc.location_name}
                           </span>
                         </label>
                       ))}
                     </div>
-                  </div>
+                  )}
 
-                  <div className="border-b pb-3">
-                    <span className="block text-xs font-semibold uppercase text-gray-500 mb-2">
-                      WI Locations
-                    </span>
-                    <div className="grid grid-cols-3 md:grid-cols-4 gap-3">
-                      {wiLocations.map((loc) => (
-                        <label
-                          key={loc}
-                          className={`flex items-center p-2 border rounded-lg cursor-pointer transition-all duration-200 ${
-                            formData.location === loc
-                              ? "ring-2 ring-blue-500 border-blue-500 bg-indigo-50"
-                              : "border-gray-300 bg-white hover:border-indigo-300"
-                          }`}
-                        >
-                          <input
-                            type="radio"
-                            checked={formData.location === loc}
-                            onChange={() => handleRadioChange("location", loc)}
-                            className="sr-only"
-                          />
-                          <span className="text-sm font-medium text-gray-700 w-full text-center">
-                            {loc}
-                          </span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <label
-                      className={`flex items-center p-2 border rounded-lg cursor-pointer transition-all duration-200 ${
-                        formData.location === "Other"
-                          ? "ring-2 ring-blue-500 border-blue-500 bg-indigo-50"
-                          : "border-gray-300 bg-white hover:border-indigo-300"
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        checked={formData.location === "Other"}
-                        onChange={() => handleRadioChange("location", "Other")}
-                        className="sr-only"
-                      />
-                      <span className="text-sm font-medium text-gray-700 w-full text-center">
-                        Other
-                      </span>
-                    </label>
-                  </div>
+                  {/*
+    ✅ Removed “Other” location option and input box below
+    <div>
+      <label
+        className={`flex items-center p-2 border rounded-lg cursor-pointer transition-all duration-200 ${
+          formData.location === "Other"
+            ? "ring-2 ring-blue-500 border-blue-500 bg-indigo-50"
+            : "border-gray-300 bg-white hover:border-indigo-300"
+        }`}
+      >
+        <input
+          type="radio"
+          checked={formData.location === "Other"}
+          onChange={() => handleRadioChange("location", "Other")}
+          className="sr-only"
+        />
+        <span className="text-sm font-medium text-gray-700 w-full text-center">
+          Other
+        </span>
+      </label>
+    </div>
+    */}
                 </div>
+
                 {errors.location && (
                   <p className="mt-1 text-sm text-red-600">{errors.location}</p>
                 )}
 
-                {/* 👇 Show custom input when Other location is selected */}
-                {formData.location === "Other" && (
-                  <div className="mt-3">
-                    <label
-                      htmlFor="locationOther"
-                      className="block text-sm font-semibold text-gray-700"
-                    >
-                      Specify Location <Asterisk />
-                    </label>
-                    <input
-                      type="text"
-                      name="locationOther"
-                      id="locationOther"
-                      value={formData.locationOther}
-                      onChange={handleInputChange}
-                      placeholder="e.g., Elmhurst (New site)"
-                      className={`mt-2 block w-full border-b ${
-                        errors.locationOther
-                          ? "border-red-500"
-                          : "border-gray-300"
-                      } bg-transparent py-2.5 px-1 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-0 sm:text-sm`}
-                    />
-                    {errors.locationOther && (
-                      <p className="mt-1 text-sm text-red-600">
-                        {errors.locationOther}
-                      </p>
-                    )}
-                  </div>
-                )}
+                {/*
+  ✅ Commented out “Specify Location” input since “Other” is removed
+  {formData.location === "Other" && (
+    <div className="mt-3">
+      <label
+        htmlFor="locationOther"
+        className="block text-sm font-semibold text-gray-700"
+      >
+        Specify Location <Asterisk />
+      </label>
+      <input
+        type="text"
+        name="locationOther"
+        id="locationOther"
+        value={formData.locationOther}
+        onChange={handleInputChange}
+        placeholder="e.g., Elmhurst (New site)"
+        className={`mt-2 block w-full border-b ${
+          errors.locationOther
+            ? "border-red-500"
+            : "border-gray-300"
+        } bg-transparent py-2.5 px-1 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-0 sm:text-sm`}
+      />
+      {errors.locationOther && (
+        <p className="mt-1 text-sm text-red-600">
+          {errors.locationOther}
+        </p>
+      )}
+    </div>
+  )}
+  */}
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-gray-100">
