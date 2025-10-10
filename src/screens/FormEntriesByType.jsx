@@ -91,7 +91,7 @@ export default function FormEntriesByType() {
       <div className="flex items-center justify-between">
         <div className="flex">
           <div className="flex gap-2 items-center">
-            <BackButton self="/forms" />
+            <BackButton self={-1} />
             {/* <h2 className="text-lg md:text-xl font-semibold text-sidebar">
               {formTypeName
                 ? `${toProperCase(formTypeName)} Form Submissions`

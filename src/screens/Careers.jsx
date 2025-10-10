@@ -174,7 +174,7 @@ const NewHireForm = () => {
     if (isEditMode && id) {
       (async () => {
         try {
-          const res = await createAPIEndPoint(`form_entries/${id}`).fetchAll();
+          const res = await createAPIEndPoint(`form_entries/details/${id}`).fetchAll();
           const entry = res.data;
           if (!entry) return;
 
@@ -565,7 +565,7 @@ const NewHireForm = () => {
             <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-700 rounded-full -translate-x-1/3 translate-y-1/3 opacity-50"></div>
 
             <div className="flex absolute top-5 left-5">
-              <BackButton self="/forms" />
+              <BackButton self={-1} />
             </div>
 
             <div className="relative z-10">

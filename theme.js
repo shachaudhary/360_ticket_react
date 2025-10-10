@@ -7,7 +7,7 @@ const theme = createTheme({
   palette: {
     mode: "light",
     primary: { main: brand },
-    secondary: { main: "#186f3c" },
+    secondary: { main: "#824EF2" },
     background: {
       default: "#F9FAFB", // light gray background like Tailwind
       paper: "#FFFFFF",   // white cards
