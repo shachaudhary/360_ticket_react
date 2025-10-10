@@ -257,17 +257,17 @@ export default function FormEntries() {
               <table className="min-w-full divide-y divide-gray-100">
                 <thead className="bg-white sticky top-0 z-10 whitespace-nowrap">
                   <tr className="text-left text-xs text-gray-500">
-                    <th className="px-4 py-3 border-b border-[#E5E7EB]">#</th>
-                    <th className="px-4 py-3 border-b border-[#E5E7EB]">
+                    <th className="px-4 py-3 border-b border-r border-[#E5E7EB]">#</th>
+                    <th className="px-4 py-3 border-b border-r border-[#E5E7EB]">
                       Form Type
                     </th>
-                    <th className="px-4 py-3 border-b border-[#E5E7EB]">
+                    <th className="px-4 py-3 border-b border-r border-[#E5E7EB]">
                       Submitted By
                     </th>
-                    <th className="px-4 py-3 border-b border-[#E5E7EB] !font-medium">
+                    <th className="px-4 py-3 border-b border-r border-[#E5E7EB] !font-medium">
                       Employee Info
                     </th>
-                    <th className="px-4 py-3 border-b border-[#E5E7EB]">
+                    <th className="px-4 py-3 border-b border-r border-[#E5E7EB]">
                       Submitted Date
                     </th>
                     <th className="px-4 py-3 text-center border-b border-[#E5E7EB]">

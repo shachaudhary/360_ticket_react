@@ -38,6 +38,7 @@ const Label = ({ title, value }) => (
 
 export default function FormEntryView() {
   const { id } = useParams();
+  console.log("🚀 ~ FormEntryView ~ id:", id)
   const navigate = useNavigate();
   const [entry, setEntry] = useState(null);
   const [loading, setLoading] = useState(true);

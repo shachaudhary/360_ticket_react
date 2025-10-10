@@ -414,7 +414,7 @@ export default function Tickets() {
                 <tbody className="divide-y divide-gray-100 bg-white text-sm">
                   {currentItems.map((t, idx) => (
                     <tr key={t.id} className="hover:bg-gray-50 ">
-                      <td className="px-4 py-3 border-b border-[#E5E7EB] ">
+                      <td className="px-4 py-3 border-b  border-[#E5E7EB] ">
                         {page * rowsPerPage + idx + 1}
                       </td>
                       <td className="px-4 py-3 border-b border-[#E5E7EB]">
