@@ -28,7 +28,7 @@ const BackButton = ({ self = null }) => {
         backgroundColor: "primary.main", // Light grey background
         borderRadius: "24px",
         "&:hover": {
-          backgroundColor: "#824EF2",
+          backgroundColor: "secondary.main",
           color: "primary.main",
         },
       }}
