@@ -233,7 +233,7 @@ export default function SettingsCategories() {
                           >
                             <ModeEditSharpIcon
                               fontSize="small"
-                              className="!text-[19px] !text-[#707784]"
+                              className="!text-[16px] !text-[#707784]"
                             />
                           </IconButton>
                         </Tooltip>

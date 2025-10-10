@@ -23,7 +23,7 @@ import StatusBadge from "../components/StatusBadge";
 import { convertToCST } from "../utils";
 import ClearIcon from "@mui/icons-material/Clear";
 import LaunchIcon from "@mui/icons-material/Launch";
-import { PlusIcon } from "@heroicons/react/24/solid";
+import { EyeIcon, PlusIcon } from "@heroicons/react/24/solid";
 import { toProperCase } from "../utils/formatting";
 
 export default function FormEntries() {
@@ -257,7 +257,9 @@ export default function FormEntries() {
               <table className="min-w-full divide-y divide-gray-100">
                 <thead className="bg-white sticky top-0 z-10 whitespace-nowrap">
                   <tr className="text-left text-xs text-gray-500">
-                    <th className="px-4 py-3 border-b border-r border-[#E5E7EB]">#</th>
+                    <th className="px-4 py-3 border-b border-r border-[#E5E7EB]">
+                      #
+                    </th>
                     <th className="px-4 py-3 border-b border-r border-[#E5E7EB]">
                       Form Type
                     </th>
@@ -365,9 +367,13 @@ export default function FormEntries() {
                               size="small"
                               onClick={() => handleViewEntry(entry.id)}
                             >
-                              <LaunchIcon
+                              {/* <LaunchIcon
                                 fontSize="small"
                                 className="text-gray-500"
+                              /> */}
+                              <EyeIcon
+                                fontSize="small"
+                                className="!text-[16px] h-4  !text-[#707784]"
                               />
                             </IconButton>
                           </Tooltip>
@@ -381,7 +387,7 @@ export default function FormEntries() {
                             >
                               <ModeEditSharpIcon
                                 fontSize="small"
-                                className="!text-[19px] !text-[#707784]"
+                                className="!text-[16px] !text-[#707784]"
                               />
                               {/* <i className="fa-solid fa-pen text-gray-500 text-[13px]" /> */}
                             </IconButton>
