@@ -97,7 +97,14 @@ export const createAPIEndPoint = (endpoint) => {
           },
         }
       ),
-
+    patchWithId: (id, updatedRecord) =>
+      axios.patch(`${url}/${id}`, updatedRecord, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "X-API-Key": X_API_Key,
+          "ngrok-skip-browser-warning": "true",
+        },
+      }),
 
   };
 };

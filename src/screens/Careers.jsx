@@ -476,7 +476,7 @@ const NewHireForm = () => {
       // ✅ 3. API call
       let response;
       if (isEditMode) {
-        response = await createAPIEndPoint(`form_entries/${id}`).patch(
+        response = await createAPIEndPoint(`form_entries/${id}`).patchWithId(
           payload
         );
         setSubmitStatus({

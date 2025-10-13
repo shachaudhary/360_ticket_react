@@ -292,8 +292,23 @@ export default function FormTypesList() {
                         </div>
                       </td> */}
 
-                      <td className="px-4 py-3 border-b border-[#E5E7EB] text-gray-600">
-                        {form?.total_entries || "N/A"}
+                      <td className="px-4 py-3 border-b border-[#E5E7EB]">
+                        <Chip
+                          label={form?.total_submissions || "N/A"}
+                          variant="filled"
+                          sx={{
+                            fontSize: 11.75,
+                            fontWeight: 500,
+                            borderRadius: "6px",
+                            color: "#6B7280",
+                            border: "1px solid #E5E7EB",
+                            background: "white",
+                            height: 23.5,
+                            "& .MuiChip-label": {
+                              px: "7px !important", // ✅ Correct selector
+                            },
+                          }}
+                        />
                       </td>
 
                       {/* Created */}
