@@ -92,7 +92,7 @@ export default function FormEntryView() {
       <Box sx={{ flex: 1, overflowY: "auto", pr: 2 }}>
         {/* Header */}
         <div className="flex justify-between items-center">
-          <BackButton isSmall/>
+          <BackButton/>
           <div className="flex items-center gap-2 justify-between w-full pl-3">
             <Typography
               variant="h6"

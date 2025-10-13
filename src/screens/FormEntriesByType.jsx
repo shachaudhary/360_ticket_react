@@ -192,7 +192,7 @@ export default function FormEntriesByType() {
         <div className="flex items-center justify-between">
           <div className="flex">
             <div className="flex gap-2 items-center">
-              <BackButton self={-1} isSmall={true} />
+              <BackButton self={-1} isSmall={false} />
               {/* <BackButton textBtn /> */}
 
               <Typography
