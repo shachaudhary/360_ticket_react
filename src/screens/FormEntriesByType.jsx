@@ -41,11 +41,18 @@ export default function FormEntriesByType() {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
-    const fullUrl = `${window.location.origin}/forms/new-hire-form`;
+    // 🧠 Check if we’re running on the live domain
+    const isLive = window.location.hostname.includes("dental360grp.com");
+
+    // ✅ Use correct base URL based on environment
+    const fullUrl = isLive
+      ? "https://support.dental360grp.com/forms/new-hire-form"
+      : `${window.location.origin}/forms/new-hire-form`;
+
     navigator.clipboard.writeText(fullUrl);
     setCopied(true);
 
-    // 🔹 Visual focus feedback
+    // 🔹 Visual feedback ring
     if (copyBtnRef.current) {
       copyBtnRef.current.focus();
       copyBtnRef.current.classList.add(
@@ -53,6 +60,7 @@ export default function FormEntriesByType() {
         "ring-brand-500",
         "ring-offset-2"
       );
+
       setTimeout(() => {
         copyBtnRef.current.classList.remove(
           "ring-2",
