@@ -113,14 +113,13 @@ export default function TicketHeader({ ticket, onUpdate, fetchAgain }) {
     >
       {/* Left side: Ticket heading + Follow button */}
       <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap">
-        <Typography
-          variant="h6" // ✅ smaller on mobile
-          fontWeight="bold"
-          color="primary"
-          // sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }}
-        >
+        {/* <Typography variant="h6" fontWeight="bold" color="#0F1A1C">
           Ticket #{ticket.id}
-        </Typography>
+        </Typography> */}
+
+        <h2 className="text-lg md:text-xl font-bold text-sidebar">
+          Ticket #{ticket.id}
+        </h2>
 
         <Button
           variant={following ? "outlined" : "contained"}

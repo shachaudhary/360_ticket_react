@@ -89,32 +89,6 @@ export default function FormTypesList() {
       <div className="flex items-center justify-between">
         <h2 className="text-lg md:text-xl font-semibold text-sidebar">Forms</h2>
 
-        <button
-          onClick={() => {
-            setSelectedForm(null);
-            setIsModalOpen(true);
-          }}
-          className="flex items-center gap-1 rounded-lg bg-brand-500 px-3 py-2 text-sm font-semibold text-white hover:bg-brand-600 transition-all"
-        >
-          <PlusIcon className="h-4 w-4 text-white stroke-[2.5]" />
-          New Form
-          {/* {isModalOpen ? "T" : "F"} */}
-        </button>
-      </div>
-
-      {/* 🟢 Modal for creating/editing form type */}
-      <FormTypeModal
-        open={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSaved={() => {
-          setIsModalOpen(false);
-          fetchForms();
-        }}
-        formType={selectedForm}
-      />
-
-      {/* Search */}
-      <div className="flex gap-3">
         <div className="max-w-xs w-full">
           <TextField
             label="Search Form Name"
@@ -132,7 +106,49 @@ export default function FormTypesList() {
           />
         </div>
 
-        <button
+        {/* <button
+          onClick={() => {
+            setSelectedForm(null);
+            setIsModalOpen(true);
+          }}
+          className="flex items-center gap-1 rounded-lg bg-brand-500 px-3 py-2 text-sm font-semibold text-white hover:bg-brand-600 transition-all"
+        >
+          <PlusIcon className="h-4 w-4 text-white stroke-[2.5]" />
+          New Form
+        </button> */}
+      </div>
+
+      {/* 🟢 Modal for creating/editing form type */}
+      <FormTypeModal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSaved={() => {
+          setIsModalOpen(false);
+          fetchForms();
+        }}
+        formType={selectedForm}
+      />
+
+      {/* Search */}
+      <div className="flex gap-3">
+        {/* <div className="max-w-xs w-full">
+          <TextField
+            label="Search Form Name"
+            size="small"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            fullWidth
+            InputProps={{
+              endAdornment: query?.length > 0 && (
+                <IconButton size="small" onClick={() => setQuery("")}>
+                  <ClearIcon fontSize="small" />
+                </IconButton>
+              ),
+            }}
+          />
+        </div> */}
+
+        {/* <button
           onClick={handleClearFilters}
           className={`ml-auto px-3 py-[6.15px] rounded-lg text-xs font-medium focus:outline-none focus:ring-2 transition-all ${
             query
@@ -141,43 +157,46 @@ export default function FormTypesList() {
           }`}
         >
           Clear
-        </button>
+        </button> */}
       </div>
 
       {/* Table */}
       {loading ? (
         <div className="overflow-hidden rounded-lg border border-[#E5E7EB]">
-          <div className="h-[calc(100dvh-190px)] flex items-center justify-center bg-purple-50">
+          <div className="h-[calc(100dvh-152px)] flex items-center justify-center bg-purple-50">
             <CircularProgress color="primary" />
           </div>
         </div>
       ) : forms.length === 0 ? (
         <div className="overflow-hidden rounded-lg border border-[#E5E7EB]">
-          <div className="h-[calc(100dvh-190px)] flex flex-col items-center justify-center bg-white">
+          <div className="h-[calc(100dvh-152px)] flex flex-col items-center justify-center bg-white">
             <p className="text-gray-500 font-normal text-md">No forms found</p>
           </div>
         </div>
       ) : (
         <div className="overflow-x-auto">
           <div className="overflow-hidden rounded-lg border border-[#E5E7EB]">
-            <div className="overflow-auto h-[calc(100dvh-248.75px)]">
+            <div className="overflow-auto h-[calc(100dvh-218.75px)]">
               <table className="min-w-full divide-y divide-gray-100">
                 <thead className="bg-white sticky top-0 z-10 whitespace-nowrap">
                   <tr className="text-left text-xs text-gray-500">
-                    <th className="px-4 py-3 border-b border-[#E5E7EB]">#</th>
-                    <th className="px-4 py-3 border-b border-[#E5E7EB]">
+                    <th className="px-4 py-3 border-b border-r border-[#E5E7EB]">
+                      #
+                    </th>
+                    <th className="px-4 py-3 border-b border-r border-[#E5E7EB]">
                       Name
                     </th>
-                    <th className="px-4 py-3 border-b border-[#E5E7EB]">
+                    <th className="px-4 py-3 border-b border-r border-[#E5E7EB]">
                       Description
                     </th>
-                    <th className="px-4 py-3 border-b border-[#E5E7EB]">
+                    <th className="px-4 py-3 border-b border-r border-[#E5E7EB]">
                       Created By
                     </th>
-                    <th className="px-4 py-3 border-b border-[#E5E7EB]">
-                      Notify Users
+                    <th className="px-4 py-3 border-b border-r border-[#E5E7EB]">
+                      {/* Notify Users */}
+                      Total Entries
                     </th>
-                    <th className="px-4 py-3 border-b border-[#E5E7EB]">
+                    <th className="px-4 py-3 border-b border-r border-[#E5E7EB]">
                       Created At
                     </th>
                     <th className="px-4 py-3 text-center border-b border-[#E5E7EB]">
@@ -211,7 +230,7 @@ export default function FormTypesList() {
                       {/* Owner */}
                       <td className="px-4 py-3 border-b border-[#E5E7EB] text-gray-700">
                         <Chip
-                          label={toProperCase(form.owner?.username) || "—"}
+                          label={toProperCase(form.owner?.username) || "N/A"}
                           variant="filled"
                           sx={{
                             fontSize: 12.5,
@@ -225,7 +244,7 @@ export default function FormTypesList() {
                       </td>
 
                       {/* ✅ Notify Users (max 2 + “+N more”) */}
-                      <td className="px-4 py-3 border-b border-[#E5E7EB] text-gray-700">
+                      {/* <td className="px-4 py-3 border-b border-[#E5E7EB] text-gray-700">
                         <div className="flex flex-wrap items-center gap-1">
                           {form.assign_users && form.assign_users.length > 0 ? (
                             <>
@@ -246,7 +265,6 @@ export default function FormTypesList() {
                                 />
                               ))}
 
-                              {/* ➕ “+N more” indicator */}
                               {form.assign_users.length > 2 && (
                                 <Chip
                                   label={`+${
@@ -272,6 +290,10 @@ export default function FormTypesList() {
                             </span>
                           )}
                         </div>
+                      </td> */}
+
+                      <td className="px-4 py-3 border-b border-[#E5E7EB] text-gray-600">
+                        {form?.total_entries || "N/A"}
                       </td>
 
                       {/* Created */}
@@ -280,7 +302,7 @@ export default function FormTypesList() {
                       </td>
 
                       {/* Action */}
-                      <td className="px-4 py-3 text-center border-b border-[#E5E7EB]">
+                      <td className="px-4 py-3 text-center border-b border-[#E5E7EB] whitespace-nowrap">
                         <Tooltip title="View Submissions">
                           <IconButton
                             size="small"
@@ -303,7 +325,7 @@ export default function FormTypesList() {
                           >
                             <ModeEditSharpIcon
                               fontSize="small"
-                              className="!text-[16px] !text-[#707784]"
+                              className="!text-[16px] text-gray-500 hover:text-brand-500 transition-colors"
                             />
                           </IconButton>
                         </Tooltip>

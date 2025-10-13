@@ -57,7 +57,7 @@ export default function Layout() {
 
   const isViewPage = location.pathname === `/tickets/${id}`;
   const isFormPage =
-    location.pathname === `/new-hire-form` ||
+    location.pathname === `/forms/new-hire-form` ||
     location.pathname.includes("form_entries/edit");
   const [settingsOpen, setSettingsOpen] = React.useState(false);
 
@@ -65,7 +65,6 @@ export default function Layout() {
   const isSettingsActive =
     location.pathname.startsWith("/settings/categories") ||
     location.pathname.startsWith("/settings/form-types");
-
 
   const initials = React.useMemo(() => {
     const n = (user?.name || "Admin User").trim();
@@ -107,11 +106,11 @@ export default function Layout() {
           className="flex h-8 w-8 rounded-lg"
         /> */}
 
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-500 font-semibold">
-          <TicketIcon style={{ width: 21 }} />
+        <div className="flex h-[30px] w-[30px] items-center justify-center rounded-lg bg-brand-500 font-semibold">
+          <TicketIcon style={{ width: 19 }} />
         </div>
 
-        <div className="font-semibold -mt-1">Support 360</div>
+        <div className="font-medium text-lg uppercase">Support 360</div>
       </div>
       {/* )} */}
       <nav className="flex flex-col gap-2">
@@ -125,12 +124,14 @@ export default function Layout() {
         <NavItem to="/tickets" icon={TicketIcon} label="Tickets" />
         {/* <NavItem to="/careers" icon={PlusCircleIcon} label="New Hire Form" /> */}
         {user?.is_form_access && (
-          <NavItem
-            to="/forms"
-            icon={ClipboardDocumentListIcon}
-            label="Forms"
-            matchChildren
-          />
+          <>
+            <NavItem
+              to="/forms"
+              icon={ClipboardDocumentListIcon}
+              label="All Forms"
+              matchChildren
+            />
+          </>
         )}
         {/* <NavItem
           to="/tickets/new"
@@ -272,7 +273,7 @@ export default function Layout() {
               alt="Support 360"
               className="flex h-8 w-8 rounded-lg"
             />
-            <div className="font-semibold">Support 360</div>
+            <div className="font-medium text-lg uppercase">Support 360</div>
           </div>
           <button
             onClick={() => setSidebarOpen(false)}

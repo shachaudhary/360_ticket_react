@@ -67,9 +67,10 @@ export default function CommentBox({ ticketId, onAdd }) {
         variant="subtitle1"
         fontWeight={600}
         gutterBottom
-        color="primary"
+        // color="primary"
+        color="#0F1A1C"
         sx={{ mb: 1 }}
-        className="!text-lg"
+        className="!text-lg !font-semibold"
       >
         Add a Comment
       </Typography>

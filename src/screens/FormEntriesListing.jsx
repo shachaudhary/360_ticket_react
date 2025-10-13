@@ -125,7 +125,7 @@ export default function FormEntries() {
           Form Submissions
         </h2>
         <button
-          onClick={() => navigate("/new-hire-form")}
+          onClick={() => navigate("/forms/new-hire-form")}
           className="flex items-center gap-1 rounded-lg bg-brand-500 px-3 py-2 text-sm font-semibold text-white hover:bg-brand-600 transition-all"
         >
           <PlusIcon className="h-4 w-4 text-white stroke-[2.5]" />
@@ -270,7 +270,7 @@ export default function FormEntries() {
                       Employee Info
                     </th>
                     <th className="px-4 py-3 border-b border-r border-[#E5E7EB]">
-                      Submitted Date
+                      Submitted At
                     </th>
                     <th className="px-4 py-3 text-center border-b border-[#E5E7EB]">
                       Action

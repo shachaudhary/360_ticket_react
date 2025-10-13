@@ -376,38 +376,38 @@ export default function Tickets() {
             <div className="overflow-auto h-[calc(100dvh-308.75px)]">
               <table className="min-w-full divide-y divide-gray-100">
                 <thead className="bg-white sticky top-0 z-10 whitespace-nowrap">
-                  <tr className="text-left text-xs text-gray-500 ">
-                    <th className="px-4 py-3 border-r border-b border-[#E5E7EB] !font-medium">
+                  <tr className="text-left !text-xs text-gray-500 ">
+                    <th className="px-4 py-3 border-b border-r border-[#E5E7EB]">
                       #
                     </th>
-                    <th className="px-4 py-3 border-r border-b border-[#E5E7EB] !font-medium">
+                    <th className="px-4 py-3 border-b border-r border-[#E5E7EB]">
                       Title
                     </th>
                     {/* <th className="px-4 py-3 border-r border-b border-[#E5E7EB] !font-medium">
                       Details
                     </th> */}
-                    <th className="px-4 py-3 border-r border-b border-[#E5E7EB] !font-medium">
+                    <th className="px-4 py-3 border-b border-r border-[#E5E7EB]">
                       Priority
                     </th>
-                    <th className="px-4 py-3 border-r border-b border-[#E5E7EB] !font-medium">
+                    <th className="px-4 py-3 border-b border-r border-[#E5E7EB] ">
                       Category
                     </th>
                     {/* <th className="px-4 py-3 border-r border-b border-[#E5E7EB] !font-medium">
                       Due Date
                     </th> */}
-                    <th className="px-4 py-3 border-r border-b border-[#E5E7EB] !font-medium">
+                    <th className="px-4 py-3 border-b border-r border-[#E5E7EB] ">
                       Status
                     </th>
-                    <th className="px-4 py-3 border-r border-b border-[#E5E7EB] !font-medium">
+                    <th className="px-4 py-3 border-b border-r border-[#E5E7EB] ">
                       Created By
                     </th>
-                    <th className="px-4 py-3 border-r border-b border-[#E5E7EB] !font-medium">
+                    <th className="px-4 py-3 border-b border-r border-[#E5E7EB] ">
                       Assigned To
                     </th>
-                    <th className="px-4 py-3 border-r border-b border-[#E5E7EB] !font-medium">
+                    <th className="px-4 py-3 border-b border-r border-[#E5E7EB] ">
                       Created At
                     </th>
-                    <th className="px-4 py-3 text-center border-b border-[#E5E7EB] !font-medium">
+                    <th className="px-4 py-3 border-b border-r border-[#E5E7EB] ">
                       Action
                     </th>
                   </tr>
@@ -418,7 +418,7 @@ export default function Tickets() {
                       <td className="px-4 py-3 border-b  border-[#E5E7EB] ">
                         {page * rowsPerPage + idx + 1}
                       </td>
-                      <td className="px-4 py-3 border-b border-[#E5E7EB]">
+                      <td className="px-4 py-3 border-b border-[#E5E7EB] font-medium text-gray-800">
                         {toProperCase(t.title)}
                       </td>
                       {/* <td className="px-4 py-3 border-b border-[#E5E7EB]">

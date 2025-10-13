@@ -40,7 +40,7 @@ export default function App() {
     "/auth/forgot-password": "Forgot Password",
     "/auth/reset-password": "Reset Password",
     "/careers": "Careers", // ✅ add careers
-    "/new-hire-form": "New Hire Form", // ✅ add careers
+    "/forms/new-hire-form": "New Hire Form", // ✅ add careers
   };
 
   useEffect(() => {
@@ -116,7 +116,7 @@ export default function App() {
           />
           F
           <Route
-            path="/new-hire-form"
+            path="/forms/new-hire-form"
             element={
               <PageTransition>
                 <Careers />

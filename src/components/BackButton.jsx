@@ -1,31 +1,52 @@
 import React from "react";
-import { IconButton } from "@mui/material";
+import { IconButton, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 
-// Component to render the back button
-const BackButton = ({ self = null }) => {
+const BackButton = ({ self = null, isSmall = false, textBtn = false }) => {
   const navigate = useNavigate();
 
-  // Handle the back navigation
   const handleBack = () => {
-    if (self) {
-      navigate(self);
-    } else {
-      navigate(-1); // Go back to the previous page
-    }
+    if (self) navigate(self);
+    else navigate(-1);
   };
 
+  // 🟢 Text-style button (outlined)
+  if (textBtn) {
+    return (
+      <Button
+        onClick={handleBack}
+        variant="outlined"
+        size="small"
+        // startIcon={<ChevronLeftIcon />}
+        sx={{
+          borderRadius: "22px",
+          textTransform: "none",
+          fontWeight: 600,
+          borderColor: "primary.main",
+          color: "primary.main",
+          "&:hover": {
+            backgroundColor: "primary.main",
+            color: "#fff",
+            borderColor: "primary.main",
+          },
+        }}
+      >
+        Back
+      </Button>
+    );
+  }
+
+  // 🟢 Default icon-only button
   return (
     <IconButton
-      color="primary.main"
       onClick={handleBack}
       sx={{
         display: "flex",
         alignItems: "center",
         width: "fit-content",
-        padding: "7px",
-        backgroundColor: "primary.main", // Light grey background
+        padding: isSmall ? "5.5px" : "7px",
+        backgroundColor: "primary.main",
         borderRadius: "24px",
         "&:hover": {
           backgroundColor: "secondary.main",
@@ -33,7 +54,9 @@ const BackButton = ({ self = null }) => {
         },
       }}
     >
-      <ChevronLeftIcon color="#fff" sx={{ fontSize: "20px", color: "#fff" }} />
+      <ChevronLeftIcon
+        sx={{ fontSize: isSmall ? "17px" : "20px", color: "#fff" }}
+      />
     </IconButton>
   );
 };

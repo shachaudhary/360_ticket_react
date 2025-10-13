@@ -75,7 +75,9 @@ export default function ActivityFeed() {
   if (loading) {
     return (
       <div className="space-y-4">
-        <h2 className="text-lg md:text-xl font-semibold text-sidebar">Notifications</h2>
+        <h2 className="text-lg md:text-xl font-semibold text-sidebar">
+          Notifications
+        </h2>
         <div className="overflow-hidden rounded-lg border border-[#E5E7EB]">
           <div className="h-[calc(100dvh-135px)] flex items-center justify-center bg-purple-50">
             <CircularProgress size={28} />
@@ -89,7 +91,9 @@ export default function ActivityFeed() {
     <div className="space-y-4">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h2 className="text-lg md:text-xl font-semibold text-sidebar">Notifications</h2>
+        <h2 className="text-lg md:text-xl font-semibold text-sidebar">
+          Notifications
+        </h2>
         {/* {activities.length > 0 && (
           <button
             onClick={handleClearAll}
@@ -123,23 +127,56 @@ export default function ActivityFeed() {
                 <CSSTransition key={a.id} timeout={300} classNames="fade">
                   <div>
                     <Box
-                      className=" flex flex-col sm:flex-row sm:items-start sm:justify-between
-                               p-5 hover:bg-gray-50 transition cursor-pointer"
-                      onClick={() =>
-                        window.open(`/tickets/${a?.ticket_id}`, "_blank")
-                      }
+                      className={` flex flex-col sm:flex-row sm:items-start sm:justify-between
+            p-5 transition cursor-pointer
+            ${ 
+              a.source === "form"
+                ? "hover:bg-gray-50 border-l-4 border-blue-400"
+                : "hover:bg-gray-50 border-l-4 border-brand-500"
+            }`}
+                      onClick={() => {
+                        if (a.source === "form") {
+                          window.open(
+                            `/form_entries/details/${a.form_entry_id}`,
+                            "_blank"
+                          );
+                        } else {
+                          window.open(`/tickets/${a.ticket_id}`, "_blank");
+                        }
+                      }}
                     >
                       {/* Content */}
                       <Box className="flex-1 mb-3 sm:mb-0">
                         <Box className="flex items-center gap-2 mb-1 flex-wrap">
                           <Typography
                             variant="subtitle2"
-                            className="font-semibold text-gray-800"
+                            className={`font-semibold ${
+                              a.source === "form"
+                                ? "text-gray-800"
+                                : "text-gray-800"
+                            }`}
                           >
-                           Ticket #{a.ticket_id} — {toProperCase(a.ticket_title)}
+                            {a.source === "form" ? (
+                              <>
+                                Form #{a.form_entry_id} —{" "}
+                                {toProperCase(
+                                  a.form_type_name || "Form Update"
+                                )}
+                              </>
+                            ) : (
+                              <>
+                                Ticket #{a.ticket_id} —{" "}
+                                {toProperCase(a.title || "Ticket")}
+                              </>
+                            )}
                           </Typography>
+
                           <StatusBadge
-                            status={a.notification_type}
+                            status={
+                              a.source === "form"
+                                ? a.email_type || "form_update"
+                                : a.notification_type
+                            }
                             isInside
                             customRadius="6px"
                           />
@@ -161,9 +198,9 @@ export default function ActivityFeed() {
                       {/* Right side */}
                       <Box
                         className="flex flex-row sm:flex-col 
-                                 items-center sm:items-end 
-                                 justify-between sm:justify-start 
-                                 gap-2 min-w-full sm:min-w-[160px]"
+                       items-center sm:items-end 
+                       justify-between sm:justify-start 
+                       gap-2 min-w-full sm:min-w-[160px]"
                       >
                         <Tooltip title={convertToCST(a.created_at)}>
                           <Box className="flex items-center text-xs text-gray-500 gap-1">
@@ -183,13 +220,7 @@ export default function ActivityFeed() {
 
                     {/* Divider */}
                     {idx !== activities.length - 1 && (
-                      <Divider
-                        sx={{
-                          backgroundColor: "#E5E7EB",
-
-                          // mx: 2.5
-                        }}
-                      />
+                      <Divider sx={{ backgroundColor: "#E5E7EB" }} />
                     )}
                   </div>
                 </CSSTransition>

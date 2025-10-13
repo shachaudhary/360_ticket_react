@@ -14,6 +14,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { createAPIEndPoint } from "../config/api/api";
 import { createAPIEndPointAuth } from "../config/api/apiAuth";
 import { toProperCase } from "../utils/formatting";
+import { useApp } from "../state/AppContext";
 
 function useDebounce(value, delay = 400) {
   const [debounced, setDebounced] = useState(value);
@@ -25,6 +26,7 @@ function useDebounce(value, delay = 400) {
 }
 
 export default function FormTypeModal({ open, onClose, onSaved, formType }) {
+  const { user } = useApp();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [selectedUsers, setSelectedUsers] = useState([]);
@@ -88,11 +90,12 @@ export default function FormTypeModal({ open, onClose, onSaved, formType }) {
         clinic_id: 1,
         location_id: 30,
         user_ids: selectedUsers.map((u) => u.user_id),
-        user_id: selectedUsers[0]?.user_id || null, // primary owner
+        user_id: user?.id || null,
+        // user_id: selectedUsers[0]?.user_id || null, // primary owner
       };
 
       if (formType?.id) {
-        await createAPIEndPointAuth(`form_types/`).update(formType.id, payload);
+        await createAPIEndPointAuth(`form_types/${formType.id}`).patch(payload);
       } else {
         await createAPIEndPointAuth("form_types").create(payload);
       }
@@ -162,8 +165,8 @@ export default function FormTypeModal({ open, onClose, onSaved, formType }) {
             renderInput={(params) => (
               <TextField
                 {...params}
-                label="Assign to Users"
-                placeholder="Search team members..."
+                label="Select Members to Notify"
+                placeholder="Search members..."
                 onChange={(e) => setSearchTerm(e.target.value)}
                 InputProps={{
                   ...params.InputProps,

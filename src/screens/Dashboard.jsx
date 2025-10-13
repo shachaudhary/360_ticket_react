@@ -242,7 +242,7 @@ export default function Dashboard() {
                   dataKey="tickets"
                   stroke="#9C6BFF"
                   strokeWidth={2}
-                  activeDot={{ r: 6, fill: "#186f3c" }}
+                  activeDot={{ r: 6, fill: "#824EF2" }}
                 />
               </LineChart>
             </ResponsiveContainer>

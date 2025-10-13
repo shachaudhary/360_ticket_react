@@ -21,6 +21,7 @@ export const statusColors = {
   unpaid: "#FFF3CD", // Light Yellow
   refund: "#E3F2FD", // Light Blue
   comment: "#E3F2FD", // Light Blue
+  form_update: "#E3F2FD", // Light Blue
   failed: "#FFCDD2", // Soft Red
   queued: "#E3F2FD",
 
@@ -76,6 +77,7 @@ export const textColors = {
   paid: "#007A33", // Dark Green
   unpaid: "#D88700", // Amber
   refund: "#0B409C", // Navy Blue
+  form_update: "#0B409C", // Navy Blue
   comment: "#0B409C", // Navy Blue
   failed: "#B71C1C", // Crimson
   queued: "#0B409C", // Navy Blue text
@@ -134,7 +136,7 @@ export const shortenStatus = (status) => {
     unpaid: "Unpaid",
     refund: "Refunded",
     failed: "Failed",
-
+    form_update: "Form Update",
     // General statuses
     initiated: "Initiated",
     ringing: "Ringing",

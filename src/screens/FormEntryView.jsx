@@ -92,7 +92,7 @@ export default function FormEntryView() {
       <Box sx={{ flex: 1, overflowY: "auto", pr: 2 }}>
         {/* Header */}
         <div className="flex justify-between items-center">
-          <BackButton self="/forms" />
+          <BackButton isSmall/>
           <div className="flex items-center gap-2 justify-between w-full pl-3">
             <Typography
               variant="h6"
@@ -100,7 +100,7 @@ export default function FormEntryView() {
               fontWeight={700}
               color="primary"
             >
-              {toProperCase(formType)} Form #{entry.id}
+              {toProperCase(formType)} #{entry.id}
             </Typography>
 
             <Button
@@ -134,7 +134,7 @@ export default function FormEntryView() {
           >
             {/* 🔹 Basic Info */}
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-              <Label title="Form Type" value={formType} />
+              <Label title="Form" value={formType} />
               {/* <Label title="Form ID" value={`#${entry.id}`} /> */}
               <Label title="Created By" value={toProperCase(submittedBy)} />
               <Label title="Email" value={entry.submitted_by?.email} />

@@ -67,7 +67,7 @@ const CommentsList = ({ comments }) => (
             className="rounded-lg border bg-[#E5E7EB] bg-opacity-10 p-3 text-sm"
           >
             <div className="flex justify-between items-center mb-1">
-              <span className="font-semibold text-brand-500">
+              <span className="font-semibold text-gray-500">
                 {toProperCase(c.username) || "N/A"}
               </span>
               <span className="text-xs text-gray-500">
@@ -80,7 +80,7 @@ const CommentsList = ({ comments }) => (
                   key={i}
                   className={
                     word.startsWith("@")
-                      ? "mr-1 text-blue-500 font-medium underline"
+                      ? "mr-1 text-blue-600 font-medium underline"
                       : "mr-1"
                   }
                 >

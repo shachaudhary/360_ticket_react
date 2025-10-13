@@ -476,7 +476,7 @@ const NewHireForm = () => {
       // ✅ 3. API call
       let response;
       if (isEditMode) {
-        response = await createAPIEndPoint(`form_entries/${id}`).update(
+        response = await createAPIEndPoint(`form_entries/${id}`).patch(
           payload
         );
         setSubmitStatus({
@@ -589,16 +589,16 @@ const NewHireForm = () => {
                 NEW HIRE FORM
               </h1> */}
 
-              <p className="text-sm text-gray-700 mt-5 mb-3 text-center">
+              {/* <p className="text-sm text-gray-700 mt-5 mb-3 text-center">
                 To be completed by Regional Manager or Office Manager and
                 submitted to HR via email.
-              </p>
+              </p> */}
 
               <div className="space-y-0 text-[13.5px] text-center">
                 {/* <span className="font-semibold text-blue-400 block">
                   Submission Emails:
                 </span> */}
-                <div className="flex items-center justify-center gap-3">
+                {/* <div className="flex items-center justify-center gap-3">
                   {[
                     "hr@dental360grp.com",
                     "eliza.g@dental360grp.com",
@@ -613,7 +613,7 @@ const NewHireForm = () => {
                       {email}
                     </a>
                   ))}
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
