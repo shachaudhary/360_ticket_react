@@ -360,9 +360,9 @@ export default function FormEntriesByType() {
         {/* TABLE SECTION (unchanged) */}
         {loading ? null : entries.length === 0 ? ( // </div> //   </div> //     <CircularProgress color="primary" /> //   <div className="h-[calc(100dvh-240px)] flex items-center justify-center rounded-lg bg-purple-50"> // <div className="overflow-hidden rounded-lg border border-[#E5E7EB]">
           <div className="overflow-hidden rounded-lg border border-[#E5E7EB]">
-            <div className="h-[calc(100dvh-240px)] flex flex-col items-center justify-center rounded-lg">
+            <div className="max-h-[calc(100dvh-240px)] min-h-28 flex flex-col items-center justify-center rounded-lg">
               <p className="text-gray-500 font-normal text-md">
-                No submissions found for this form
+                No submissions found
               </p>
             </div>
           </div>
