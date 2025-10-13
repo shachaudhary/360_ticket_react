@@ -476,9 +476,9 @@ const NewHireForm = () => {
       // ✅ 3. API call
       let response;
       if (isEditMode) {
-        response = await createAPIEndPoint(`form_entries/${id}`).patchWithId(
-          payload
-        );
+        response = await createAPIEndPoint(
+          `form_entries/field_values/${id}`
+        ).patch(payload);
         setSubmitStatus({
           type: "success",
           message: "Form updated successfully!",
@@ -493,7 +493,7 @@ const NewHireForm = () => {
         });
       }
 
-      navigate("/forms");
+      navigate(-1);
 
       window.scrollTo({ top: 0, behavior: "smooth" }); // scroll up for success too (nice UX)
 

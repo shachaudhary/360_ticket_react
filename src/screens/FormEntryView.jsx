@@ -215,7 +215,7 @@ export default function FormEntryView() {
             )}
 
             {/* 🔹 Back Button */}
-            <div className="mt-6 flex justify-end">
+            {/* <div className="mt-6 flex justify-end">
               <Button
                 variant="outlined"
                 color="inherit"
@@ -223,7 +223,7 @@ export default function FormEntryView() {
               >
                 Back to List
               </Button>
-            </div>
+            </div> */}
           </Card>
         </Container>
       </Box>
