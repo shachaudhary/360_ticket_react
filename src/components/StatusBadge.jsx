@@ -227,10 +227,12 @@ export default function StatusBadge({
         py: isInside ? 0.75 : 0.875,
         minWidth: isInside ? 48 : 75,
         borderRadius: customRadius ? customRadius : "14px",
+        // borderRadius: "4px",
         backgroundColor: errorColor ? "#FFCDD2" : bgColor,
         color: errorColor ? "#B71C1C" : textColor,
         textTransform: "capitalize",
         minHeight: isBigger ? 35 : 22,
+        opacity: 0.85,
         whiteSpace: "nowrap",
         textAlign: "center",
       }}

@@ -63,6 +63,10 @@ select:focus {
   outline: none !important;
 }
 
+.fit-height-table tr:last-child td {
+  border-bottom: none !important;
+}
+
 .MuiAutocomplete-option:not(:last-child) {
   border-bottom: 1px solid #f3f3f3 !important;
 }
@@ -94,7 +98,7 @@ select:focus {
 }
 
 .otp-input input:focus {
-  outline: 2px solid #9C6BFF !important;
+  outline: 2px solid #9c6bff !important;
   background-color: #e9fcf0;
   border: none !important;
 }
@@ -153,7 +157,7 @@ table td,
 }
 
 a.active {
-  background-color: #9C6BFF !important;
+  background-color: #9c6bff !important;
   color: #fff;
 }
 
