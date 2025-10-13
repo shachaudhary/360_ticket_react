@@ -111,7 +111,7 @@ export default function ActivityFeed() {
           overflow: "hidden",
           backgroundColor: "#fff",
           boxShadow:
-            "rgba(14, 63, 126, 0.04) 0px 0px 0px 1px, rgba(42, 51, 69, 0.04) 0px 1px 1px -0.5px, rgba(42, 51, 70, 0.04) 0px 3px 3px -1.5px, rgba(42, 51, 70, 0.04) 0px 6px 6px -3px, rgba(14, 63, 126, 0.04) 0px 12px 12px -6px, rgba(14, 63, 126, 0.04) 0px 24px 24px -12px",
+            "rgba(14, 63, 126, 0.04) 0px 0px 1px 1px, rgba(42, 51, 69, 0.04) 0px 1px 1px 2.5px, rgba(42, 51, 70, 0.04) 0px 3px 3px -1.5px, rgba(42, 51, 70, 0.04) 0px 6px 6px -3px, rgba(14, 63, 126, 0.04) 0px 12px 12px -6px, rgba(14, 63, 126, 0.04) 0px 24px 24px -12px",
           maxHeight: "calc(100dvh - 140px)",
           overflowY: "auto",
         }}
@@ -132,7 +132,7 @@ export default function ActivityFeed() {
             ${ 
               a.source === "form"
                 ? "hover:bg-gray-50 border-l-4 border-blue-400"
-                : "hover:bg-gray-50 border-l-4 border-brand-500"
+                : "hover:bg-gray-50 border-l-4 border-brand-400"
             }`}
                       onClick={() => {
                         if (a.source === "form") {
