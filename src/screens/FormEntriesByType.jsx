@@ -7,9 +7,10 @@ import {
   IconButton,
   Tooltip,
   Typography,
+  Button,
 } from "@mui/material";
 import ClearIcon from "@mui/icons-material/Clear";
-import { EyeIcon } from "@heroicons/react/24/outline";
+import { EyeIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
 import ModeEditSharpIcon from "@mui/icons-material/ModeEditSharp";
 import { createAPIEndPoint } from "../config/api/api";
 import CustomTablePagination from "../components/CustomTablePagination";
@@ -18,6 +19,7 @@ import { convertToCST } from "../utils";
 import { toProperCase } from "../utils/formatting";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import BackButton from "../components/BackButton";
+import FormTypeModal from "../components/FormTypeModal";
 
 export default function FormEntriesByType() {
   const navigate = useNavigate();
@@ -32,6 +34,7 @@ export default function FormEntriesByType() {
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [entries, setEntries] = useState([]);
+  const [description, setDescription] = useState([]);
   const [loading, setLoading] = useState(true);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [page, setPage] = useState(0);
@@ -39,6 +42,9 @@ export default function FormEntriesByType() {
 
   const copyBtnRef = useRef(null);
   const [copied, setCopied] = useState(false);
+
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedFormType, setSelectedFormType] = useState(null);
 
   const handleCopy = () => {
     // 🧠 Check if we’re running on the live domain
@@ -105,6 +111,7 @@ export default function FormEntriesByType() {
         `form_entries/by_form_type/${formTypeId}?${params}`
       ).fetchAll();
 
+      setDescription(res.data?.description || []);
       setEntries(res.data?.entries || []);
       setTotalCount(res.data?.total_entries || 0);
       setFormTypeName(res.data?.form_type_name || "");
@@ -139,6 +146,27 @@ export default function FormEntriesByType() {
       console.error("Failed to fetch form stats", err);
       setLoading(false);
     }
+  };
+
+  const handleOpenEditModal = () => {
+    setSelectedFormType({
+      id: formTypeId,
+      name: formTypeName,
+      description: description,
+      assign_users: notifiers.map((n) => ({
+        id: n.id,
+        username: n.name,
+        email: n.email,
+      })),
+    });
+    setEditModalOpen(true);
+  };
+
+  const handleModalClose = () => setEditModalOpen(false);
+
+  const handleModalSaved = async () => {
+    setEditModalOpen(false);
+    await fetchFormEntries(); // Refresh stats + notifiers after edit
   };
 
   // 🔹 Run both APIs
@@ -197,6 +225,13 @@ export default function FormEntriesByType() {
 
           <div className="flex gap-2">
             <button
+              ref={copyBtnRef}
+              onClick={handleCopy}
+              className="px-3 py-[6.15px] shrink-0 rounded-lg text-xs font-medium focus:outline-none  transition-all border border-[#E5E7EB] text-gray-500 hover:border-gray-300 hover:text-gray-600 hover:bg-brand-50"
+            >
+              {copied ? "Copied!" : "Copy Link"}
+            </button>
+            <button
               onClick={() => navigate("/forms/new-hire-form")}
               className="flex items-center gap-1 rounded-lg bg-brand-500 px-3 py-2 text-sm font-semibold text-white hover:bg-brand-600 transition-all"
             >
@@ -204,13 +239,16 @@ export default function FormEntriesByType() {
               New Submission
             </button>
 
-            <button
-              ref={copyBtnRef}
-              onClick={handleCopy}
-              className="px-3 py-[6.15px] shrink-0 rounded-lg text-xs font-medium focus:outline-none  transition-all border border-[#E5E7EB] text-gray-500 hover:border-gray-300 hover:text-gray-600 hover:bg-brand-50"
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<PencilSquareIcon className="h-4 w-4" />}
+              onClick={handleOpenEditModal}
+              sx={{ borderRadius: 1.25 }}
+              className="!border !border-[#E5E7EB] hover:!border-[#ddd]  !text-gray-500 hover:!bg-gray-50 focus:!ring-gray-500 !px-1 !py-1.5"
             >
-              {copied ? "Copied!" : "Copy Link"}
-            </button>
+              Edit
+            </Button>
           </div>
         </div>
 
@@ -243,6 +281,18 @@ export default function FormEntriesByType() {
             </h2>
           </div>
         </div>
+
+        {/* 🔹 DESCRIPTION CARD */}
+        {description && (
+          <div className="rounded-lg border border-gray-200 bg-white p-4 mt-3 text-sm text-gray-600 leading-relaxed">
+            <p className="mb-1">
+              <span className="font-semibold text-brand-600 block">
+                Description:
+              </span>
+              {description}
+            </p>
+          </div>
+        )}
 
         {/* 🟣 NOTIFIERS SECTION */}
         <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm mt-2">
@@ -319,7 +369,8 @@ export default function FormEntriesByType() {
         ) : (
           <div className="overflow-x-auto !pb-4">
             <div className="overflow-hidden rounded-lg border border-[#E5E7EB]">
-              <div className="overflow-auto h-[calc(100dvh-250.75px)]">
+              {/* <div className="overflow-auto h-[calc(100dvh-250.75px)]"> */}
+              <div className="overflow-auto max-h-[calc(100dvh-250.75px)]">
                 <table className="min-w-full divide-y divide-gray-100">
                   <thead className="bg-white sticky top-0 z-10 whitespace-nowrap">
                     <tr className="text-left text-xs text-gray-500">
@@ -421,6 +472,12 @@ export default function FormEntriesByType() {
           Back
         </button>
       </div> */}
+      <FormTypeModal
+        open={editModalOpen}
+        onClose={handleModalClose}
+        onSaved={handleModalSaved}
+        formType={selectedFormType}
+      />
     </>
   );
 }
