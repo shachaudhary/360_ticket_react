@@ -96,7 +96,7 @@ export default function TicketHeader({ ticket, onUpdate, fetchAgain }) {
       status: "completed",
       icon: <CheckCircleIcon />,
       styles: {
-        backgroundColor: "#2ed573",
+        backgroundColor: "#2ed896",
         color: "white",
         "&:hover": { backgroundColor: "#2ed589" },
       },

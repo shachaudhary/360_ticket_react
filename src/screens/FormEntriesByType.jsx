@@ -58,6 +58,8 @@ export default function FormEntriesByType() {
       copyBtnRef.current.focus();
       copyBtnRef.current.classList.add(
         "ring-2",
+        "!border-none",
+        "!text-brand-500",
         "ring-brand-500",
         "ring-offset-2"
       );
@@ -65,6 +67,8 @@ export default function FormEntriesByType() {
       setTimeout(() => {
         copyBtnRef.current.classList.remove(
           "ring-2",
+          "!border-none",
+          "!text-brand-500",
           "ring-brand-500",
           "ring-offset-2"
         );
