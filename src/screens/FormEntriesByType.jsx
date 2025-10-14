@@ -186,58 +186,49 @@ export default function FormEntriesByType() {
         </div>
       )}
 
-      <div className="space-y-3 relative">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex">
-            <div className="flex gap-2 items-center">
-              <BackButton self={-1} isSmall={false} />
-              {/* <BackButton textBtn /> */}
+      <div className="space-y-5 relative">
+        {/* 🔹 Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          {/* Left side */}
+          <div className="flex flex-wrap items-center gap-3">
+            <BackButton self={-1} isSmall={false} />
 
-              <Typography
-                variant="h6"
-                className="!text-sidebar"
-                fontWeight={700}
-                color="primary"
-              >
-                {(() => {
-                  const title =
-                    formTypeName || form_name
-                      ? toProperCase(formTypeName || form_name)
-                      : "Form";
-                  const cleanTitle = title.toLowerCase().includes("form")
-                    ? title
-                    : `${title} Form`;
-                  return `${cleanTitle} Overview`;
-                })()}
-              </Typography>
+            <Typography
+              variant="h6"
+              className="!text-sidebar"
+              fontWeight={700}
+              color="primary"
+            >
+              {(() => {
+                const title =
+                  formTypeName || form_name
+                    ? toProperCase(formTypeName || form_name)
+                    : "Form";
+                const cleanTitle = title.toLowerCase().includes("form")
+                  ? title
+                  : `${title} Form`;
+                return `${cleanTitle} Overview`;
+              })()}
+            </Typography>
 
-              <Button
-                variant="outlined"
-                size="small"
-                startIcon={<PencilSquareIcon className="h-4 w-4" />}
-                onClick={handleOpenEditModal}
-                sx={{ borderRadius: 1.25 }}
-                className="!text-xs !border !border-[#E5E7EB] hover:!border-[#ddd]  !text-gray-500 hover:!bg-gray-50 focus:!ring-gray-500 !px-2 !py-1.5 !min-w-10"
-              >
-                Edit
-              </Button>
-            </div>
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<PencilSquareIcon className="h-4 w-4" />}
+              onClick={handleOpenEditModal}
+              sx={{ borderRadius: 1.25 }}
+              className="!text-xs !border !border-gray-200 hover:!border-gray-300 !text-gray-600 hover:!bg-gray-50 !px-2.5 !py-1.5"
+            >
+              Edit
+            </Button>
           </div>
 
-          {/* <button
-            onClick={() => navigate("/forms/new-hire-form")}
-            className="flex items-center gap-1 rounded-lg bg-brand-500 px-3 py-2 text-sm font-semibold text-white hover:bg-brand-600 transition-all"
-          >
-            <PlusIcon className="h-4 w-4 text-white stroke-[2.5]" />
-            New Submission
-          </button> */}
-
-          <div className="flex gap-2">
+          {/* Right side buttons */}
+          <div className="flex gap-2 justify-end">
             <button
               ref={copyBtnRef}
               onClick={handleCopy}
-              className="px-3 py-[6.15px] shrink-0 rounded-lg text-xs font-medium focus:outline-none  transition-all border border-[#E5E7EB] text-gray-500 hover:border-gray-300 hover:text-gray-600 hover:bg-brand-50"
+              className="px-3 py-[6.15px] rounded-lg text-xs font-medium border border-gray-200 text-gray-600 hover:border-gray-300 hover:text-gray-700 hover:bg-gray-50 transition-all"
             >
               {copied ? "Copied!" : "Copy Link"}
             </button>
@@ -251,41 +242,44 @@ export default function FormEntriesByType() {
           </div>
         </div>
 
-        {/* 🟢 STATS SECTION */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-2">
-          <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm hover:shadow-md transition-all">
-            <p className="text-sm text-brand-500 font-medium">
-              Total Submissions
-            </p>
-            <h2 className="text-2xl font-bold text-gray-800 mt-1">
-              {stats.totalSubmissions}
-            </h2>
-          </div>
-
-          <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm hover:shadow-md transition-all">
-            <p className="text-sm text-brand-500 font-medium">
-              Total Notifiers
-            </p>
-            <h2 className="text-2xl font-bold text-gray-800 mt-1">
-              {stats.totalNotifiers}
-            </h2>
-          </div>
-
-          <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm hover:shadow-md transition-all">
-            <p className="text-sm text-brand-500 font-medium">
-              Last Submission
-            </p>
-            <h2 className="text-xl font-semibold text-gray-800 mt-1">
-              {stats.lastSubmission}
-            </h2>
-          </div>
+        {/* 🔸 Stats Section */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {[
+            {
+              label: "Total Submissions",
+              value: stats.totalSubmissions,
+            },
+            {
+              label: "Total Notifiers",
+              value: stats.totalNotifiers,
+            },
+            {
+              label: "Last Submission",
+              value: stats.lastSubmission,
+              small: true,
+            },
+          ].map((item, i) => (
+            <div
+              key={i}
+              className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm hover:shadow-md transition-all"
+            >
+              <p className="text-sm text-brand-500 font-medium">{item.label}</p>
+              <h2
+                className={`${
+                  item.small ? "text-xl font-semibold" : "text-2xl font-bold"
+                } text-gray-800 mt-1`}
+              >
+                {item.value}
+              </h2>
+            </div>
+          ))}
         </div>
 
-        {/* 🔹 DESCRIPTION CARD */}
+        {/* 🔹 Description */}
         {description && (
-          <div className="rounded-lg border border-gray-200 bg-white p-4 mt-3 text-sm text-gray-600 leading-relaxed">
+          <div className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-600 leading-relaxed">
             <p className="mb-1">
-              <span className="font-semibold text-brand-600 block">
+              <span className="font-semibold text-brand-600 block mb-1">
                 Description:
               </span>
               {description}
@@ -293,10 +287,9 @@ export default function FormEntriesByType() {
           </div>
         )}
 
-        {/* 🟣 NOTIFIERS SECTION */}
-        <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm mt-2">
+        {/* 🟣 Notifiers Section */}
+        <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
           <p className="text-sm text-brand-500 font-semibold mb-2">Notifiers</p>
-
           <div className="flex flex-wrap gap-2">
             {notifiers.length > 0 ? (
               notifiers.map((n) => (
@@ -328,76 +321,65 @@ export default function FormEntriesByType() {
           </div>
         </div>
 
-        {/* Search + Heading Row */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-4 mb-1">
-          {/* Left Heading */}
-          <h2 className="text-[15px] sm:text-base font-semibold text-gray-700 mb-2 sm:mb-0">
+        {/* 🔹 Search + Submissions Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-4 mb-2 gap-3">
+          <h2 className="text-[15px] sm:text-base font-semibold text-gray-700">
             Submissions List
           </h2>
-
-          {/* Right Search */}
-          <div className="flex gap-2 items-center w-full sm:w-auto">
-            <TextField
-              label="Search by name, email"
-              size="small"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              InputProps={{
-                endAdornment: query?.length > 0 && (
-                  <InputAdornment position="end">
-                    <IconButton size="small" onClick={handleClearSearch}>
-                      <ClearIcon fontSize="small" />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-              className="w-full sm:w-[320px]"
-            />
-          </div>
+          <TextField
+            label="Search by name or email"
+            size="small"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            InputProps={{
+              endAdornment: query?.length > 0 && (
+                <InputAdornment position="end">
+                  <IconButton size="small" onClick={handleClearSearch}>
+                    <ClearIcon fontSize="small" />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+            className="w-full sm:w-[320px]"
+          />
         </div>
 
-        {/* TABLE SECTION (unchanged) */}
-        {loading ? null : entries.length === 0 ? ( // </div> //   </div> //     <CircularProgress color="primary" /> //   <div className="h-[calc(100dvh-240px)] flex items-center justify-center rounded-lg bg-purple-50"> // <div className="overflow-hidden rounded-lg border border-[#E5E7EB]">
-          <div className="overflow-hidden rounded-lg border border-[#E5E7EB]">
-            <div className="max-h-[calc(100dvh-240px)] min-h-28 flex flex-col items-center justify-center rounded-lg">
-              <p className="text-gray-500 font-normal text-md">
-                No submissions found
-              </p>
+        {/* 🧾 Table Section */}
+        {loading ? null : entries.length === 0 ? (
+          <div className="overflow-hidden rounded-lg border border-gray-200">
+            <div className="max-h-[calc(100dvh-240px)] min-h-28 flex flex-col items-center justify-center">
+              <p className="text-gray-500 text-md">No submissions found</p>
             </div>
           </div>
         ) : (
-          <div className="overflow-x-auto !pb-4">
-            <div className="overflow-hidden rounded-lg border border-[#E5E7EB]">
-              {/* <div className="overflow-auto h-[calc(100dvh-250.75px)]"> */}
+          <div className="overflow-x-auto pb-4">
+            <div className="overflow-hidden rounded-lg border border-gray-200">
               <div className="overflow-auto max-h-[calc(100dvh-250.75px)]">
-                <table className="fit-height-table min-w-full divide-y divide-gray-100">
+                <table className="min-w-full divide-y divide-gray-100">
                   <thead className="bg-white sticky top-0 z-10 whitespace-nowrap">
                     <tr className="text-left text-xs text-gray-500">
-                      <th className="px-4 py-3 border-b border-r border-[#E5E7EB]">
-                        #
-                      </th>
-                      <th className="px-4 py-3 border-b border-r border-[#E5E7EB]">
-                        Created By
-                      </th>
-                      <th className="px-4 py-3 border-b border-r border-[#E5E7EB]">
-                        Email
-                      </th>
-                      <th className="px-4 py-3 border-b border-r border-[#E5E7EB]">
-                        Created At
-                      </th>
-                      <th className="px-4 py-3 text-center border-b border-[#E5E7EB]">
-                        Action
-                      </th>
+                      {["#", "Created By", "Email", "Created At", "Action"].map(
+                        (header, i) => (
+                          <th
+                            key={i}
+                            className={`px-4 py-3 border-b border-r border-gray-200 ${
+                              header === "Action" ? "text-center" : ""
+                            }`}
+                          >
+                            {header}
+                          </th>
+                        )
+                      )}
                     </tr>
                   </thead>
 
                   <tbody className="divide-y divide-gray-100 bg-white text-sm">
                     {entries.map((entry, idx) => (
                       <tr key={entry.id} className="hover:bg-gray-50">
-                        <td className="px-4 py-3 border-b border-[#E5E7EB]">
+                        <td className="px-4 py-3 border-b">
                           {page * rowsPerPage + idx + 1}
                         </td>
-                        <td className="px-4 py-3 border-b border-[#E5E7EB] text-gray-700">
+                        <td className="px-4 py-3 border-b text-gray-700">
                           <Chip
                             label={toProperCase(
                               entry.submitted_by?.username || "N/A"
@@ -413,13 +395,13 @@ export default function FormEntriesByType() {
                             }}
                           />
                         </td>
-                        <td className="px-4 py-3 border-b border-[#E5E7EB]">
+                        <td className="px-4 py-3 border-b text-gray-700">
                           {entry.submitted_by?.email || "N/A"}
                         </td>
-                        <td className="px-4 py-3 border-b border-[#E5E7EB] text-gray-700">
+                        <td className="px-4 py-3 border-b text-gray-700">
                           {convertToCST(entry.created_at) || "—"}
                         </td>
-                        <td className="px-4 py-3 text-center border-b border-[#E5E7EB]">
+                        <td className="px-4 py-3 text-center border-b">
                           <Tooltip title="View Submission">
                             <IconButton
                               size="small"
