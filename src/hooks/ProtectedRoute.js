@@ -47,7 +47,6 @@ function ProtectedRoute({ children }) {
             if (err.code === "ECONNABORTED" || err.message?.includes("Network Error") || !err.response) {
                 if (!isOffline) {
                     setIsOffline(true);
-                    toast.error("⚠️ Network issue detected. You’re offline — please check your connection.");
                 }
                 return; // 🚫 Do not log out on network errors
             }
@@ -118,13 +117,16 @@ function ProtectedRoute({ children }) {
                 "div",
                 {
                     className:
-                        "fixed top-0 left-0 w-full bg-yellow-500 text-white text-center py-2 z-50 shadow-md",
+                        "fixed top-0 left-0 w-full text-center py-3 px-4 z-50 backdrop-blur-md " +
+                        "bg-gradient-to-r from-amber-400/90 to-yellow-500/90 text-white font-medium " +
+                        "shadow-lg animate-slideDown",
                 },
-                "⚠️ You’re offline. Some features may not work."
+                "You’re offline — some features may be temporarily unavailable."
             ),
             children
         )
         : null;
+
 }
 
 export default ProtectedRoute;

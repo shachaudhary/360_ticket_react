@@ -192,6 +192,23 @@ a.active {
   border-color: #1c64f2 !important;
 }
 
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slideDown {
+  animation: slideDown 0.4s ease-out forwards;
+}
+
+
 @media (max-width: 992px) {
   .sidebar-desktop {
     display: none !important;
