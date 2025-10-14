@@ -97,7 +97,7 @@ function ProtectedRoute({ children }) {
         } else if (!accessToken && !toastShown.current) {
             toast.error("Unauthorized access. Please log in.");
             toastShown.current = true;
-            setShouldRedirect(true); 
+            setShouldRedirect(true);
         }
     }, [location.search, accessToken]);
 
@@ -109,16 +109,22 @@ function ProtectedRoute({ children }) {
     }, [shouldRedirect]);
 
     // 🔹 Show content even if temporarily offline
-    return accessToken ? (
-        <div>
-            {isOffline && (
-                <div className="fixed top-0 left-0 w-full bg-yellow-500 text-white text-center py-2 z-50 shadow-md">
-                    ⚠️ You’re offline. Some features may not work.
-                </div>
-            )}
-            {children}
-        </div>
-    ) : null;
+    return accessToken
+        ? React.createElement(
+            "div",
+            null,
+            isOffline &&
+            React.createElement(
+                "div",
+                {
+                    className:
+                        "fixed top-0 left-0 w-full bg-yellow-500 text-white text-center py-2 z-50 shadow-md",
+                },
+                "⚠️ You’re offline. Some features may not work."
+            ),
+            children
+        )
+        : null;
 }
 
 export default ProtectedRoute;
