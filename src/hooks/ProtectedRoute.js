@@ -1,54 +1,92 @@
-import { useLocation } from "react-router-dom";
-import toast from "react-hot-toast";
-import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
+import { useEffect, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
+import { toast } from "react-hot-toast";
 
 function ProtectedRoute({ children }) {
     const location = useLocation();
     const [shouldRedirect, setShouldRedirect] = useState(false);
     const [accessToken, setAccessToken] = useState(localStorage.getItem("access_token"));
+    const [isOffline, setIsOffline] = useState(false);
     const toastShown = useRef(false);
 
-    // 🔹 Validate token
+    // 🔹 Logout Helper
+    const logoutUser = (message) => {
+        if (!toastShown.current) {
+            toast.error(message || "Session expired. Please log in again.");
+            toastShown.current = true;
+        }
+        setTimeout(() => {
+            localStorage.removeItem("access_token");
+            setShouldRedirect(true);
+        }, 2500);
+    };
+
+    // 🔹 Token Validation Function
     const validateToken = async () => {
         if (!accessToken) return;
 
         try {
             const res = await axios.get("https://api.dental360grp.com/validate_token", {
                 headers: { Authorization: `Bearer ${accessToken}` },
+                timeout: 7000,
             });
 
-            if (!res.data.success) {
-                localStorage.removeItem("access_token");
-                if (!toastShown.current) {
-                    toast.error("Session expired. Please log in again.");
-                    toastShown.current = true;
-                }
-                setShouldRedirect(true);
+            // ✅ Token invalid
+            if (!res.data?.success) {
+                logoutUser("Session expired. Please log in again.");
+                return;
             }
+
+            // ✅ Token valid
+            setIsOffline(false);
         } catch (err) {
-            console.error("Token validation error:", err);
-            localStorage.removeItem("access_token");
-            if (!toastShown.current) {
-                toast.error("Authentication error. Please log in again.");
-                toastShown.current = true;
+            console.error("🔻 Token validation error:", err.message || err);
+
+            // ⚠️ Handle network or timeout issues
+            if (err.code === "ECONNABORTED" || err.message?.includes("Network Error") || !err.response) {
+                if (!isOffline) {
+                    setIsOffline(true);
+                    toast.error("⚠️ Network issue detected. You’re offline — please check your connection.");
+                }
+                return; // 🚫 Do not log out on network errors
             }
-            setShouldRedirect(true);
+
+            // 🔒 Handle actual authentication failures
+            const status = err.response?.status;
+            if ([401, 403].includes(status)) {
+                logoutUser("Authentication failed. Please log in again.");
+            } else {
+                toast.error("Unexpected error occurred. Please try again.");
+            }
         }
     };
 
-    // 🔹 Validate on route change
+    // 🔹 Revalidate on route change
     useEffect(() => {
         validateToken();
     }, [location.pathname, accessToken]);
 
-    // 🔹 Background check every 5 minutes
+    // 🔹 Auto-recheck every 5 minutes
     useEffect(() => {
         const interval = setInterval(validateToken, 5 * 60 * 1000);
         return () => clearInterval(interval);
     }, [accessToken]);
 
-    // 🔹 Handle token in URL (first login redirect)
+    // 🔹 Detect reconnection automatically
+    useEffect(() => {
+        const handleOnline = () => {
+            if (isOffline) {
+                toast.success("✅ Connection restored.");
+                setIsOffline(false);
+                validateToken(); // recheck token after reconnect
+            }
+        };
+        window.addEventListener("online", handleOnline);
+        return () => window.removeEventListener("online", handleOnline);
+    }, [isOffline]);
+
+    // 🔹 Handle token from URL (OAuth redirect)
     useEffect(() => {
         const urlParams = new URLSearchParams(location.search);
         const tokenFromUrl = urlParams.get("token");
@@ -70,7 +108,17 @@ function ProtectedRoute({ children }) {
         }
     }, [shouldRedirect]);
 
-    return accessToken ? children : null;
+    // 🔹 Show content even if temporarily offline
+    return accessToken ? (
+        <div>
+            {isOffline && (
+                <div className="fixed top-0 left-0 w-full bg-yellow-500 text-white text-center py-2 z-50 shadow-md">
+                    ⚠️ You’re offline. Some features may not work.
+                </div>
+            )}
+            {children}
+        </div>
+    ) : null;
 }
 
 export default ProtectedRoute;
