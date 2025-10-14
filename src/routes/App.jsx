@@ -107,7 +107,7 @@ export default function App() {
             }
           />
           <Route
-            path="/forms/:form_type_id/submissions"
+            path="/forms/:form_type_id/submissions/:form_name"
             element={
               <PageTransition>
                 <FormEntriesByType />
@@ -132,7 +132,7 @@ export default function App() {
             }
           />
           <Route
-            path="/form_entries/details/:id"
+            path="/forms/form_entries/details/:id"
             element={
               <PageTransition>
                 <FormEntryView />

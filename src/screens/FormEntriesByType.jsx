@@ -14,7 +14,7 @@ import { EyeIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
 import ModeEditSharpIcon from "@mui/icons-material/ModeEditSharp";
 import { createAPIEndPoint } from "../config/api/api";
 import CustomTablePagination from "../components/CustomTablePagination";
-import { useNavigate, useLocation, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { convertToCST } from "../utils";
 import { toProperCase } from "../utils/formatting";
 import { PlusIcon } from "@heroicons/react/24/solid";
@@ -23,12 +23,7 @@ import FormTypeModal from "../components/FormTypeModal";
 
 export default function FormEntriesByType() {
   const navigate = useNavigate();
-  const location = useLocation();
-
-  const { form_type_id } = useParams();
-  const formTypeId = form_type_id;
-  const params = new URLSearchParams(location.search);
-  const formName = params.get("form_name");
+  const { form_type_id, form_name } = useParams();
 
   const [formTypeName, setFormTypeName] = useState("");
   const [query, setQuery] = useState("");
@@ -99,7 +94,7 @@ export default function FormEntriesByType() {
 
   // 🔹 Fetch submissions (existing logic — untouched)
   const fetchFormEntries = async () => {
-    if (!formTypeId) return;
+    if (!form_type_id) return;
     try {
       setLoading(true);
       const params = new URLSearchParams();
@@ -108,7 +103,7 @@ export default function FormEntriesByType() {
       params.append("per_page", rowsPerPage);
 
       const res = await createAPIEndPoint(
-        `form_entries/by_form_type/${formTypeId}?${params}`
+        `form_entries/by_form_type/${form_type_id}?${params}`
       ).fetchAll();
 
       setDescription(res.data?.description || []);
@@ -125,11 +120,11 @@ export default function FormEntriesByType() {
 
   // 🟢 NEW API → Fetch stats and notifiers
   const fetchFormStats = async () => {
-    if (!formTypeId) return;
+    if (!form_type_id) return;
     try {
       setLoading(true);
       const res = await createAPIEndPoint(
-        `stats/form_entries_summary/${formTypeId}`
+        `stats/form_entries_summary/${form_type_id}`
       ).fetchAll();
 
       const data = res.data;
@@ -150,7 +145,7 @@ export default function FormEntriesByType() {
 
   const handleOpenEditModal = () => {
     setSelectedFormType({
-      id: formTypeId,
+      id: form_type_id,
       name: formTypeName,
       description: description,
       assign_users: notifiers.map((n) => ({
@@ -173,9 +168,9 @@ export default function FormEntriesByType() {
   useEffect(() => {
     fetchFormEntries();
     fetchFormStats();
-  }, [formTypeId, page, rowsPerPage, debouncedQuery]);
+  }, [form_type_id, page, rowsPerPage, debouncedQuery]);
 
-  const handleViewEntry = (id) => navigate(`/form_entries/details/${id}`);
+  const handleViewEntry = (id) => navigate(`/forms/form_entries/details/${id}`);
   const handleClearSearch = () => setQuery("");
 
   return (
@@ -203,8 +198,8 @@ export default function FormEntriesByType() {
               >
                 {(() => {
                   const title =
-                    formTypeName || formName
-                      ? toProperCase(formTypeName || formName)
+                    formTypeName || form_name
+                      ? toProperCase(formTypeName || form_name)
                       : "Form";
                   const cleanTitle = title.toLowerCase().includes("form")
                     ? title

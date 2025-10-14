@@ -183,7 +183,7 @@ export default function FormEntryView() {
                 {entry.field_values.map((field, idx) => (
                   <div
                     key={idx}
-                    className="rounded-lg border border-gray-200 bg-gray-50 p-3"
+                    className="rounded-lg border border-gray-200 bg-white p-3"
                   >
                     <Typography
                       variant="body2"

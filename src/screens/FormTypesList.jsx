@@ -80,7 +80,7 @@ export default function FormTypesList() {
     const encodedName = encodeURIComponent(
       formName.trim().replace(/\s+/g, "-").toLowerCase()
     );
-    navigate(`/forms/${formId}/submissions?form_name=${encodedName}`);
+    navigate(`/forms/${formId}/submissions/${encodedName}`);
   };
 
   return (

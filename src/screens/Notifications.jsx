@@ -137,7 +137,7 @@ export default function ActivityFeed() {
                       onClick={() => {
                         if (a.source === "form") {
                           window.open(
-                            `/form_entries/details/${a.form_entry_id}`,
+                            `/forms/form_entries/details/${a.form_entry_id}`,
                             "_blank"
                           );
                         } else {
