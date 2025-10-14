@@ -217,7 +217,7 @@ export default function FormEntriesByType() {
               startIcon={<PencilSquareIcon className="h-4 w-4" />}
               onClick={handleOpenEditModal}
               sx={{ borderRadius: 1.25 }}
-              className="!text-xs !border !border-gray-200 hover:!border-gray-300 !text-gray-600 hover:!bg-gray-50 !px-2.5 !py-1.5"
+              className="!text-xs !border !border-gray-200 hover:!border-gray-300 !text-gray-600 hover:!bg-gray-50 !px-2.5 !py-1.5 !min-w-10"
             >
               Edit
             </Button>
