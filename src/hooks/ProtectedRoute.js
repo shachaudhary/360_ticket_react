@@ -97,7 +97,7 @@ function ProtectedRoute({ children }) {
         } else if (!accessToken && !toastShown.current) {
             toast.error("Unauthorized access. Please log in.");
             toastShown.current = true;
-            setShouldRedirect(true);
+            setShouldRedirect(true); 
         }
     }, [location.search, accessToken]);
 
