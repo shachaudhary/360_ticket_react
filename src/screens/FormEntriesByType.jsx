@@ -276,16 +276,20 @@ export default function FormEntriesByType() {
         </div>
 
         {/* 🔹 Description */}
-        {description && (
-          <div className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-600 leading-relaxed">
-            <p className="mb-1">
-              <span className="font-semibold text-brand-600 block mb-1">
-                Description:
+        <div className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-600 leading-relaxed">
+          <p className="mb-1">
+            <span className="font-semibold text-brand-600 block mb-1">
+              Description:
+            </span>
+            {description.length > 0 ? (
+              description
+            ) : (
+              <span className="text-gray-400 text-sm">
+                No description available yet.{" "}
               </span>
-              {description}
-            </p>
-          </div>
-        )}
+            )}
+          </p>
+        </div>
 
         {/* 🟣 Notifiers Section */}
         <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
@@ -315,7 +319,7 @@ export default function FormEntriesByType() {
               ))
             ) : (
               <span className="text-gray-400 text-sm">
-                No notifiers assigned
+                No notifiers assigned.
               </span>
             )}
           </div>
