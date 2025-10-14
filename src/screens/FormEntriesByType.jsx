@@ -212,6 +212,17 @@ export default function FormEntriesByType() {
                   return `${cleanTitle} Overview`;
                 })()}
               </Typography>
+
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<PencilSquareIcon className="h-4 w-4" />}
+                onClick={handleOpenEditModal}
+                sx={{ borderRadius: 1.25 }}
+                className="!text-xs !border !border-[#E5E7EB] hover:!border-[#ddd]  !text-gray-500 hover:!bg-gray-50 focus:!ring-gray-500 !px-2 !py-1.5 !min-w-10"
+              >
+                Edit
+              </Button>
             </div>
           </div>
 
@@ -238,17 +249,6 @@ export default function FormEntriesByType() {
               <PlusIcon className="h-4 w-4 text-white stroke-[2.5]" />
               New Submission
             </button>
-
-            <Button
-              variant="outlined"
-              size="small"
-              startIcon={<PencilSquareIcon className="h-4 w-4" />}
-              onClick={handleOpenEditModal}
-              sx={{ borderRadius: 1.25 }}
-              className="!border !border-[#E5E7EB] hover:!border-[#ddd]  !text-gray-500 hover:!bg-gray-50 focus:!ring-gray-500 !px-1 !py-1.5"
-            >
-              Edit
-            </Button>
           </div>
         </div>
 
