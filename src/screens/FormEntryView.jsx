@@ -92,16 +92,11 @@ export default function FormEntryView() {
       <Box sx={{ flex: 1, overflowY: "auto", pr: 2 }}>
         {/* Header */}
         <div className="flex justify-between items-center">
-          <BackButton/>
+          <BackButton />
           <div className="flex items-center gap-2 justify-between w-full pl-3">
-            <Typography
-              variant="h6"
-              className="!text-sidebar"
-              fontWeight={700}
-              color="primary"
-            >
+            <h2 className="text-lg md:text-xl font-semibold text-sidebar">
               {toProperCase(formType)} #{entry.id}
-            </Typography>
+            </h2>
 
             <Button
               variant="outlined"

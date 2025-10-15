@@ -193,12 +193,7 @@ export default function FormEntriesByType() {
           <div className="flex flex-wrap items-center gap-3">
             <BackButton self={-1} isSmall={false} />
 
-            <Typography
-              variant="h6"
-              className="!text-sidebar"
-              fontWeight={700}
-              color="primary"
-            >
+            <h2 className="text-lg md:text-xl font-semibold text-sidebar">
               {(() => {
                 const title =
                   formTypeName || form_name
@@ -209,8 +204,7 @@ export default function FormEntriesByType() {
                   : `${title} Form`;
                 return `${cleanTitle} Overview`;
               })()}
-            </Typography>
-
+            </h2>
             <Button
               variant="outlined"
               size="small"
