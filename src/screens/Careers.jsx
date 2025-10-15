@@ -567,7 +567,8 @@ const NewHireForm = () => {
             <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-700 rounded-full -translate-x-1/3 translate-y-1/3 opacity-50"></div>
 
             <div className="flex absolute top-5 left-5">
-              <BackButton self={-1} />
+              {/* <BackButton self={-1} /> */}
+              <BackButton self="/forms/1/submissions/new-hire-form" />
             </div>
 
             <div className="relative z-10">

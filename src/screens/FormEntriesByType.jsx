@@ -191,7 +191,7 @@ export default function FormEntriesByType() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           {/* Left side */}
           <div className="flex flex-wrap items-center gap-3">
-            <BackButton self={-1} isSmall={false} />
+            <BackButton self="/forms" isSmall={false} />
 
             <h2 className="text-lg md:text-xl font-semibold text-sidebar">
               {(() => {
