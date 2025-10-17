@@ -130,7 +130,7 @@ export default function Dashboard() {
           <CircularProgress size={60} thickness={4} sx={{ color: "#9C6BFF" }} />
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-6 pb-5">
           {/* Header with Date Filters */}
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             {/* Left: Heading */}
@@ -213,9 +213,21 @@ export default function Dashboard() {
             {stats.map((s) => (
               <div
                 key={s.label}
-                className="rounded-md border border-gray-100 bg-white p-5 shadow-card flex items-center gap-4"
+                className="rounded-md border border-gray-100 bg-white p-5 shadow-card hover:shadow-md flex items-center gap-4 transition-all duration-300"
               >
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gray-50">
+                <div
+                  className="flex h-11 w-11 items-center justify-center rounded-lg"
+                  style={{
+                    backgroundColor:
+                      s.label === "Open Tickets"
+                        ? "rgba(59, 130, 246, 0.12)" // light blue bg
+                        : s.label === "In Progress"
+                        ? "rgba(250, 204, 21, 0.15)" // light yellow bg
+                        : s.label === "Completed"
+                        ? "rgba(34, 197, 94, 0.12)" // light green bg
+                        : "#f3f4f6", // fallback light gray
+                  }}
+                >
                   {s.icon}
                 </div>
                 <div>
@@ -227,7 +239,7 @@ export default function Dashboard() {
           </div>
 
           {/* Ticket Trends Line Chart */}
-          <div className="rounded-md border border-gray-100 bg-white p-5 shadow-card">
+          <div className="rounded-md border border-gray-100 bg-white p-5 shadow-card hover:shadow-md ">
             <h3 className="mb-3 text-md font-medium text-sidebar">
               Tickets Created
             </h3>
@@ -250,7 +262,7 @@ export default function Dashboard() {
 
           <div className="grid md:grid-cols-2 gap-5">
             {/* Status Pie Chart */}
-            <div className="rounded-md border border-gray-100 bg-white p-5 shadow-card">
+            <div className="rounded-md border border-gray-100 bg-white p-5 shadow-card hover:shadow-md ">
               <h3 className="mb-4 text-sidebar font-medium">
                 Tickets by Status
               </h3>
@@ -305,7 +317,7 @@ export default function Dashboard() {
             </div>
 
             {/* Priority Pie Chart */}
-            <div className="rounded-md border border-gray-100 bg-white p-5 shadow-card">
+            <div className="rounded-md border border-gray-100 bg-white p-5 shadow-card hover:shadow-md ">
               <h3 className="mb-4 text-sidebar font-medium">
                 Tickets by Priority
               </h3>

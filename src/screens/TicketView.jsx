@@ -64,7 +64,7 @@ const CommentsList = ({ comments }) => (
             exit={{ opacity: 0, y: 0 }}
             transition={{ duration: 0.25 }}
             layout // enables smooth reordering
-            className="rounded-lg border bg-[#E5E7EB] bg-opacity-10 p-3 text-sm"
+            className="rounded-lg border bg-[#E5E7EB] hover:bg-gray-50 bg-opacity-10 p-3 text-sm"
           >
             <div className="flex justify-between items-center mb-1">
               <span className="font-semibold text-gray-500">
