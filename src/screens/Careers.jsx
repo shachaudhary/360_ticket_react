@@ -171,68 +171,62 @@ const NewHireForm = () => {
   };
 
   useEffect(() => {
-    if (isEditMode && id) {
-      (async () => {
-        try {
-          const res = await createAPIEndPoint(
-            `form_entries/details/${id}`
-          ).fetchAll();
-          const entry = res.data;
-          if (!entry) return;
+    const loadEditData = async () => {
+      if (!isEditMode || !id || locations.length === 0) return; // wait until locations loaded
 
-          const mapped = {};
-          entry.field_values?.forEach((f) => {
-            mapped[f.field_name.toLowerCase()] = f.field_value;
-          });
-          const normalizedType = normalizeFormType(entry.form_type_name);
-          setFormData({
-            form_type: normalizedType,
-            formTypeOther:
-              normalizedType === "Other" ? entry.form_type_name : "",
-            newHireName: mapped["employee_name"] || "",
-            startDate: mapped["joining_date"] || "",
-            jobTitle:
-              jobTitleOptions.includes(mapped["position"]) ||
-              !mapped["position"]
-                ? mapped["position"]
-                : "Other",
-            jobTitleOther:
-              !jobTitleOptions.includes(mapped["position"]) &&
-              mapped["position"]
-                ? mapped["position"]
-                : "",
-            department: mapped["department"] || "",
-            requestDate: mapped["request_date"] || dayjs().format("YYYY-MM-DD"),
-            email: mapped["email"] || "",
-            location: locations.some(
-              (l) =>
-                l.location_name.toLowerCase() ===
-                mapped["location"]?.toLowerCase()
-            )
-              ? mapped["location"]
-              : mapped["location"]
-              ? "Other"
+      try {
+        const res = await createAPIEndPoint(
+          `form_entries/details/${id}`
+        ).fetchAll();
+        const entry = res.data;
+        if (!entry) return;
+
+        const mapped = {};
+        entry.field_values?.forEach((f) => {
+          mapped[f.field_name.toLowerCase()] = f.field_value;
+        });
+
+        const normalizedType = normalizeFormType(entry.form_type_name);
+
+        const locationMatch = locations.find(
+          (l) =>
+            l.location_name.trim().toLowerCase() ===
+            mapped["location"]?.trim().toLowerCase()
+        );
+
+        setFormData({
+          form_type: normalizedType,
+          formTypeOther: normalizedType === "Other" ? entry.form_type_name : "",
+          newHireName: mapped["employee_name"] || "",
+          startDate: mapped["joining_date"] || "",
+          jobTitle:
+            jobTitleOptions.includes(mapped["position"]) || !mapped["position"]
+              ? mapped["position"]
+              : "Other",
+          jobTitleOther:
+            !jobTitleOptions.includes(mapped["position"]) && mapped["position"]
+              ? mapped["position"]
               : "",
-            // locationOther: !locations.some(
-            //   (l) =>
-            //     l.location_name.toLowerCase() ===
-            //     mapped["location"]?.toLowerCase()
-            // )
-            //   ? mapped["location"]
-            //   : "",
-            hireType: mapped["hire_type"] || "",
-            payType: mapped["pay_type"] || "",
-            payRate: mapped["pay_rate"] || "",
-            supervisor: mapped["supervisor"] || "",
-            requestorName: mapped["requestor_name"] || "",
-          });
-        } catch (err) {
-          console.error("Failed to load form for edit:", err);
-          Swal.fire("Error", "Unable to load form data", "error");
-        }
-      })();
-    }
-  }, [isEditMode, id]);
+          department: mapped["department"] || "",
+          requestDate: mapped["request_date"] || dayjs().format("YYYY-MM-DD"),
+          email: mapped["email"] || "",
+          location: locationMatch
+            ? locationMatch.location_name
+            : mapped["location"] || "",
+          hireType: mapped["hire_type"] || "",
+          payType: mapped["pay_type"] || "",
+          payRate: mapped["pay_rate"] || "",
+          supervisor: mapped["supervisor"] || "",
+          requestorName: mapped["requestor_name"] || "",
+        });
+      } catch (err) {
+        console.error("Failed to load form for edit:", err);
+        Swal.fire("Error", "Unable to load form data", "error");
+      }
+    };
+
+    loadEditData();
+  }, [isEditMode, id, locations]);
 
   // Custom validation functions
   const validateEmail = (email) => {
