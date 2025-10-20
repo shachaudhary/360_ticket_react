@@ -106,11 +106,15 @@ export default function Layout() {
           className="flex h-8 w-8 rounded-lg"
         /> */}
 
-        <div className="flex h-[30px] w-[30px] items-center justify-center rounded-lg bg-brand-500 font-semibold">
-          <TicketIcon style={{ width: 19 }} />
+        <div
+          onClick={() => navigate("/dashboard")}
+          className="flex items-center gap-2 cursor-pointer "
+        >
+          <div className="flex h-[30px] w-[30px] items-center justify-center rounded-lg bg-brand-500 font-semibold">
+            <TicketIcon style={{ width: 19 }} />
+          </div>
+          <div className="font-normal text-lg uppercase">Support 360</div>
         </div>
-
-        <div className="font-medium text-lg uppercase">Support 360</div>
       </div>
       {/* )} */}
       <nav className="flex flex-col gap-2">
