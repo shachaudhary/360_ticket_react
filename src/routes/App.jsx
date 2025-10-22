@@ -68,6 +68,7 @@ export default function App() {
         <Route path="/auth/sign-in" element={<Login />} />
         <Route path="/auth/forgot-password" element={<ForgotPassword />} />
         <Route path="/auth/reset-password" element={<ResetPassword />} />
+
         <Route path="/contact-us" element={<ContactForm />} />
 
         <Route
@@ -79,6 +80,7 @@ export default function App() {
           }
         >
           <Route index element={<Navigate to="/dashboard" />} />
+
           <Route
             path="/dashboard"
             element={
@@ -192,7 +194,7 @@ export default function App() {
             }
           />
         </Route>
-        <Route path="*" element={<Navigate to="/" replace />} />
+        {/* <Route path="*" element={<Navigate to="/" replace />} /> */}
       </Routes>
     </AnimatePresence>
   );
