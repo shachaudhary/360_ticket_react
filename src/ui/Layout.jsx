@@ -137,6 +137,9 @@ export default function Layout() {
             />
           </>
         )}
+
+        <NavItem to="/contacts" icon={UserCircleIcon} label="Contacts" />
+
         {/* <NavItem
           to="/tickets/new"
           icon={PlusCircleIcon}
