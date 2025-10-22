@@ -3,17 +3,17 @@ import {
   TextField,
   IconButton,
   Tooltip,
-  Switch,
   CircularProgress,
   Chip,
 } from "@mui/material";
-import { PlusIcon } from "@heroicons/react/24/solid";
-import ModeEditSharpIcon from "@mui/icons-material/ModeEditSharp";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import { createAPIEndPoint } from "../config/api/api";
-import CategoryModal from "../components/CategoryModal";
 import DateWithTooltip from "../components/DateWithTooltip";
 import { toProperCase } from "../utils/formatting";
 import CustomTablePagination from "../components/CustomTablePagination";
+import { formatUSPhoneNumber } from "../utils";
+import { EyeIcon } from "@heroicons/react/24/outline";
+import { useNavigate } from "react-router-dom";
 
 // 🔹 Debounce Hook
 function useDebounce(value, delay = 400) {
@@ -25,81 +25,51 @@ function useDebounce(value, delay = 400) {
   return debounced;
 }
 
-export default function SettingsCategories() {
-  const [categories, setCategories] = useState([]);
+export default function ContactList() {
+  const navigate = useNavigate();
+  
+  const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [openModal, setOpenModal] = useState(false);
-  const [editingCategory, setEditingCategory] = useState(null);
 
   // 🔹 Pagination state
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [page, setPage] = useState(0); // starts from 0 for UI
+  const [page, setPage] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
 
   // 🔹 Search state
   const [query, setQuery] = useState("");
   const debouncedQuery = useDebounce(query, 500);
 
-  // 🔹 Fetch categories
-  const fetchCategories = async () => {
+  // 🔹 Fetch Contacts
+  const fetchContacts = async () => {
     try {
       setLoading(true);
-
       const res = await createAPIEndPoint(
-        `category?page=${
+        `contact/get_all?clinic_id=1&page=${
           page + 1
         }&per_page=${rowsPerPage}&search=${debouncedQuery}`
       ).fetchAll();
 
-      setCategories(res.data?.categories || res.data || []);
+      setContacts(res.data?.forms || res.data || []);
       setTotalCount(res.data?.total || res.data?.length || 0);
     } catch (err) {
-      console.error("Error fetching categories:", err);
-      setCategories([]);
+      console.error("Error fetching contacts:", err);
+      setContacts([]);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchCategories();
+    fetchContacts();
   }, [page, rowsPerPage, debouncedQuery]);
-
-  // 🔹 Toggle enable/disable
-  const handleToggle = async (cat) => {
-    try {
-      await createAPIEndPoint(`category/${cat.id}`).patch({
-        enabled: !cat.enabled,
-      });
-      fetchCategories();
-    } catch (err) {
-      console.error("Failed to toggle category", err);
-    }
-  };
-
-  // 🔹 Modal open/close
-  const handleOpenModal = (category = null) => {
-    setEditingCategory(category);
-    setOpenModal(true);
-  };
-
-  const handleCloseModal = () => {
-    setEditingCategory(null);
-    setOpenModal(false);
-  };
-
-  // 🔹 After save
-  const handleSaved = () => {
-    handleCloseModal();
-    fetchCategories();
-  };
 
   return (
     <div className="space-y-4">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
         <h2 className="text-lg md:text-xl font-semibold text-sidebar">
-          Categories
+          Contact Submissions
         </h2>
 
         {/* Search Input */}
@@ -110,20 +80,11 @@ export default function SettingsCategories() {
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
-              setPage(0); // reset to first page when searching
+              setPage(0);
             }}
             fullWidth
           />
         </div>
-
-        {/* Add Button */}
-        <button
-          onClick={() => handleOpenModal()}
-          className="flex items-center gap-1 rounded-lg bg-brand-500 px-3 py-2 text-sm font-semibold text-white hover:bg-brand-600 transition-all"
-        >
-          <PlusIcon className="h-4 w-4 text-white stroke-[2.5]" />
-          Add Category
-        </button>
       </div>
 
       {/* Table */}
@@ -133,11 +94,11 @@ export default function SettingsCategories() {
             <CircularProgress color="primary" />
           </div>
         </div>
-      ) : categories.length === 0 ? (
+      ) : contacts.length === 0 ? (
         <div className="overflow-hidden rounded-lg border border-[#E5E7EB]">
           <div className="h-[calc(100dvh-145px)] flex-col gap-1 flex items-center justify-center rounded-lg">
             <p className="text-gray-500 font-normal text-md">
-              No categories found
+              No contacts found
             </p>
           </div>
         </div>
@@ -152,52 +113,34 @@ export default function SettingsCategories() {
                       #
                     </th>
                     <th className="px-4 py-3 border-r border-b border-[#E5E7EB] font-medium">
-                      Category Name
+                      Name
                     </th>
                     <th className="px-4 py-3 border-r border-b border-[#E5E7EB] font-medium">
-                      Assigned To
+                      Phone
                     </th>
                     <th className="px-4 py-3 border-r border-b border-[#E5E7EB] font-medium">
-                      Created At
+                      Email
                     </th>
-                    {/* <th className="px-4 py-3 text-center border-b border-[#E5E7EB] font-medium">
-                      Enabled
-                    </th> */}
-                    <th className="px-4 py-3 text-center border-b border-[#E5E7EB] font-medium">
+                    <th className="px-4 py-3 border-r border-b border-[#E5E7EB] font-medium">
+                      Message
+                    </th>
+                    <th className="px-4 py-3 border-b border-[#E5E7EB] text-center font-medium">
                       Action
                     </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 bg-white text-sm">
-                  {categories.map((cat, idx) => (
-                    <tr key={cat.id} className="hover:bg-gray-50">
+                  {contacts?.map((contact, idx) => (
+                    <tr key={contact.id || idx} className="hover:bg-gray-50">
                       <td className="px-4 py-3 border-b border-[#E5E7EB]">
                         {page * rowsPerPage + idx + 1}
                       </td>
                       <td className="px-4 py-3 border-b border-[#E5E7EB] font-medium text-gray-800">
-                        {toProperCase(cat.name) || "N/A"}
-                        {/* <Chip
-                          label={toProperCase(cat.name) || "—"}
-                          variant="filled"
-                          sx={{
-                            fontSize: 11.75,
-                            fontWeight: 500,
-                            borderRadius: "6px",
-                            color: "#6B7280",
-                            border: "1px solid #E5E7EB",
-                            background: "white",
-                            height: 27.5,
-                            "& .MuiChip-label": {
-                              px: "7px !important", // ✅ Correct selector
-                            },
-                          }}
-                        /> */}
+                        {toProperCase(contact.name) || "—"}
                       </td>
                       <td className="px-4 py-3 border-b border-[#E5E7EB]">
-                        {/* {toProperCase(cat.assignee_name) || "—"} */}
-
                         <Chip
-                          label={toProperCase(cat.assignee_name) || "—"}
+                          label={formatUSPhoneNumber(contact.phone) || "—"}
                           variant="filled"
                           sx={{
                             fontSize: 12.75,
@@ -212,30 +155,21 @@ export default function SettingsCategories() {
                         />
                       </td>
                       <td className="px-4 py-3 border-b border-[#E5E7EB]">
-                        {cat.created_at ? (
-                          <DateWithTooltip date={cat.created_at} />
-                        ) : (
-                          "—"
-                        )}
+                        {contact.email || "—"}
                       </td>
-                      {/* <td className="px-4 py-3 border-b border-[#E5E7EB] text-center">
-                        <Switch
-                          checked={cat.enabled}
-                          onChange={() => handleToggle(cat)}
-                          color="primary"
-                        />
-                      </td> */}
-                      <td className="px-4 py-3 border-b  border-[#E5E7EB] text-center">
-                        <Tooltip title="Edit">
+                      <td className="px-4 py-3 border-b border-[#E5E7EB] text-gray-600">
+                        {contact.message?.length > 45
+                          ? contact.message.slice(0, 45) + "..."
+                          : contact.message || "—"}
+                      </td>
+                      <td className="px-4 py-3 border-b border-[#E5E7EB] text-center">
+                        <Tooltip title="View Details">
                           <IconButton
                             size="small"
-                            onClick={() => handleOpenModal(cat)}
+                            onClick={() => navigate(`/contacts/${contact.id}`)}
                             className="!bg-slate-50"
                           >
-                            <ModeEditSharpIcon
-                              fontSize="small"
-                              className="!text-[16px] !text-[#707784]"
-                            />
+                            <EyeIcon className="h-5 w-5 text-gray-500 hover:text-brand-500 transition-colors" />
                           </IconButton>
                         </Tooltip>
                       </td>
@@ -255,16 +189,6 @@ export default function SettingsCategories() {
             totalCount={totalCount}
           />
         </div>
-      )}
-
-      {/* Modal */}
-      {openModal && (
-        <CategoryModal
-          open={openModal}
-          onClose={handleCloseModal}
-          onSaved={handleSaved}
-          category={editingCategory}
-        />
       )}
     </div>
   );

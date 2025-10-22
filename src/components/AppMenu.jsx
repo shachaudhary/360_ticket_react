@@ -122,7 +122,7 @@ const AppMenu = () => {
           },
         }}
       >
-        <div className="grid grid-cols-3 gap-4 p-2">
+        <div className="grid grid-cols-3 gap-5 px-2 py-3.5">
           {apps && apps.length > 0 ? (
             apps.map((app, index) => (
               <div

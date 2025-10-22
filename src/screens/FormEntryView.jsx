@@ -148,7 +148,7 @@ export default function FormEntryView() {
               <Box sx={{ mb: 2 }}>
                 <Typography
                   variant="subtitle1"
-                  color="primary"
+                  // color="primary"
                   sx={{ mb: 1, fontWeight: 600 }}
                 >
                   Description
@@ -167,7 +167,7 @@ export default function FormEntryView() {
             {/* 🔹 Field Values */}
             <Typography
               variant="subtitle1"
-              color="primary"
+              // color="primary"
               sx={{ mb: 1, fontWeight: 600 }}
             >
               Form Details
@@ -178,7 +178,7 @@ export default function FormEntryView() {
                 {entry.field_values.map((field, idx) => (
                   <div
                     key={idx}
-                    className="rounded-lg border border-gray-200 bg-white p-3"
+                    className="rounded-lg border border-gray-200 bg-white p-3 hover:shadow-md transition-all"
                   >
                     <Typography
                       variant="body2"

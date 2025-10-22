@@ -20,6 +20,9 @@ import SettingsFormTypes from "../screens/SettingsFormTypes.jsx";
 import FormEntryView from "../screens/FormEntryView.jsx";
 import FormTypesList from "../screens/FormTypesList.jsx";
 import FormEntriesByType from "../screens/FormEntriesByType.jsx";
+import ContactForm from "../screens/ContactUs.jsx";
+import ContactList from "../screens/ContactList.jsx";
+import ContactView from "../screens/ContactView.jsx";
 
 // ✅ Add your favicon paths (public/ folder ke relative)
 const DEFAULT_FAVICON = "/favicon.ico";
@@ -41,6 +44,7 @@ export default function App() {
     "/auth/reset-password": "Reset Password",
     "/careers": "Careers", // ✅ add careers
     "/forms/new-hire-form": "New Hire Form", // ✅ add careers
+    "/contact-us": "Contact Us", // ✅ add careers
   };
 
   useEffect(() => {
@@ -64,6 +68,7 @@ export default function App() {
         <Route path="/auth/sign-in" element={<Login />} />
         <Route path="/auth/forgot-password" element={<ForgotPassword />} />
         <Route path="/auth/reset-password" element={<ResetPassword />} />
+        <Route path="/contact-us" element={<ContactForm />} />
 
         <Route
           path="/"
@@ -106,6 +111,8 @@ export default function App() {
               </PageTransition>
             }
           />
+          <Route path="/contacts" element={<ContactList />} />
+          <Route path="/contacts/:id" element={<ContactView />} />
           <Route
             path="/forms/:form_type_id/submissions/:form_name"
             element={
