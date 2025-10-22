@@ -23,6 +23,7 @@ import FormEntriesByType from "../screens/FormEntriesByType.jsx";
 import ContactForm from "../screens/ContactUs.jsx";
 import ContactList from "../screens/ContactList.jsx";
 import ContactView from "../screens/ContactView.jsx";
+import NotFound from "../screens/NotFound.jsx";
 
 // ✅ Add your favicon paths (public/ folder ke relative)
 const DEFAULT_FAVICON = "/favicon.ico";
@@ -80,7 +81,6 @@ export default function App() {
           }
         >
           <Route index element={<Navigate to="/dashboard" />} />
-
           <Route
             path="/dashboard"
             element={
@@ -194,7 +194,7 @@ export default function App() {
             }
           />
         </Route>
-        {/* <Route path="*" element={<Navigate to="/" replace />} /> */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </AnimatePresence>
   );
