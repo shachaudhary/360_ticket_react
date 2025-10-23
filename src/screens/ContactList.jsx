@@ -12,7 +12,7 @@ import { createAPIEndPoint } from "../config/api/api";
 import DateWithTooltip from "../components/DateWithTooltip";
 import { toProperCase1 } from "../utils/formatting";
 import CustomTablePagination from "../components/CustomTablePagination";
-import { formatUSPhoneNumber } from "../utils";
+import { convertToCST, formatUSPhoneNumber } from "../utils";
 import { EyeIcon } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
 
@@ -134,6 +134,9 @@ export default function ContactList() {
                     <th className="px-4 py-3 border-r border-b border-[#E5E7EB] font-medium">
                       Message
                     </th>
+                    <th className="px-4 py-3 border-r border-b border-[#E5E7EB] font-medium">
+                      Created At
+                    </th>
                     <th className="px-4 py-3 border-b border-[#E5E7EB] text-center font-medium">
                       Action
                     </th>
@@ -171,6 +174,9 @@ export default function ContactList() {
                         {contact.message?.length > 45
                           ? contact.message.slice(0, 45) + "..."
                           : contact.message || "—"}
+                      </td>
+                      <td className="px-4 py-3 border-b text-gray-700">
+                        {convertToCST(contact?.created_at) || "—"}
                       </td>
                       <td className="px-4 py-3 border-b border-[#E5E7EB] text-center">
                         <Tooltip title="View Details">

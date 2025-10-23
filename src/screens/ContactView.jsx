@@ -143,7 +143,7 @@ export default function ContactView() {
               variant="body2"
               sx={{
                 color: "#2d3436",
-                fontWeight: 500,
+                // fontWeight: 500,
                 whiteSpace: "pre-wrap",
                 border: "1px solid #eee",
                 borderRadius: "8px",
