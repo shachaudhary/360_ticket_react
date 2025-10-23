@@ -167,7 +167,7 @@ export default function ContactForm() {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className="grid grid-cols-1 lg:grid-cols-7 gap-0 shadow-2xl rounded-3xl overflow-hidden"
+          className="grid grid-cols-1 lg:grid-cols-7 gap-0 shadow-lg rounded-xl overflow-hidden"
         >
           {/* LEFT SIDE INFO */}
           {/* <motion.div
