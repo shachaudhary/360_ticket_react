@@ -5,11 +5,12 @@ import {
   Tooltip,
   CircularProgress,
   Chip,
+  Button,
 } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { createAPIEndPoint } from "../config/api/api";
 import DateWithTooltip from "../components/DateWithTooltip";
-import { toProperCase } from "../utils/formatting";
+import { toProperCase1 } from "../utils/formatting";
 import CustomTablePagination from "../components/CustomTablePagination";
 import { formatUSPhoneNumber } from "../utils";
 import { EyeIcon } from "@heroicons/react/24/outline";
@@ -27,7 +28,7 @@ function useDebounce(value, delay = 400) {
 
 export default function ContactList() {
   const navigate = useNavigate();
-  
+
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -85,6 +86,15 @@ export default function ContactList() {
             fullWidth
           />
         </div>
+        {/* <Button
+          variant="outlined"
+          size="small"
+          onClick={() => navigate(`/contact-us`)}
+          sx={{ borderRadius: 1.25 }}
+          className="!border !border-[#E5E7EB] hover:!border-[#ddd]  !text-gray-500 hover:!bg-gray-50 focus:!ring-gray-500 !px-2.5 !py-1.5"
+        >
+          View Form
+        </Button> */}
       </div>
 
       {/* Table */}
@@ -135,8 +145,8 @@ export default function ContactList() {
                       <td className="px-4 py-3 border-b border-[#E5E7EB]">
                         {page * rowsPerPage + idx + 1}
                       </td>
-                      <td className="px-4 py-3 border-b border-[#E5E7EB] font-medium text-gray-800">
-                        {toProperCase(contact.name) || "—"}
+                      <td className="px-4 py-3 border-b border-[#E5E7EB] font-medium text-gray-800 text-wrap max-w-40">
+                        {toProperCase1(contact.name) || "N/A"}
                       </td>
                       <td className="px-4 py-3 border-b border-[#E5E7EB]">
                         <Chip

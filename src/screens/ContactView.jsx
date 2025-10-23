@@ -11,7 +11,7 @@ import {
 import { useParams, useNavigate } from "react-router-dom";
 import { createAPIEndPoint } from "../config/api/api";
 import { convertToCST, formatUSPhoneNumber } from "../utils";
-import { toProperCase } from "../utils/formatting";
+import { toProperCase1 } from "../utils/formatting";
 import BackButton from "../components/BackButton";
 import { EnvelopeIcon } from "@heroicons/react/24/outline";
 import toast from "react-hot-toast";
@@ -44,8 +44,8 @@ export default function ContactView() {
 
   const fetchContact = useCallback(async () => {
     try {
-      const res = await createAPIEndPoint(`contact/${id}`).fetchAll();
-      setContact(res.data);
+      const res = await createAPIEndPoint(`contact/get_by_id/${id}`).fetchAll();
+      setContact(res.data.form);
     } catch (err) {
       console.error("Failed to fetch contact:", err);
       toast.error("Failed to fetch contact details.");
@@ -69,10 +69,11 @@ export default function ContactView() {
 
   if (!contact) {
     return (
-      <Box className="absolute inset-0 flex items-center justify-center bg-purple-50">
+      <Box className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-purple-50">
         <Typography color="text.secondary" fontWeight={500}>
           Contact not found or failed to load.
         </Typography>
+        <BackButton textBtn />
       </Box>
     );
   }
@@ -90,7 +91,7 @@ export default function ContactView() {
               Contact #{contact.id}
             </h2>
 
-            <Button
+            {/* <Button
               variant="outlined"
               size="small"
               startIcon={<EnvelopeIcon className="h-4 w-4" />}
@@ -99,7 +100,7 @@ export default function ContactView() {
               className="!border !border-[#E5E7EB] hover:!border-[#ddd] !text-gray-500 hover:!bg-gray-50 focus:!ring-gray-500 !px-1 !py-1.5"
             >
               Back to List
-            </Button>
+            </Button> */}
           </div>
         </div>
 
@@ -121,7 +122,7 @@ export default function ContactView() {
           >
             {/* 🔹 Contact Info */}
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-              <Label title="Name" value={toProperCase(contact.name)} />
+              <Label title="Name" value={toProperCase1(contact.name)} />
               <Label title="Email" value={contact.email} />
               <Label title="Phone" value={formatUSPhoneNumber(contact.phone)} />
               <Label title="Created At" value={createdAt} />

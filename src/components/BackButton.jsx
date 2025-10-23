@@ -20,10 +20,12 @@ const BackButton = ({ self = null, isSmall = false, textBtn = false }) => {
         size="small"
         // startIcon={<ChevronLeftIcon />}
         sx={{
-          borderRadius: "22px",
+          borderRadius: "8px",
           textTransform: "none",
           fontWeight: 600,
-          borderColor: "primary.main",
+          // borderColor: "primary.main",
+          minHeight: 32,
+
           color: "primary.main",
           "&:hover": {
             backgroundColor: "primary.main",
@@ -32,7 +34,7 @@ const BackButton = ({ self = null, isSmall = false, textBtn = false }) => {
           },
         }}
       >
-        Back
+        <span style={{ marginBottom: 1 }}>Back</span>
       </Button>
     );
   }

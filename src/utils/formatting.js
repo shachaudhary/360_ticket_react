@@ -1,11 +1,11 @@
 // utils/formatting.js
-// export function toProperCase(str) {
-//     if (!str) return "";
-//     return str
-//         .toLowerCase()
-//         .replace(/_/g, ' ') // Replace underscores with spaces
-//         .replace(/(^|\s|-|\/)\S/g, (match) => match.toUpperCase());
-// }
+export function toProperCase1(str) {
+    if (!str) return "";
+    return str
+        .toLowerCase()
+        .replace(/_/g, ' ') // Replace underscores with spaces
+        .replace(/(^|\s|-|\/)\S/g, (match) => match.toUpperCase());
+}
 
 // export function toProperCase(str) {
 //     if (!str) return "";
