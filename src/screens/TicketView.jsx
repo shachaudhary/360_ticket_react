@@ -221,6 +221,8 @@ export default function TicketView() {
   const { user } = useApp();
   const navigate = useNavigate();
   const [ticket, setTicket] = useState(null);
+  const [isFetching, setIsFetching] = useState(true); // 👈 added
+  const [fetchError, setFetchError] = useState(false); // 👈 for not found
   const [assignee, setAssignee] = useState(null);
   console.log("🚀 ~ TicketView ~ assignee:", assignee);
   const [loading, setLoading] = useState(false);
@@ -233,11 +235,21 @@ export default function TicketView() {
 
   // ✅ Fetch Ticket
   const fetchTicket = useCallback(async () => {
+    setIsFetching(true);
+    setFetchError(false);
+
     try {
       const res = await createAPIEndPoint(`ticket/${id}`).fetchAll();
-      setTicket(res.data);
-    } catch {
-      setTicket(null);
+      if (!res.data) {
+        setFetchError(true);
+      } else {
+        setTicket(res.data);
+      }
+    } catch (err) {
+      console.error("❌ Failed to fetch ticket:", err);
+      setFetchError(true);
+    } finally {
+      setIsFetching(false);
     }
   }, [id]);
 
@@ -347,10 +359,25 @@ export default function TicketView() {
     </Box>
   );
 
-  if (!ticket) {
+  if (isFetching) {
     return (
       <Box className="absolute inset-0 flex items-center justify-center bg-purple-50">
         <CircularProgress color="primary" />
+      </Box>
+    );
+  }
+
+  // ✅ Show not found message
+  if (fetchError || !ticket) {
+    return (
+      <Box className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gray-50">
+        <Typography variant="h6" fontWeight={600} color="text.secondary">
+          Ticket not found or failed to load.
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          The ticket may have been deleted or the link is invalid.
+        </Typography>
+        <BackButton textBtn />
       </Box>
     );
   }

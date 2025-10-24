@@ -15,6 +15,7 @@ import CustomTablePagination from "../components/CustomTablePagination";
 import { convertToCST, formatUSPhoneNumber } from "../utils";
 import { EyeIcon } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
+import StatusBadge from "../components/StatusBadge";
 
 // 🔹 Debounce Hook
 function useDebounce(value, delay = 400) {
@@ -135,6 +136,9 @@ export default function ContactList() {
                       Message
                     </th>
                     <th className="px-4 py-3 border-r border-b border-[#E5E7EB] font-medium">
+                      Status
+                    </th>
+                    <th className="px-4 py-3 border-r border-b border-[#E5E7EB] font-medium">
                       Created At
                     </th>
                     <th className="px-4 py-3 border-b border-[#E5E7EB] text-center font-medium">
@@ -170,10 +174,13 @@ export default function ContactList() {
                       <td className="px-4 py-3 border-b border-[#E5E7EB]">
                         {contact.email || "—"}
                       </td>
-                      <td className="px-4 py-3 border-b border-[#E5E7EB] text-gray-600">
-                        {contact.message?.length > 45
-                          ? contact.message.slice(0, 45) + "..."
+                      <td className="px-4 py-3 border-b max-w-56 border-[#E5E7EB] text-gray-600">
+                        {contact.message?.length > 55
+                          ? contact.message.slice(0, 55) + "..."
                           : contact.message || "—"}
+                      </td>
+                      <td className="px-4 py-3 border-b border-[#E5E7EB] text-gray-600">
+                        <StatusBadge status={contact?.status} />
                       </td>
                       <td className="px-4 py-3 border-b text-gray-700">
                         {convertToCST(contact?.created_at) || "—"}
