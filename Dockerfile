@@ -1,9 +1,9 @@
 # Step 1: Build React App
-FROM node:alpine3.18 as build
+FROM node:alpine3.18 AS build
 
 WORKDIR /app 
-COPY package.json . 
-RUN npm install
+COPY package.json package-lock.json ./
+RUN npm ci --legacy-peer-deps
 COPY . .
 
 # Pass Build Arguments
