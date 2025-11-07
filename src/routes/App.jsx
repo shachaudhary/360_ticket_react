@@ -24,6 +24,8 @@ import ContactForm from "../screens/ContactUs.jsx";
 import ContactList from "../screens/ContactList.jsx";
 import ContactView from "../screens/ContactView.jsx";
 import NotFound from "../screens/NotFound.jsx";
+import AppointmentForm from "../screens/AppointmentForm.jsx";
+import FormEntryEdit from "../screens/FormEntryEdit.jsx";
 
 // ✅ Add your favicon paths (public/ folder ke relative)
 const DEFAULT_FAVICON = "/favicon.ico";
@@ -45,6 +47,7 @@ export default function App() {
     "/auth/reset-password": "Reset Password",
     "/careers": "Careers", // ✅ add careers
     "/forms/new-hire-form": "New Hire Form", // ✅ add careers
+    "/forms/appointment-form": "Appointment Form", // ✅ add appointment
     "/contact-us": "Contact Us", // ✅ add careers
   };
 
@@ -123,7 +126,6 @@ export default function App() {
               </PageTransition>
             }
           />
-          F
           <Route
             path="/forms/new-hire-form"
             element={
@@ -133,10 +135,18 @@ export default function App() {
             }
           />
           <Route
+            path="/forms/appointment-form"
+            element={
+              <PageTransition>
+                <AppointmentForm />
+              </PageTransition>
+            }
+          />
+          <Route
             path="/form_entries/edit/:id"
             element={
               <PageTransition>
-                <Careers isEditMode={true} />
+                <FormEntryEdit />
               </PageTransition>
             }
           />

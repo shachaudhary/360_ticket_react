@@ -58,6 +58,7 @@ export default function Layout() {
   const isViewPage = location.pathname === `/tickets/${id}`;
   const isFormPage =
     location.pathname === `/forms/new-hire-form` ||
+    location.pathname === `/forms/appointment-form` ||
     location.pathname.includes("form_entries/edit");
   const [settingsOpen, setSettingsOpen] = React.useState(false);
 

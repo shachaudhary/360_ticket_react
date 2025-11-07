@@ -42,13 +42,16 @@ export default function FormEntriesByType() {
   const [selectedFormType, setSelectedFormType] = useState(null);
 
   const handleCopy = () => {
-    // 🧠 Check if we’re running on the live domain
+    // 🧠 Check if we're running on the live domain
     const isLive = window.location.hostname.includes("dental360grp.com");
+
+    // ✅ Determine form route based on form_type_id
+    const formRoute = form_type_id === "2" ? "appointment-form" : "new-hire-form";
 
     // ✅ Use correct base URL based on environment
     const fullUrl = isLive
-      ? "https://support.dental360grp.com/forms/new-hire-form"
-      : `${window.location.origin}/forms/new-hire-form`;
+      ? `https://support.dental360grp.com/forms/${formRoute}`
+      : `${window.location.origin}/forms/${formRoute}`;
 
     navigator.clipboard.writeText(fullUrl);
     setCopied(true);
@@ -227,7 +230,10 @@ export default function FormEntriesByType() {
               {copied ? "Copied!" : "Copy Link"}
             </button>
             <button
-              onClick={() => navigate("/forms/new-hire-form")}
+              onClick={() => {
+                const formRoute = form_type_id === "2" ? "appointment-form" : "new-hire-form";
+                navigate(`/forms/${formRoute}`);
+              }}
               className="flex items-center gap-1 rounded-lg bg-brand-500 px-3 py-2 text-sm font-semibold text-white hover:bg-brand-600 transition-all"
             >
               <PlusIcon className="h-4 w-4 text-white stroke-[2.5]" />
