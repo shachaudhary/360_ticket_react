@@ -9,6 +9,8 @@ import {
   CircularProgress,
   InputAdornment,
   Chip,
+  Menu,
+  Typography,
 } from "@mui/material";
 import { IconButton, Tooltip } from "@mui/material";
 import LaunchIcon from "@mui/icons-material/Launch";
@@ -25,6 +27,7 @@ import { convertToCST } from "../utils";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import { toProperCase } from "../utils/formatting";
 import { EyeIcon } from "@heroicons/react/24/outline";
+import toast from "react-hot-toast";
 
 export default function Tickets() {
   const navigate = useNavigate();
@@ -77,6 +80,32 @@ export default function Tickets() {
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  
+  // Status update state
+  const [statusMenuAnchor, setStatusMenuAnchor] = useState(null);
+  const [selectedTicketForStatus, setSelectedTicketForStatus] = useState(null);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
+
+  // 🔹 Handle Status Update
+  const handleStatusUpdate = async (ticketId, newStatus) => {
+    setUpdatingStatus(true);
+    try {
+      await createAPIEndPoint(`ticket/${ticketId}`).patch({
+        updated_by: user?.id,
+        status: newStatus,
+      });
+
+      toast.success(`Status updated to ${toProperCase(newStatus)}`);
+      setStatusMenuAnchor(null);
+      setSelectedTicketForStatus(null);
+      fetchTickets(); // Refresh the list
+    } catch (err) {
+      console.error("Failed to update status", err);
+      toast.error("Failed to update status");
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
 
   // 🔹 fetchTickets with API filters
   const fetchTickets = async () => {
@@ -463,7 +492,31 @@ export default function Tickets() {
                         <DateWithTooltip date={t?.due_date} />
                       </td> */}
                       <td className="px-4 py-3 border-b border-[#E5E7EB]">
-                        <StatusBadge isInside status={t.status} />
+                        {t.status?.toLowerCase() === "completed" ? (
+                          <div className="inline-block">
+                            <StatusBadge 
+                              isInside 
+                              status={t.status} 
+                              showDropdown={false}
+                            />
+                          </div>
+                        ) : (
+                          <Tooltip title="Click to change status" arrow>
+                            <div
+                              onClick={(e) => {
+                                setStatusMenuAnchor(e.currentTarget);
+                                setSelectedTicketForStatus(t);
+                              }}
+                              className="cursor-pointer inline-block hover:opacity-80 transition-opacity"
+                            >
+                              <StatusBadge 
+                                isInside 
+                                status={t.status} 
+                                showDropdown={true}
+                              />
+                            </div>
+                          </Tooltip>
+                        )}
                       </td>
                       <td className="px-4 py-3 text-gray-700 border-b border-[#E5E7EB]">
                         {/* {toProperCase(t.created_by?.username) || "—"} */}
@@ -551,6 +604,80 @@ export default function Tickets() {
           />
         </div>
       )}
+
+      {/* Status Update Menu */}
+      <Menu
+        anchorEl={statusMenuAnchor}
+        open={Boolean(statusMenuAnchor)}
+        onClose={() => {
+          setStatusMenuAnchor(null);
+          setSelectedTicketForStatus(null);
+        }}
+        PaperProps={{
+          sx: {
+            borderRadius: "12px",
+            border: "1px solid #E5E7EB",
+            boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)",
+            minWidth: 180,
+            mt: 0.5,
+          },
+        }}
+      >
+        <div className="px-2 py-1">
+          <Typography
+            variant="caption"
+            className="!px-2 !py-1 !text-brand-500 !font-medium !text-xs"
+          >
+            Update Status
+          </Typography>
+        </div>
+        {["Pending", "In Progress", "Completed"].map((status) => {
+          const isCurrentStatus =
+            selectedTicketForStatus?.status?.toLowerCase() ===
+            status.toLowerCase().replace(" ", "_");
+          return (
+            <MenuItem
+              key={status}
+              onClick={() => {
+                if (!isCurrentStatus) {
+                  handleStatusUpdate(
+                    selectedTicketForStatus?.id,
+                    status.toLowerCase().replace(" ", "_")
+                  );
+                }
+              }}
+              disabled={isCurrentStatus || updatingStatus}
+              sx={{
+                fontSize: "14px",
+                py: 1,
+                px: 2,
+                mx: 1,
+                my: 0.25,
+                borderRadius: "8px",
+                "&:hover": {
+                  backgroundColor: "#F3F4F6",
+                },
+                ...(isCurrentStatus && {
+                  backgroundColor: "#F3F4F6",
+                  color: "#9CA3AF",
+                }),
+              }}
+            >
+              <div className="flex items-center justify-between w-full">
+                <span>{status}</span>
+                {updatingStatus &&
+                  selectedTicketForStatus?.status?.toLowerCase() ===
+                    status.toLowerCase().replace(" ", "_") && (
+                    <CircularProgress size={14} sx={{ ml: 1 }} />
+                  )}
+                {isCurrentStatus && (
+                  <span className="text-xs text-gray-400 ml-2">(Current)</span>
+                )}
+              </div>
+            </MenuItem>
+          );
+        })}
+      </Menu>
     </div>
   );
 }

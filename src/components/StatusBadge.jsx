@@ -9,6 +9,7 @@ import HorizontalRuleIcon from "@mui/icons-material/HorizontalRule";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import TrendingDownIcon from "@mui/icons-material/TrendingDown";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 
 export const statusColors = {
   // Payment Statuses
@@ -212,6 +213,7 @@ export default function StatusBadge({
   errorColor = false,
   isBigger = false,
   customRadius = "12px",
+  showDropdown = false,
 }) {
   const normalizedStatus = status?.toLowerCase?.().trim();
   const bgColor = statusColors[normalizedStatus] || statusColors.default;
@@ -235,6 +237,7 @@ export default function StatusBadge({
         opacity: 0.85,
         whiteSpace: "nowrap",
         textAlign: "center",
+        gap: 0.5,
       }}
     >
       {/* ✅ Show priority icon */}
@@ -248,6 +251,15 @@ export default function StatusBadge({
       >
         {shortenStatus(normalizedStatus)}
       </Typography>
+      {/* ✅ Show dropdown arrow if editable */}
+      {showDropdown && (
+        <KeyboardArrowDownIcon
+          sx={{
+            fontSize: isInside ? 14 : 16,
+            opacity: 0.7,
+          }}
+        />
+      )}
     </Box>
   );
 }
