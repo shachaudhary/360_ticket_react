@@ -272,7 +272,7 @@ export default function ContactList() {
                                 color: "#6B7280",
                                 border: "1px solid #E5E7EB",
                                 background: "white",
-                                height: 28.5,
+                                height: 27.5,
                                 cursor: "pointer",
                                 "&:hover": {
                                   backgroundColor: "#F3F4F6",
