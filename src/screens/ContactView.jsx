@@ -137,6 +137,8 @@ export default function ContactView() {
   const comments = ticket?.comments || [];
   const createdAt = convertToCST(contact.created_at);
 
+
+
   return (
     <Box sx={{ display: "flex", height: "100%", position: "relative" }}>
       <Box sx={{ flex: 1, overflowY: "auto", pr: 2 }}>
@@ -194,6 +196,32 @@ export default function ContactView() {
               <Label title="Phone" value={formatUSPhoneNumber(contact.phone)} />
               <Label title="Created At" value={createdAt} />
 
+              {/* Category */}
+              <Box className="mt-2">
+                <Typography
+                  variant="body2"
+                  sx={{ fontWeight: 600, color: "#7E858D", mb: 0.5 }}
+                >
+                  Category
+                </Typography>
+                <Chip
+                  label={toProperCase(contact?.data?.predicted_category) || "—"}
+                  variant="filled"
+                  sx={{
+                    fontSize: 11.75,
+                    fontWeight: 500,
+                    borderRadius: "6px",
+                    color: "#6B7280",
+                    border: "1px solid #E5E7EB",
+                    background: "white",
+                    height: 27.5,
+                    "& .MuiChip-label": {
+                      px: "7px !important",
+                    },
+                  }}
+                />
+              </Box>
+
               {/* <Divider sx={{ my: 2 }} />
 
             <Label
@@ -221,13 +249,16 @@ export default function ContactView() {
                       fontWeight: 600,
                       fontSize: "0.85rem",
                       borderRadius: "10px",
-                      px: 0.5,
+                      pr: 0.5,
+                      pl: 1,
                       "& .MuiChip-icon": {
                         color: "#824EF2",
-                        marginLeft: "6px",
+                        marginLeft: "0px",
                         marginRight: "0px",
+                        fontSize: "1rem",
                       },
                       "& .MuiChip-label": {
+                        overflow: "visible",
                         lineHeight: 1,
                         marginTop: -0.45,
                         px: 1,

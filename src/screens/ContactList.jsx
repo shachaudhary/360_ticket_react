@@ -10,7 +10,7 @@ import {
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { createAPIEndPoint } from "../config/api/api";
 import DateWithTooltip from "../components/DateWithTooltip";
-import { toProperCase1 } from "../utils/formatting";
+import { toProperCase1, toProperCase } from "../utils/formatting";
 import CustomTablePagination from "../components/CustomTablePagination";
 import { convertToCST, formatUSPhoneNumber } from "../utils";
 import { EyeIcon } from "@heroicons/react/24/outline";
@@ -26,6 +26,18 @@ function useDebounce(value, delay = 400) {
   }, [value, delay]);
   return debounced;
 }
+
+// 🔹 Helper to parse predicted_category from data JSON string
+const getPredictedCategory = (dataString) => {
+  try {
+    if (!dataString) return null;
+    const parsed = JSON.parse(dataString);
+    return parsed.predicted_category || null;
+  } catch (err) {
+    console.error("Error parsing data field:", err);
+    return null;
+  }
+};
 
 export default function ContactList() {
   const navigate = useNavigate();
@@ -136,6 +148,9 @@ export default function ContactList() {
                       Message
                     </th>
                     <th className="px-4 py-3 border-r border-b border-[#E5E7EB] font-medium">
+                      Category
+                    </th>
+                    <th className="px-4 py-3 border-r border-b border-[#E5E7EB] font-medium">
                       Status
                     </th>
                     <th className="px-4 py-3 border-r border-b border-[#E5E7EB] font-medium">
@@ -178,6 +193,24 @@ export default function ContactList() {
                         {contact.message?.length > 55
                           ? contact.message.slice(0, 55) + "..."
                           : contact.message || "—"}
+                      </td>
+                      <td className="px-4 py-3 border-b border-[#E5E7EB]">
+                        <Chip
+                          label={toProperCase(getPredictedCategory(contact.data)) || "—"}
+                          variant="filled"
+                          sx={{
+                            fontSize: 11.75,
+                            fontWeight: 500,
+                            borderRadius: "6px",
+                            color: "#6B7280",
+                            border: "1px solid #E5E7EB",
+                            background: "white",
+                            height: 27.5,
+                            "& .MuiChip-label": {
+                              px: "7px !important",
+                            },
+                          }}
+                        />
                       </td>
                       <td className="px-4 py-3 border-b border-[#E5E7EB] text-gray-600">
                         <StatusBadge status={contact?.status} />
