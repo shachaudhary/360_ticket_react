@@ -447,7 +447,7 @@ export default function Tickets() {
                       <td className="px-4 py-3 border-b  border-[#E5E7EB] ">
                         {page * rowsPerPage + idx + 1}
                       </td>
-                      <td className="px-4 py-3 border-b border-[#E5E7EB] font-medium text-gray-800">
+                      <td className="px-4 py-3 border-b border-[#E5E7EB] font-medium text-gray-800 max-w-48">
                         {toProperCase(t.title)}
                       </td>
                       {/* <td className="px-4 py-3 border-b border-[#E5E7EB]">
@@ -664,14 +664,14 @@ export default function Tickets() {
               }}
             >
               <div className="flex items-center justify-between w-full">
-                <span>{status}</span>
+                <span className="!text-gray-500"> {status}</span>
                 {updatingStatus &&
                   selectedTicketForStatus?.status?.toLowerCase() ===
                     status.toLowerCase().replace(" ", "_") && (
                     <CircularProgress size={14} sx={{ ml: 1 }} />
                   )}
                 {isCurrentStatus && (
-                  <span className="text-xs text-gray-400 ml-2">(Current)</span>
+                  <span className="text-xs !text-gray-800 ml-2">(Current)</span>
                 )}
               </div>
             </MenuItem>

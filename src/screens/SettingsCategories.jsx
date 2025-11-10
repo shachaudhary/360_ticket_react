@@ -9,11 +9,14 @@ import {
 } from "@mui/material";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import ModeEditSharpIcon from "@mui/icons-material/ModeEditSharp";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { createAPIEndPoint } from "../config/api/api";
 import CategoryModal from "../components/CategoryModal";
+import ConfirmationModal from "../components/ConfirmationModal";
 import DateWithTooltip from "../components/DateWithTooltip";
 import { toProperCase } from "../utils/formatting";
 import CustomTablePagination from "../components/CustomTablePagination";
+import toast from "react-hot-toast";
 
 // 🔹 Debounce Hook
 function useDebounce(value, delay = 400) {
@@ -40,14 +43,18 @@ export default function SettingsCategories() {
   const [query, setQuery] = useState("");
   const debouncedQuery = useDebounce(query, 500);
 
+  // 🔹 Delete confirmation state
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+
   // 🔹 Fetch categories
   const fetchCategories = async () => {
     try {
       setLoading(true);
 
       const res = await createAPIEndPoint(
-        `category?page=${
-          page + 1
+        `category?page=${page + 1
         }&per_page=${rowsPerPage}&search=${debouncedQuery}`
       ).fetchAll();
 
@@ -92,6 +99,41 @@ export default function SettingsCategories() {
   const handleSaved = () => {
     handleCloseModal();
     fetchCategories();
+  };
+
+  // 🔹 Open delete confirmation
+  const handleOpenDeleteModal = (category) => {
+    setCategoryToDelete(category);
+    setDeleteModalOpen(true);
+  };
+
+  // 🔹 Close delete confirmation
+  const handleCloseDeleteModal = () => {
+    if (!deleting) {
+      setCategoryToDelete(null);
+      setDeleteModalOpen(false);
+    }
+  };
+
+  // 🔹 Handle delete
+  const handleDelete = async () => {
+    if (!categoryToDelete) return;
+
+    setDeleting(true);
+    try {
+      await createAPIEndPoint(`category/`).delete(categoryToDelete.id);
+      toast.success("Category deleted successfully");
+      setDeleteModalOpen(false);
+      setCategoryToDelete(null);
+      fetchCategories();
+    } catch (err) {
+      console.error("Failed to delete category:", err);
+      toast.error(
+        err?.response?.data?.message || "Failed to delete category. It may be in use."
+      );
+    } finally {
+      setDeleting(false);
+    }
   };
 
   return (
@@ -226,18 +268,32 @@ export default function SettingsCategories() {
                         />
                       </td> */}
                       <td className="px-4 py-3 border-b  border-[#E5E7EB] text-center">
-                        <Tooltip title="Edit">
-                          <IconButton
-                            size="small"
-                            onClick={() => handleOpenModal(cat)}
-                            className="!bg-slate-50"
-                          >
-                            <ModeEditSharpIcon
-                              fontSize="small"
-                              className="!text-[16px] !text-[#707784]"
-                            />
-                          </IconButton>
-                        </Tooltip>
+                        <div className="flex items-center justify-center gap-1">
+                          <Tooltip title="Edit">
+                            <IconButton
+                              size="small"
+                              onClick={() => handleOpenModal(cat)}
+                              className="!bg-slate-50"
+                            >
+                              <ModeEditSharpIcon
+                                fontSize="small"
+                                className="!text-[16px] !text-[#707784]"
+                              />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Delete">
+                            <IconButton
+                              size="small"
+                              onClick={() => handleOpenDeleteModal(cat)}
+                              className="!bg-red-50"
+                            >
+                              <DeleteOutlineIcon
+                                fontSize="small"
+                                className="!text-[16px] !text-red-500"
+                              />
+                            </IconButton>
+                          </Tooltip>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -266,6 +322,21 @@ export default function SettingsCategories() {
           category={editingCategory}
         />
       )}
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        open={deleteModalOpen}
+        onClose={handleCloseDeleteModal}
+        onConfirm={handleDelete}
+        title="Delete Category"
+        message={`Are you sure you want to delete "${toProperCase(
+          categoryToDelete?.name
+        )}"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        loading={deleting}
+        danger={true}
+      />
     </div>
   );
 }
