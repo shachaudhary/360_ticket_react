@@ -18,6 +18,7 @@ import FormTypeModal from "../components/FormTypeModal";
 import toast from "react-hot-toast"; // ✅ make sure toast works
 import { createAPIEndPointAuth } from "../config/api/apiAuth";
 import ModeEditSharpIcon from "@mui/icons-material/ModeEditSharp";
+import { chipStyle } from "../utils/common";
 
 export default function FormTypesList() {
   const navigate = useNavigate();
@@ -232,14 +233,7 @@ export default function FormTypesList() {
                         <Chip
                           label={toProperCase(form.owner?.username) || "N/A"}
                           variant="filled"
-                          sx={{
-                            fontSize: 12.5,
-                            borderRadius: "24px",
-                            backgroundColor: "#f5f6fa",
-                            color: "#353b48",
-                            height: 27,
-                            "& .MuiChip-label": { px: "8px !important" },
-                          }}
+                          sx={chipStyle}
                         />
                       </td>
 

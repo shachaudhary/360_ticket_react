@@ -17,6 +17,7 @@ import DateWithTooltip from "../components/DateWithTooltip";
 import { toProperCase } from "../utils/formatting";
 import CustomTablePagination from "../components/CustomTablePagination";
 import toast from "react-hot-toast";
+import { chipStyle } from "../utils/common";
 
 // 🔹 Debounce Hook
 function useDebounce(value, delay = 400) {
@@ -241,16 +242,7 @@ export default function SettingsCategories() {
                         <Chip
                           label={toProperCase(cat.assignee_name) || "—"}
                           variant="filled"
-                          sx={{
-                            fontSize: 12.75,
-                            borderRadius: "24px",
-                            color: "#353b48",
-                            backgroundColor: "#f5f6fa",
-                            height: 27.5,
-                            "& .MuiChip-label": {
-                              px: "7px !important",
-                            },
-                          }}
+                          sx={chipStyle}
                         />
                       </td>
                       <td className="px-4 py-3 border-b border-[#E5E7EB]">

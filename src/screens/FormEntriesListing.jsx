@@ -25,6 +25,7 @@ import ClearIcon from "@mui/icons-material/Clear";
 import LaunchIcon from "@mui/icons-material/Launch";
 import { EyeIcon, PlusIcon } from "@heroicons/react/24/solid";
 import { toProperCase } from "../utils/formatting";
+import { chipStyle } from "../utils/common";
 
 export default function FormEntries() {
   const navigate = useNavigate();
@@ -327,16 +328,7 @@ export default function FormEntries() {
                           <Chip
                             label={toProperCase(submitter)}
                             variant="filled"
-                            sx={{
-                              fontSize: 12.75,
-                              borderRadius: "24px",
-                              color: "#353b48",
-                              backgroundColor: "#f5f6fa",
-                              height: 27.5,
-                              "& .MuiChip-label": {
-                                px: "7px !important",
-                              },
-                            }}
+                            sx={chipStyle}
                           />
                         </td>
 

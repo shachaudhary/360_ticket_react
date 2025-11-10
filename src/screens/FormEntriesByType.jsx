@@ -20,6 +20,7 @@ import { toProperCase } from "../utils/formatting";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import BackButton from "../components/BackButton";
 import FormTypeModal from "../components/FormTypeModal";
+import { chipStyle } from "../utils/common";
 
 export default function FormEntriesByType() {
   const navigate = useNavigate();
@@ -265,9 +266,8 @@ export default function FormEntriesByType() {
             >
               <p className="text-sm text-brand-500 font-medium">{item.label}</p>
               <h2
-                className={`${
-                  item.small ? "text-xl font-semibold" : "text-2xl font-bold"
-                } text-gray-800 mt-1`}
+                className={`${item.small ? "text-xl font-semibold" : "text-2xl font-bold"
+                  } text-gray-800 mt-1`}
               >
                 {item.value}
               </h2>
@@ -282,9 +282,11 @@ export default function FormEntriesByType() {
               Description:
             </span>
             {description.length > 0 ? (
-              description
+              <span className="first-letter:uppercase">
+                {description}
+              </span>
             ) : (
-              <span className="text-gray-400 text-sm">
+              <span className="text-gray-400 text-sm e" >
                 No description available yet.{" "}
               </span>
             )}
@@ -366,9 +368,8 @@ export default function FormEntriesByType() {
                         (header, i) => (
                           <th
                             key={i}
-                            className={`px-4 py-3 border-b border-r border-gray-200 ${
-                              header === "Action" ? "text-center" : ""
-                            }`}
+                            className={`px-4 py-3 border-b border-r border-gray-200 ${header === "Action" ? "text-center" : ""
+                              }`}
                           >
                             {header}
                           </th>
@@ -384,7 +385,7 @@ export default function FormEntriesByType() {
                           {page * rowsPerPage + idx + 1}
                         </td>
                         <td className="px-4 py-3 border-b text-gray-700">
-                          <Chip
+                          {/* <Chip
                             label={toProperCase(
                               entry.submitted_by?.username || "N/A"
                             )}
@@ -397,6 +398,15 @@ export default function FormEntriesByType() {
                               height: 27.5,
                               "& .MuiChip-label": { px: "7px !important" },
                             }}
+                          /> */}
+
+
+                          <Chip
+                            label={toProperCase(
+                              entry.submitted_by?.username || "N/A"
+                            )}
+                            variant="filled"
+                            sx={chipStyle}
                           />
                         </td>
                         <td className="px-4 py-3 border-b text-gray-700">

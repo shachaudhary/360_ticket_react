@@ -6,8 +6,13 @@ import {
   CircularProgress,
   Chip,
   Button,
+  Menu,
+  MenuItem,
+  Typography,
+  InputAdornment,
 } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import SearchIcon from "@mui/icons-material/Search";
 import { createAPIEndPoint } from "../config/api/api";
 import DateWithTooltip from "../components/DateWithTooltip";
 import { toProperCase1, toProperCase } from "../utils/formatting";
@@ -16,6 +21,9 @@ import { convertToCST, formatUSPhoneNumber } from "../utils";
 import { EyeIcon } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
 import StatusBadge from "../components/StatusBadge";
+import toast from "react-hot-toast";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import { chipStyle } from "../utils/common";
 
 // 🔹 Debounce Hook
 function useDebounce(value, delay = 400) {
@@ -54,13 +62,59 @@ export default function ContactList() {
   const [query, setQuery] = useState("");
   const debouncedQuery = useDebounce(query, 500);
 
+  // 🔹 Category update state
+  const [categories, setCategories] = useState([]);
+  const [categoryMenuAnchor, setCategoryMenuAnchor] = useState(null);
+  const [selectedContactForCategory, setSelectedContactForCategory] = useState(null);
+  const [updatingCategory, setUpdatingCategory] = useState(false);
+  const [categorySearchTerm, setCategorySearchTerm] = useState("");
+
+  // 🔹 Fetch Categories
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await createAPIEndPoint("category").fetchAll();
+        setCategories(res.data || []);
+      } catch (err) {
+        console.error("Error fetching categories:", err);
+        setCategories([]);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  // 🔹 Filter categories based on search
+  const filteredCategories = categories.filter((cat) =>
+    cat.name?.toLowerCase().includes(categorySearchTerm.toLowerCase())
+  );
+
+  // 🔹 Handle Category Update
+  const handleCategoryUpdate = async (contactId, categoryName) => {
+    setUpdatingCategory(true);
+    try {
+      await createAPIEndPoint(`contact/update_category/`).update(contactId, {
+        category: categoryName,
+      });
+
+      toast.success(`Category updated to ${toProperCase(categoryName)}`);
+      setCategoryMenuAnchor(null);
+      setSelectedContactForCategory(null);
+      setCategorySearchTerm("");
+      fetchContacts(); // Refresh the list
+    } catch (err) {
+      console.error("Failed to update category", err);
+      toast.error("Failed to update category");
+    } finally {
+      setUpdatingCategory(false);
+    }
+  };
+
   // 🔹 Fetch Contacts
   const fetchContacts = async () => {
     try {
       setLoading(true);
       const res = await createAPIEndPoint(
-        `contact/get_all?clinic_id=1&page=${
-          page + 1
+        `contact/get_all?clinic_id=1&page=${page + 1
         }&per_page=${rowsPerPage}&search=${debouncedQuery}`
       ).fetchAll();
 
@@ -174,16 +228,7 @@ export default function ContactList() {
                         <Chip
                           label={formatUSPhoneNumber(contact.phone) || "—"}
                           variant="filled"
-                          sx={{
-                            fontSize: 12.75,
-                            borderRadius: "24px",
-                            color: "#353b48",
-                            backgroundColor: "#f5f6fa",
-                            height: 27.5,
-                            "& .MuiChip-label": {
-                              px: "7px !important",
-                            },
-                          }}
+                          sx={chipStyle}
                         />
                       </td>
                       <td className="px-4 py-3 border-b border-[#E5E7EB]">
@@ -195,22 +240,57 @@ export default function ContactList() {
                           : contact.message || "—"}
                       </td>
                       <td className="px-4 py-3 border-b border-[#E5E7EB]">
-                        <Chip
-                          label={toProperCase(getPredictedCategory(contact.data)) || "—"}
-                          variant="filled"
-                          sx={{
-                            fontSize: 11.75,
-                            fontWeight: 500,
-                            borderRadius: "6px",
-                            color: "#6B7280",
-                            border: "1px solid #E5E7EB",
-                            background: "white",
-                            height: 27.5,
-                            "& .MuiChip-label": {
-                              px: "7px !important",
-                            },
-                          }}
-                        />
+                        <Tooltip title="Click to change category" arrow>
+                          <div className="cursor-pointer inline-block">
+                            <Chip
+                              label={toProperCase(getPredictedCategory(contact.data)) || "—"}
+                              deleteIcon={
+                                <KeyboardArrowDownIcon
+                                  sx={{
+                                    fontSize: 14,
+                                    color: "#6B7280 !important",
+                                    opacity: 0.7,
+                                    px: 0.25
+                                  }}
+                                />
+                              }
+                              onDelete={(e) => {
+                                setCategoryMenuAnchor(e.currentTarget.closest('.MuiChip-root'));
+                                setSelectedContactForCategory(contact);
+                                setCategorySearchTerm("");
+                              }}
+                              onClick={(e) => {
+                                setCategoryMenuAnchor(e.currentTarget);
+                                setSelectedContactForCategory(contact);
+                                setCategorySearchTerm("");
+                              }}
+                              variant="filled"
+                              sx={{
+                                fontSize: 11.75,
+                                fontWeight: 500,
+                                borderRadius: "6px",
+                                color: "#6B7280",
+                                border: "1px solid #E5E7EB",
+                                background: "white",
+                                height: 28.5,
+                                cursor: "pointer",
+                                "&:hover": {
+                                  backgroundColor: "#F3F4F6",
+                                },
+                                "& .MuiChip-label": {
+                                  px: "7px !important",
+                                  pr: "4px !important",
+                                },
+                                "& .MuiChip-deleteIcon": {
+                                  margin: "0 4px 0 -2px",
+                                  "&:hover": {
+                                    color: "#6B7280 !important",
+                                  },
+                                },
+                              }}
+                            />
+                          </div>
+                        </Tooltip>
                       </td>
                       <td className="px-4 py-3 border-b border-[#E5E7EB] text-gray-600">
                         <StatusBadge status={contact?.status} />
@@ -246,6 +326,121 @@ export default function ContactList() {
           />
         </div>
       )}
+
+      {/* Category Update Menu */}
+      <Menu
+        anchorEl={categoryMenuAnchor}
+        open={Boolean(categoryMenuAnchor)}
+        onClose={() => {
+          setCategoryMenuAnchor(null);
+          setSelectedContactForCategory(null);
+          setCategorySearchTerm("");
+        }}
+        PaperProps={{
+          sx: {
+            borderRadius: "12px",
+            border: "1px solid #E5E7EB",
+            boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)",
+            minWidth: 200,
+            maxHeight: 400,
+            mt: 0.5,
+          },
+        }}
+      >
+        {/* Search Field */}
+        <div className="px-3 py-2 sticky top-0 bg-white z-10 border-b">
+          <TextField
+            size="small"
+            fullWidth
+            placeholder="Search category..."
+            value={categorySearchTerm}
+            onChange={(e) => setCategorySearchTerm(e.target.value)}
+            autoFocus
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon fontSize="small" />
+                </InputAdornment>
+              ),
+            }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "8px",
+                fontSize: "14px",
+              },
+            }}
+          />
+        </div>
+
+        {/* Header */}
+        <div className="px-2 py-1">
+          <Typography
+            variant="caption"
+            className="!px-2 !py-1 !text-brand-500 !font-medium !text-xs"
+          >
+            Update Category
+          </Typography>
+        </div>
+
+        {/* Category List */}
+        <div className="max-h-60 overflow-auto">
+          {filteredCategories.length > 0 ? (
+            filteredCategories.map((category) => {
+              const currentCategory = getPredictedCategory(
+                selectedContactForCategory?.data
+              );
+              const isCurrentCategory =
+                currentCategory?.toLowerCase() === category.name?.toLowerCase();
+
+              return (
+                <MenuItem
+                  key={category.id}
+                  onClick={() => {
+                    if (!isCurrentCategory) {
+                      handleCategoryUpdate(
+                        selectedContactForCategory?.id,
+                        category.name
+                      );
+                    }
+                  }}
+                  disabled={isCurrentCategory || updatingCategory}
+                  sx={{
+                    fontSize: "14px",
+                    py: 1,
+                    px: 2,
+                    mx: 1,
+                    my: 0.25,
+                    borderRadius: "8px",
+                    "&:hover": {
+                      backgroundColor: "#F3F4F6",
+                    },
+                    ...(isCurrentCategory && {
+                      backgroundColor: "#F3F4F6",
+                      color: "#9CA3AF",
+                    }),
+                  }}
+                >
+                  <div className="flex items-center justify-between w-full">
+                    <span>{toProperCase(category.name)}</span>
+                    {updatingCategory && isCurrentCategory && (
+                      <CircularProgress size={14} sx={{ ml: 1 }} />
+                    )}
+                    {isCurrentCategory && (
+                      <span className="text-xs text-gray-400 ml-2">
+                        (Current)
+                      </span>
+                    )}
+                  </div>
+                </MenuItem>
+              );
+            })
+          ) : (
+            <MenuItem disabled>
+              <span className="text-gray-500 text-sm">No categories found</span>
+            </MenuItem>
+          )}
+        </div>
+      </Menu>
     </div>
   );
 }

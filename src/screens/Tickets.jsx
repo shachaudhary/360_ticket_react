@@ -28,6 +28,7 @@ import { PlusIcon } from "@heroicons/react/24/solid";
 import { toProperCase } from "../utils/formatting";
 import { EyeIcon } from "@heroicons/react/24/outline";
 import toast from "react-hot-toast";
+import { chipStyle } from "../utils/common";
 
 export default function Tickets() {
   const navigate = useNavigate();
@@ -80,7 +81,7 @@ export default function Tickets() {
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
-  
+
   // Status update state
   const [statusMenuAnchor, setStatusMenuAnchor] = useState(null);
   const [selectedTicketForStatus, setSelectedTicketForStatus] = useState(null);
@@ -330,11 +331,10 @@ export default function Tickets() {
                 onClick={() =>
                   setUserFilter(userFilter === filter.value ? "" : filter.value)
                 }
-                className={`px-3 py-[6.15px] !text-xs font-medium rounded-lg border transition-all duration-500 ${
-                  userFilter === filter.value
+                className={`px-3 py-[6.15px] !text-xs font-medium rounded-lg border transition-all duration-500 ${userFilter === filter.value
                     ? "bg-brand-500 text-white border-brand-500 hover:bg-brand-600"
                     : "border border-[#E5E7EB] text-[#969AA1] hover:bg-gray-50"
-                }`}
+                  }`}
               >
                 {filter.label}
               </button>
@@ -353,16 +353,15 @@ export default function Tickets() {
                 setUserFilter("");
                 setPage(0);
               }}
-              className={`px-3 py-[6.15px] shrink-0 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 transition-all ${
-                query ||
-                statusFilter ||
-                categoryFilter ||
-                startDate ||
-                endDate ||
-                userFilter
+              className={`px-3 py-[6.15px] shrink-0 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 transition-all ${query ||
+                  statusFilter ||
+                  categoryFilter ||
+                  startDate ||
+                  endDate ||
+                  userFilter
                   ? "border border-red-500 bg-red-500 text-white hover:bg-red-600 focus:ring-red-500"
                   : "border border-[#E5E7EB] text-gray-400 hover:border-gray-300 hover:text-gray-600 hover:bg-brand-50 focus:ring-gray-500"
-              }`}
+                }`}
             >
               Clear
             </button>
@@ -472,7 +471,7 @@ export default function Tickets() {
                       </td>
                       <td className="px-4 py-3 border-b border-[#E5E7EB]">
                         <Chip
-                          label={toProperCase(t.category?.name) || "—"}
+                          label={toProperCase(t.category?.name) || "N/A"}
                           variant="filled"
                           sx={{
                             fontSize: 11.75,
@@ -494,9 +493,9 @@ export default function Tickets() {
                       <td className="px-4 py-3 border-b border-[#E5E7EB]">
                         {t.status?.toLowerCase() === "completed" ? (
                           <div className="inline-block">
-                            <StatusBadge 
-                              isInside 
-                              status={t.status} 
+                            <StatusBadge
+                              isInside
+                              status={t.status}
                               showDropdown={false}
                             />
                           </div>
@@ -509,9 +508,9 @@ export default function Tickets() {
                               }}
                               className="cursor-pointer inline-block hover:opacity-80 transition-opacity"
                             >
-                              <StatusBadge 
-                                isInside 
-                                status={t.status} 
+                              <StatusBadge
+                                isInside
+                                status={t.status}
                                 showDropdown={true}
                               />
                             </div>
@@ -523,16 +522,7 @@ export default function Tickets() {
                         <Chip
                           label={toProperCase(t.created_by?.username) || "N/A"}
                           variant="filled"
-                          sx={{
-                            fontSize: 12.75,
-                            borderRadius: "24px",
-                            color: "#353b48",
-                            backgroundColor: "#f5f6fa",
-                            height: 27.5,
-                            "& .MuiChip-label": {
-                              px: "7px !important",
-                            },
-                          }}
+                          sx={chipStyle}
                         />
                       </td>
                       <td className="px-4 py-3 text-gray-700 border-b border-[#E5E7EB]">
@@ -546,28 +536,29 @@ export default function Tickets() {
                           label={
                             t.assignees && t.assignees.length > 0
                               ? t.assignees
-                                  .map((a) =>
-                                    toProperCase(a.assign_to_username)
-                                  )
-                                  .join(", ")
+                                .map((a) =>
+                                  toProperCase(a.assign_to_username)
+                                )
+                                .join(", ")
                               : "Unassigned"
                           }
                           variant="filled"
-                          sx={{
-                            fontSize: 12.75,
-                            borderRadius: "24px",
-                            color: "#353b48",
-                            backgroundColor: "#f5f6fa",
-                            height: 27.5,
-                            "& .MuiChip-label": {
-                              px: "7px !important",
-                            },
-                          }}
+                          sx={chipStyle}
+                        // sx={{
+                        //   fontSize: 12.75,
+                        //   borderRadius: "24px",
+                        //   color: "#353b48",
+                        //   backgroundColor: "#f5f6fa",
+                        //   height: 27.5,
+                        //   "& .MuiChip-label": {
+                        //     px: "7px !important",
+                        //   },
+                        // }}
                         />
                       </td>
 
                       <td className="px-4 py-3 text-gray-700 border-b border-[#E5E7EB]">
-                        {convertToCST(t.created_at) || "—"}
+                        {convertToCST(t.created_at) || "N/A"}
                       </td>
                       <td className="px-4 py-3 text-center border-b border-[#E5E7EB]">
                         <Tooltip title="View Ticket">
@@ -600,7 +591,7 @@ export default function Tickets() {
             page={page}
             setPage={setPage}
             totalCount={totalCount}
-            // totalCount={filtered.length}
+          // totalCount={filtered.length}
           />
         </div>
       )}
@@ -667,7 +658,7 @@ export default function Tickets() {
                 <span className="!text-gray-500"> {status}</span>
                 {updatingStatus &&
                   selectedTicketForStatus?.status?.toLowerCase() ===
-                    status.toLowerCase().replace(" ", "_") && (
+                  status.toLowerCase().replace(" ", "_") && (
                     <CircularProgress size={14} sx={{ ml: 1 }} />
                   )}
                 {isCurrentStatus && (
