@@ -29,15 +29,22 @@
   background-color: #249e56; 
 } */
 
+.MuiPickersFilledInput-root::before {
+  border-bottom: 1px solid rgb(209 213 219) !important;
+}
+
 .badge {
   @apply inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium;
 }
+
 .badge-high {
   @apply bg-red-100 text-red-600;
 }
+
 .badge-medium {
   @apply bg-yellow-100 text-yellow-700;
 }
+
 .badge-low {
   @apply bg-green-100 text-green-700;
 }
@@ -70,6 +77,7 @@ select:focus {
 .MuiAutocomplete-option:not(:last-child) {
   border-bottom: 1px solid #f3f3f3 !important;
 }
+
 .MuiPickersOutlinedInput-notchedOutline {
   border-color: #e5e7eb !important;
 }
@@ -123,6 +131,7 @@ table td,
 .MuiAutocomplete-loading {
   padding: 12px !important;
 }
+
 /* .MuiBackdrop-root {
   backdrop-filter: blur(3px);
   background-color: rgba(0, 0, 0, 0.125) !important;
@@ -133,6 +142,7 @@ table td,
   color: #969aa1 !important;
   /* font-size: 0.75rem !important; */
 }
+
 .MuiButton-icon {
   margin-right: 4px !important;
 }
@@ -141,15 +151,18 @@ table td,
   opacity: 0;
   transform: translateY(-5px);
 }
+
 .fade-enter-active {
   opacity: 1;
   transform: translateY(0);
   transition: opacity 300ms ease, transform 300ms ease;
 }
+
 .fade-exit {
   opacity: 1;
   transform: translateY(0);
 }
+
 .fade-exit-active {
   opacity: 0;
   transform: translateY(-5px);
@@ -169,14 +182,19 @@ a.active {
 
 /* In your global CSS (e.g., index.css, globals.css) */
 .scroll-width {
-  overflow-y: auto; /* allow scrolling */
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE/Edge */
+  overflow-y: auto;
+  /* allow scrolling */
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE/Edge */
 }
 
 .scroll-width::-webkit-scrollbar {
-  width: 0; /* Chrome, Safari */
-  height: 0; /* optional for horizontal scrollbars */
+  width: 0;
+  /* Chrome, Safari */
+  height: 0;
+  /* optional for horizontal scrollbars */
 }
 
 /* Only text-like inputs, NOT checkboxes */
@@ -184,12 +202,14 @@ a.active {
   border: none;
   border-bottom: 2px solid #d1d5db;
   transition: all 0.3s ease;
-  caret-color: #1c64f2 !important;
+  /* caret-color: #1c64f2 !important; */
+  caret-color: #9c6bff !important;
 }
 
 /* Focus style, still excluding checkboxes */
 .dental360-form input:not([type="checkbox"]):focus {
-  border-color: #1c64f2 !important;
+  border-color: #9c6bff !important;
+  /* border-color: #1c64f2 !important; */
 }
 
 
@@ -198,6 +218,7 @@ a.active {
     transform: translateY(-100%);
     opacity: 0;
   }
+
   to {
     transform: translateY(0);
     opacity: 1;
@@ -213,6 +234,7 @@ a.active {
   .sidebar-desktop {
     display: none !important;
   }
+
   .sidebar-mobile {
     display: flex !important;
   }

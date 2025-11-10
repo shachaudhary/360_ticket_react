@@ -13,7 +13,7 @@ import { AnimatePresence } from "framer-motion";
 import PageTransition from "../components/PageTransition.jsx";
 import Notifications from "../screens/Notifications.jsx";
 import TicketForm from "../screens/CreateTicket.jsx";
-import Careers from "../screens/Careers.jsx";
+import NewHireForm from "../screens/NewHireForm.jsx";
 import FormEntriesListing from "../screens/FormEntriesListing.jsx";
 import SettingsCategories from "../screens/SettingsCategories.jsx";
 import SettingsFormTypes from "../screens/SettingsFormTypes.jsx";
@@ -130,7 +130,7 @@ export default function App() {
             path="/forms/new-hire-form"
             element={
               <PageTransition>
-                <Careers />
+                <NewHireForm />
               </PageTransition>
             }
           />

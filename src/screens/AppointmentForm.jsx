@@ -9,20 +9,16 @@ import { useApp } from "../state/AppContext";
 import { createAPIEndPointAuth } from "../config/api/apiAuth";
 import { toProperCase } from "../utils/formatting";
 import BackButton from "../components/BackButton";
-import { Autocomplete, TextField } from "@mui/material";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { TimePicker } from "@mui/x-date-pickers/TimePicker";
+import { Menu, MenuItem, TextField, InputAdornment } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 
 dayjs.extend(isSameOrBefore);
 dayjs.extend(isSameOrAfter);
-
-// Debounce helper
-function useDebounce(value, delay = 400) {
-  const [debounced, setDebounced] = useState(value);
-  useEffect(() => {
-    const handler = setTimeout(() => setDebounced(value), delay);
-    return () => clearTimeout(handler);
-  }, [value, delay]);
-  return debounced;
-}
 
 const AppointmentForm = () => {
   const { user } = useApp();
@@ -43,34 +39,16 @@ const AppointmentForm = () => {
   const [submitStatus, setSubmitStatus] = useState(null);
   const [locations, setLocations] = useState([]);
   const [providers, setProviders] = useState([]);
-  const [providerSearchTerm, setProviderSearchTerm] = useState("");
-  const [providerSearchResults, setProviderSearchResults] = useState([]);
   const [selectedProvider, setSelectedProvider] = useState(null);
+  const [providerMenuAnchor, setProviderMenuAnchor] = useState(null);
+  const [providerSearchTerm, setProviderSearchTerm] = useState("");
 
-  const debouncedProviderSearch = useDebounce(providerSearchTerm, 400);
-
-  // Time slots for appointment
-  const timeSlots = [
-    "08:00 AM",
-    "08:30 AM",
-    "09:00 AM",
-    "09:30 AM",
-    "10:00 AM",
-    "10:30 AM",
-    "11:00 AM",
-    "11:30 AM",
-    "12:00 PM",
-    "12:30 PM",
-    "01:00 PM",
-    "01:30 PM",
-    "02:00 PM",
-    "02:30 PM",
-    "03:00 PM",
-    "03:30 PM",
-    "04:00 PM",
-    "04:30 PM",
-    "05:00 PM",
-  ];
+  // Filter providers based on search term
+  const filteredProviders = providers.filter((provider) =>
+    provider.provider_name
+      ?.toLowerCase()
+      .includes(providerSearchTerm.toLowerCase())
+  );
 
   // Fetch Locations
   useEffect(() => {
@@ -110,29 +88,12 @@ const AppointmentForm = () => {
         ).fetchAll();
         const data = res.data?.providers || res.data || [];
         setProviders(data);
-        setProviderSearchResults(data); // Show all providers initially
       } catch (err) {
         console.error("Error fetching providers:", err);
       }
     };
     fetchProviders();
   }, [user?.clinic_id]);
-
-  // Filter providers locally based on debounced search term
-  useEffect(() => {
-    if (!debouncedProviderSearch) {
-      setProviderSearchResults(providers);
-      return;
-    }
-
-    // Local filtering - no API call
-    const filtered = providers.filter((p) =>
-      p.provider_name
-        ?.toLowerCase()
-        .includes(debouncedProviderSearch.toLowerCase())
-    );
-    setProviderSearchResults(filtered);
-  }, [debouncedProviderSearch, providers]);
 
   // Load edit data if in edit mode
   useEffect(() => {
@@ -464,9 +425,9 @@ const AppointmentForm = () => {
                     id="patientName"
                     value={formData.patientName}
                     onChange={handleInputChange}
-                    className={`mt-2 block w-full border-b ${
-                      errors.patientName ? "border-red-500" : "border-gray-300"
-                    } bg-transparent py-2.5 px-1 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-0 sm:text-sm`}
+                    className={`mt-2 block w-full !border-b ${
+                      errors.patientName ? "border-red-500" : "border-[rgba(0, 0, 0, 0.42)]"
+                    } bg-transparent py-[5.5px] px-1 text-gray-900 placeholder-gray-400 focus:!border-brand-500 focus:outline-none focus:ring-0 sm:text-sm`}
                   />
                   {errors.patientName && (
                     <p className="mt-1 text-sm text-red-600">
@@ -483,17 +444,50 @@ const AppointmentForm = () => {
                   >
                     Date of Birth <Asterisk />
                   </label>
-                  <input
-                    type="date"
-                    name="dob"
-                    id="dob"
-                    value={formData.dob}
-                    onChange={handleInputChange}
-                    max={dayjs().format("YYYY-MM-DD")}
-                    className={`mt-2 block w-full border-b ${
-                      errors.dob ? "border-red-500" : "border-gray-300"
-                    } bg-transparent py-2.5 px-1 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-0 sm:text-sm`}
-                  />
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DatePicker
+                      value={formData.dob ? dayjs(formData.dob) : null}
+                      onChange={(newValue) => {
+                        setFormData((prev) => ({
+                          ...prev,
+                          dob: newValue ? newValue.format("YYYY-MM-DD") : "",
+                        }));
+                        if (errors.dob) {
+                          setErrors((prev) => ({ ...prev, dob: "" }));
+                        }
+                      }}
+                      maxDate={dayjs()}
+                      format="MM/DD/YYYY"
+                      slotProps={{
+                        textField: {
+                          placeholder: "mm/dd/yyyy",
+                          fullWidth: true,
+                          variant: "standard",
+                          sx: {
+                            mt: 1,
+                            "& .MuiInput-root": {
+                              fontSize: "0.875rem",
+                              "&:before": {
+                                borderBottom: errors.dob
+                                  ? "1px solid #ef4444"
+                                  : "1px solid #D1D5DB",
+                              },
+                              "&:hover:not(.Mui-disabled):before": {
+                                borderBottom: "1px solid #824EF2 !important",
+                              },
+                              "&:after": {
+                                borderBottom: "2px solid #824EF2 !important",
+                              },
+                            },
+                            "& .MuiInputBase-input": {
+                              padding: "10px 4px",
+                              fontSize: "0.875rem",
+                            },
+                          },
+                        },
+                      }}
+                    />
+                  </LocalizationProvider>
                   {errors.dob && (
                     <p className="mt-1 text-sm text-red-600">{errors.dob}</p>
                   )}
@@ -507,19 +501,59 @@ const AppointmentForm = () => {
                   >
                     Appointment Date <Asterisk />
                   </label>
-                  <input
-                    type="date"
-                    name="appointmentDate"
-                    id="appointmentDate"
-                    value={formData.appointmentDate}
-                    onChange={handleInputChange}
-                    min={dayjs().format("YYYY-MM-DD")}
-                    className={`mt-2 block w-full border-b ${
-                      errors.appointmentDate
-                        ? "border-red-500"
-                        : "border-gray-300"
-                    } bg-transparent py-2.5 px-1 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-0 sm:text-sm`}
-                  />
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DatePicker
+                      value={
+                        formData.appointmentDate
+                          ? dayjs(formData.appointmentDate)
+                          : null
+                      }
+                      onChange={(newValue) => {
+                        setFormData((prev) => ({
+                          ...prev,
+                          appointmentDate: newValue
+                            ? newValue.format("YYYY-MM-DD")
+                            : "",
+                        }));
+                        if (errors.appointmentDate) {
+                          setErrors((prev) => ({
+                            ...prev,
+                            appointmentDate: "",
+                          }));
+                        }
+                      }}
+                      minDate={dayjs()}
+                      format="MM/DD/YYYY"
+                      slotProps={{
+                        textField: {
+                          placeholder: "mm/dd/yyyy",
+                          fullWidth: true,
+                          variant: "standard",
+                          sx: {
+                            mt: 1,
+                            "& .MuiInput-root": {
+                              fontSize: "0.875rem",
+                              "&:before": {
+                                borderBottom: errors.appointmentDate
+                                  ? "1px solid #ef4444"
+                                  : "1px solid #d1d5db",
+                              },
+                              "&:hover:not(.Mui-disabled):before": {
+                                borderBottom: "1px solid #824EF2",
+                              },
+                              "&:after": {
+                                borderBottom: "2px solid #824EF2",
+                              },
+                            },
+                            "& .MuiInputBase-input": {
+                              padding: "10px 4px",
+                              fontSize: "0.875rem",
+                            },
+                          },
+                        },
+                      }}
+                    />
+                  </LocalizationProvider>
                   {errors.appointmentDate && (
                     <p className="mt-1 text-sm text-red-600">
                       {errors.appointmentDate}
@@ -535,31 +569,58 @@ const AppointmentForm = () => {
                   >
                     Appointment Time <Asterisk />
                   </label>
-                  <select
-                    name="appointmentTime"
-                    id="appointmentTime"
-                    value={formData.appointmentTime}
-                    onChange={handleInputChange}
-                    className={`mt-2 block w-full border-0 border-b ${
-                      errors.appointmentTime
-                        ? "border-red-500"
-                        : "border-gray-300"
-                    } bg-transparent py-2.5 px-1 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-0 sm:text-sm appearance-none`}
-                    style={{
-                      backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
-                      backgroundPosition: "right 0.5rem center",
-                      backgroundRepeat: "no-repeat",
-                      backgroundSize: "1.5em 1.5em",
-                      paddingRight: "2.5rem",
-                    }}
-                  >
-                    <option value="">Select time</option>
-                    {timeSlots.map((time) => (
-                      <option key={time} value={time}>
-                        {time}
-                      </option>
-                    ))}
-                  </select>
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <TimePicker
+                      value={
+                        formData.appointmentTime
+                          ? dayjs(formData.appointmentTime, "hh:mm A")
+                          : null
+                      }
+                      onChange={(newValue) => {
+                        setFormData((prev) => ({
+                          ...prev,
+                          appointmentTime: newValue
+                            ? newValue.format("hh:mm A")
+                            : "",
+                        }));
+                        if (errors.appointmentTime) {
+                          setErrors((prev) => ({
+                            ...prev,
+                            appointmentTime: "",
+                          }));
+                        }
+                      }}
+                      minutesStep={30}
+                      slotProps={{
+                        textField: {
+                          placeholder: "hh:mm aa",
+                          fullWidth: true,
+                          variant: "standard",
+                          sx: {
+                            mt: 1,
+                            "& .MuiInput-root": {
+                              fontSize: "0.875rem",
+                              "&:before": {
+                                borderBottom: errors.appointmentTime
+                                  ? "1px solid #ef4444"
+                                  : "1px solid #d1d5db",
+                              },
+                              "&:hover:not(.Mui-disabled):before": {
+                                borderBottom: "1px solid #824EF2",
+                              },
+                              "&:after": {
+                                borderBottom: "2px solid #824EF2",
+                              },
+                            },
+                            "& .MuiInputBase-input": {
+                              padding: "10px 4px",
+                              fontSize: "0.875rem",
+                            },
+                          },
+                        },
+                      }}
+                    />
+                  </LocalizationProvider>
                   {errors.appointmentTime && (
                     <p className="mt-1 text-sm text-red-600">
                       {errors.appointmentTime}
@@ -575,69 +636,28 @@ const AppointmentForm = () => {
                   >
                     Provider <Asterisk />
                   </label>
-                  <div className="mt-2">
-                    <Autocomplete
-                      fullWidth
-                      size="small"
-                      options={providerSearchResults}
-                      value={selectedProvider}
-                      onChange={(e, newValue) => {
-                        setSelectedProvider(newValue);
-                        if (errors.provider) {
-                          setErrors((prev) => ({ ...prev, provider: "" }));
-                        }
-                      }}
-                      filterOptions={(x) => x}
-                      getOptionLabel={(option) =>
-                        option ? toProperCase(option.provider_name || "") : ""
+                  <div
+                    onClick={(e) => {
+                      setProviderMenuAnchor(e.currentTarget);
+                      setProviderSearchTerm("");
+                    }}
+                    className={`mt-2 block w-full border-0 border-b ${
+                      errors.provider ? "border-red-500" : "border-gray-300"
+                    } bg-transparent py-2.5 px-1 text-gray-900 cursor-pointer hover:border-brand-500 transition-colors sm:text-sm flex items-center justify-between`}
+                  >
+                    <span
+                      className={
+                        selectedProvider
+                          ? "text-gray-900"
+                          : "text-gray-400"
                       }
-                      isOptionEqualToValue={(option, value) =>
-                        option?.id === value?.id
-                      }
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          placeholder="Search and select provider..."
-                          onChange={(e) =>
-                            setProviderSearchTerm(e.target.value)
-                          }
-                          sx={{
-                            "& .MuiOutlinedInput-root": {
-                              paddingTop: "6px",
-                              paddingBottom: "6px",
-                              borderRadius: "0px",
-                              border: "none",
-                              borderBottom: errors.provider
-                                ? "1px solid #ef4444"
-                                : "1px solid #d1d5db",
-                              "&:hover": {
-                                borderBottom: "1px solid #3b82f6",
-                              },
-                              "&.Mui-focused": {
-                                borderBottom: "1px solid #3b82f6",
-                                boxShadow: "none",
-                              },
-                              "& fieldset": {
-                                border: "none",
-                              },
-                            },
-                          }}
-                        />
-                      )}
-                      renderOption={(props, option) => (
-                        <li {...props} key={option.id}>
-                          <div className="flex flex-col py-1">
-                            <span className="font-medium text-gray-700">
-                              {toProperCase(option.provider_name || "")}
-                            </span>
-                            {option.designation && (
-                              <span className="text-xs text-gray-500">
-                                {toProperCase(option.designation)}
-                              </span>
-                            )}
-                          </div>
-                        </li>
-                      )}
+                    >
+                      {selectedProvider
+                        ? toProperCase(selectedProvider.provider_name || "")
+                        : "Search and select provider..."}
+                    </span>
+                    <KeyboardArrowDownIcon
+                      sx={{ fontSize: 20, color: "#6b7280" }}
                     />
                   </div>
                   {errors.provider && (
@@ -645,6 +665,91 @@ const AppointmentForm = () => {
                       {errors.provider}
                     </p>
                   )}
+
+                  {/* Provider Menu */}
+                  <Menu
+                    anchorEl={providerMenuAnchor}
+                    open={Boolean(providerMenuAnchor)}
+                    onClose={() => {
+                      setProviderMenuAnchor(null);
+                      setProviderSearchTerm("");
+                    }}
+                    PaperProps={{
+                      sx: {
+                        maxHeight: 400,
+                        width: providerMenuAnchor
+                          ? providerMenuAnchor.offsetWidth
+                          : 300,
+                        mt: 0.5,
+                      },
+                    }}
+                  >
+                    {/* Search Field */}
+                    <div className="px-3 py-2 sticky top-0 bg-white z-10 border-b">
+                      <TextField
+                        size="small"
+                        fullWidth
+                        placeholder="Search provider..."
+                        value={providerSearchTerm}
+                        onChange={(e) => setProviderSearchTerm(e.target.value)}
+                        autoFocus
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <SearchIcon fontSize="small" />
+                            </InputAdornment>
+                          ),
+                        }}
+                        sx={{
+                          "& .MuiOutlinedInput-root": {
+                            borderRadius: "8px",
+                          },
+                        }}
+                      />
+                    </div>
+
+                    {/* Provider List */}
+                    <div className="max-h-72 overflow-auto">
+                      {filteredProviders.length > 0 ? (
+                        filteredProviders.map((provider) => (
+                          <MenuItem
+                            key={provider.id}
+                            onClick={() => {
+                              setSelectedProvider(provider);
+                              setProviderMenuAnchor(null);
+                              setProviderSearchTerm("");
+                              if (errors.provider) {
+                                setErrors((prev) => ({
+                                  ...prev,
+                                  provider: "",
+                                }));
+                              }
+                            }}
+                            selected={
+                              selectedProvider?.id === provider.id
+                            }
+                          >
+                            <div className="flex flex-col py-1">
+                              <span className="font-medium text-gray-800 text-sm">
+                                {toProperCase(provider.provider_name || "")}
+                              </span>
+                              {provider.designation && (
+                                <span className="text-xs text-gray-500">
+                                  {toProperCase(provider.designation)}
+                                </span>
+                              )}
+                            </div>
+                          </MenuItem>
+                        ))
+                      ) : (
+                        <MenuItem disabled>
+                          <span className="text-gray-500 text-sm">
+                            No providers found
+                          </span>
+                        </MenuItem>
+                      )}
+                    </div>
+                  </Menu>
                 </div>
               </div>
 
@@ -666,8 +771,8 @@ const AppointmentForm = () => {
                           key={loc.id}
                           className={`flex items-center p-2 border rounded-lg cursor-pointer transition-all duration-200 ${
                             formData.location === loc.location_name
-                              ? "ring-2 ring-blue-500 border-blue-500 bg-indigo-50"
-                              : "border-gray-300 bg-white hover:border-indigo-300"
+                              ? "ring-2 ring-brand-500 border-brand-500 bg-purple-50"
+                              : "border-gray-300 bg-white hover:border-brand-300"
                           }`}
                         >
                           <input
@@ -700,8 +805,8 @@ const AppointmentForm = () => {
                   disabled={isSubmitting}
                   className={`w-full sm:w-auto rounded-md px-8 py-3.5 text-base font-semibold text-white shadow-sm transition-colors duration-300 ${
                     isSubmitting
-                      ? "bg-indigo-400 cursor-not-allowed"
-                      : "bg-blue-500 hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+                      ? "bg-brand-400 cursor-not-allowed"
+                      : "bg-brand-500 hover:bg-brand-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
                   }`}
                 >
                   {isSubmitting

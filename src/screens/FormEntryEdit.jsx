@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { createAPIEndPoint } from "../config/api/api";
 import { CircularProgress, Box } from "@mui/material";
-import Careers from "./Careers";
+import NewHireForm from "./NewHireForm";
 import AppointmentForm from "./AppointmentForm";
 
 /**
@@ -64,7 +64,7 @@ const FormEntryEdit = () => {
   // Route to the appropriate form based on form_type_id
   switch (formTypeId) {
     case 1:
-      return <Careers isEditMode={true} />;
+      return <NewHireForm isEditMode={true} />;
     case 2:
       return <AppointmentForm />;
     default:

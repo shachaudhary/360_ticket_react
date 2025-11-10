@@ -86,7 +86,11 @@ export default function TicketForm({ isEdit = false }) {
   }, []);
 
   const handleCancel = () => {
-    navigate("/tickets");
+    if (isEdit && id) {
+      navigate(`/tickets/${id}`);
+    } else {
+      navigate("/tickets");
+    }
   };
 
   const formik = useFormik({
@@ -136,11 +140,12 @@ export default function TicketForm({ isEdit = false }) {
         if (isEdit && id) {
           res = await createAPIEndPoint(`ticket/${id}`).patch(formData);
           toast.success("Ticket updated successfully!");
+          navigate(`/tickets/${id}`);
         } else {
           res = await createAPIEndPoint("ticket").create(formData);
           toast.success("Ticket created successfully!");
+          navigate("/tickets");
         }
-        navigate("/tickets");
       } catch (err) {
         toast.error("Error saving ticket");
       } finally {

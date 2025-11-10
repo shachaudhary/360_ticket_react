@@ -9,6 +9,9 @@ import { useApp } from "../state/AppContext";
 import { createAPIEndPointAuth } from "../config/api/apiAuth";
 import { toProperCase } from "../utils/formatting";
 import BackButton from "../components/BackButton";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 dayjs.extend(isSameOrBefore);
 dayjs.extend(isSameOrAfter);
 
@@ -649,7 +652,7 @@ const NewHireForm = () => {
                       errors.requestorName
                         ? "border-red-500"
                         : "border-gray-300"
-                    } bg-transparent py-2.5 px-1 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-0 sm:text-sm`}
+                    } bg-transparent py-2.5 px-1 text-gray-900 placeholder-gray-400 focus:border-brand-500 focus:outline-none focus:ring-0 sm:text-sm`}
                   />
                   {errors.requestorName && (
                     <p className="mt-1 text-sm text-red-600">
@@ -674,7 +677,7 @@ const NewHireForm = () => {
                     // onChange={handleInputChange}
                     className={`mt-2 block w-full border-b ${
                       errors.requestDate ? "border-red-500" : "border-gray-300"
-                    } bg-transparent py-2.5 px-1 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-0 sm:text-sm`}
+                    } bg-transparent py-2.5 px-1 text-gray-900 focus:border-brand-500 focus:outline-none focus:ring-0 sm:text-sm`}
                   />
                   {errors.requestDate && (
                     <p className="mt-1 text-sm text-red-600">
@@ -706,8 +709,8 @@ const NewHireForm = () => {
                           key={type.id}
                           className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all duration-200 ${
                             formData.form_type === type.name
-                              ? "ring-2 ring-blue-500 border-blue-500 bg-indigo-50"
-                              : "border-gray-300 hover:border-indigo-300"
+                              ? "ring-2 ring-brand-500 border-brand-500 bg-purple-50"
+                              : "border-gray-300 hover:border-brand-300"
                           }`}
                         >
                           <input
@@ -751,7 +754,7 @@ const NewHireForm = () => {
                           errors.formTypeOther
                             ? "border-red-500"
                             : "border-gray-300"
-                        } bg-transparent py-2.5 px-1 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-0 sm:text-sm`}
+                        } bg-transparent py-2.5 px-1 text-gray-900 placeholder-gray-400 focus:border-brand-500 focus:outline-none focus:ring-0 sm:text-sm`}
                       />
                       {errors.formTypeOther && (
                         <p className="mt-1 text-sm text-red-600">
@@ -783,7 +786,7 @@ const NewHireForm = () => {
                     onChange={handleInputChange}
                     className={`mt-2 block w-full border-b ${
                       errors.newHireName ? "border-red-500" : "border-gray-300"
-                    } bg-transparent py-2.5 px-1 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-0 sm:text-sm`}
+                    } bg-transparent py-2.5 px-1 text-gray-900 placeholder-gray-400 focus:border-brand-500 focus:outline-none focus:ring-0 sm:text-sm`}
                   />
                   {errors.newHireName && (
                     <p className="mt-1 text-sm text-red-600">
@@ -807,7 +810,7 @@ const NewHireForm = () => {
                     onChange={handleInputChange}
                     className={`mt-2 block w-full border-b ${
                       errors.email ? "border-red-500" : "border-gray-300"
-                    } bg-transparent py-2.5 px-1 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-0 sm:text-sm`}
+                    } bg-transparent py-2.5 px-1 text-gray-900 placeholder-gray-400 focus:border-brand-500 focus:outline-none focus:ring-0 sm:text-sm`}
                   />
                   {errors.email && (
                     <p className="mt-1 text-sm text-red-600">{errors.email}</p>
@@ -824,15 +827,15 @@ const NewHireForm = () => {
                         key={title}
                         className={`flex items-center p-3 border rounded-lg cursor-pointer transition-all duration-200 ${
                           formData.jobTitle === title
-                            ? "ring-2 ring-blue-500 border-blue-500 bg-indigo-50"
-                            : "border-gray-300 hover:border-indigo-300"
+                            ? "ring-2 ring-brand-500 border-brand-500 bg-purple-50"
+                            : "border-gray-300 hover:border-brand-300"
                         }`}
                       >
                         <input
                           type="checkbox"
                           checked={formData.jobTitle === title}
                           onChange={() => handleJobTitleSelect(title)}
-                          className="h-4 w-4 rounded  text-blue-500 focus:ring-blue-500 mr-2"
+                          className="h-4 w-4 rounded  text-brand-500 focus:ring-brand-500 mr-2"
                         />
                         <span className="text-sm font-medium text-gray-700">
                           {title}
@@ -866,7 +869,7 @@ const NewHireForm = () => {
                           errors.jobTitleOther
                             ? "border-red-500"
                             : "border-gray-300"
-                        } bg-transparent py-2.5 px-1 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-0 sm:text-sm`}
+                        } bg-transparent py-2.5 px-1 text-gray-900 placeholder-gray-400 focus:border-brand-500 focus:outline-none focus:ring-0 sm:text-sm`}
                       />
                       {errors.jobTitleOther && (
                         <p className="mt-1 text-sm text-red-600">
@@ -889,8 +892,8 @@ const NewHireForm = () => {
                         key={type}
                         className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all duration-200 ${
                           formData.hireType === type
-                            ? "ring-2 ring-blue-500 border-blue-500 bg-indigo-50"
-                            : "border-gray-300 hover:border-indigo-300"
+                            ? "ring-2 ring-brand-500 border-brand-500 bg-purple-50"
+                            : "border-gray-300 hover:border-brand-300"
                         }`}
                       >
                         <input
@@ -922,8 +925,8 @@ const NewHireForm = () => {
                         key={dept}
                         className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all duration-200 ${
                           formData.department === dept
-                            ? "ring-2 ring-blue-500 border-blue-500 bg-indigo-50"
-                            : "border-gray-300 hover:border-indigo-300"
+                            ? "ring-2 ring-brand-500 border-brand-500 bg-purple-50"
+                            : "border-gray-300 hover:border-brand-300"
                         }`}
                       >
                         <input
@@ -962,8 +965,8 @@ const NewHireForm = () => {
                           key={loc.id}
                           className={`flex items-center p-2 border rounded-lg cursor-pointer transition-all duration-200 ${
                             formData.location === loc.location_name
-                              ? "ring-2 ring-blue-500 border-blue-500 bg-indigo-50"
-                              : "border-gray-300 bg-white hover:border-indigo-300"
+                              ? "ring-2 ring-brand-500 border-brand-500 bg-purple-50"
+                              : "border-gray-300 bg-white hover:border-brand-300"
                           }`}
                         >
                           <input
@@ -988,8 +991,8 @@ const NewHireForm = () => {
       <label
         className={`flex items-center p-2 border rounded-lg cursor-pointer transition-all duration-200 ${
           formData.location === "Other"
-            ? "ring-2 ring-blue-500 border-blue-500 bg-indigo-50"
-            : "border-gray-300 bg-white hover:border-indigo-300"
+            ? "ring-2 ring-brand-500 border-brand-500 bg-purple-50"
+            : "border-gray-300 bg-white hover:border-brand-300"
         }`}
       >
         <input
@@ -1031,7 +1034,7 @@ const NewHireForm = () => {
           errors.locationOther
             ? "border-red-500"
             : "border-gray-300"
-        } bg-transparent py-2.5 px-1 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-0 sm:text-sm`}
+        } bg-transparent py-2.5 px-1 text-gray-900 placeholder-gray-400 focus:border-brand-500 focus:outline-none focus:ring-0 sm:text-sm`}
       />
       {errors.locationOther && (
         <p className="mt-1 text-sm text-red-600">
@@ -1054,8 +1057,8 @@ const NewHireForm = () => {
                         key={type}
                         className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all duration-200 ${
                           formData.payType === type
-                            ? "ring-2 ring-blue-500 border-blue-500 bg-indigo-50"
-                            : "border-gray-300 hover:border-indigo-300"
+                            ? "ring-2 ring-brand-500 border-brand-500 bg-purple-50"
+                            : "border-gray-300 hover:border-brand-300"
                         }`}
                       >
                         <input
@@ -1093,7 +1096,7 @@ const NewHireForm = () => {
                     placeholder="e.g., 25.00 or 75,000"
                     className={`mt-2 block w-full border-b ${
                       errors.payRate ? "border-red-500" : "border-gray-300"
-                    } bg-transparent py-2.5 px-1 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-0 sm:text-sm`}
+                    } bg-transparent py-2.5 px-1 text-gray-900 placeholder-gray-400 focus:border-brand-500 focus:outline-none focus:ring-0 sm:text-sm`}
                   />
                   {errors.payRate && (
                     <p className="mt-1 text-sm text-red-600">
@@ -1118,7 +1121,7 @@ const NewHireForm = () => {
                     placeholder="Full Name of Manager"
                     className={`mt-2 block w-full border-b ${
                       errors.supervisor ? "border-red-500" : "border-gray-300"
-                    } bg-transparent py-2.5 px-1 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-0 sm:text-sm`}
+                    } bg-transparent py-2.5 px-1 text-gray-900 placeholder-gray-400 focus:border-brand-500 focus:outline-none focus:ring-0 sm:text-sm`}
                   />
                   {errors.supervisor && (
                     <p className="mt-1 text-sm text-red-600">
@@ -1134,16 +1137,50 @@ const NewHireForm = () => {
                   >
                     Start Date <Asterisk />
                   </label>
-                  <input
-                    type="date"
-                    name="startDate"
-                    id="startDate"
-                    value={formData.startDate}
-                    onChange={handleInputChange}
-                    className={`mt-2 block w-full border-b ${
-                      errors.startDate ? "border-red-500" : "border-gray-300"
-                    } bg-transparent py-2.5 px-1 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-0 sm:text-sm`}
-                  />
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DatePicker
+                      value={formData.startDate ? dayjs(formData.startDate) : null}
+                      onChange={(newValue) => {
+                        setFormData((prev) => ({
+                          ...prev,
+                          startDate: newValue ? newValue.format("YYYY-MM-DD") : "",
+                        }));
+                        if (errors.startDate) {
+                          setErrors((prev) => ({ ...prev, startDate: "" }));
+                        }
+                      }}
+                      minDate={dayjs()}
+                      format="MM/DD/YYYY"
+                      slotProps={{
+                        textField: {
+                          placeholder: "mm/dd/yyyy",
+                          fullWidth: true,
+                          variant: "standard",
+                          sx: {
+                            mt: 2,
+                            "& .MuiInput-root": {
+                              fontSize: "0.875rem",
+                              "&:before": {
+                                borderBottom: errors.startDate
+                                  ? "1px solid #ef4444"
+                                  : "1px solid #d1d5db",
+                              },
+                              "&:hover:not(.Mui-disabled):before": {
+                                borderBottom: "1px solid #824EF2",
+                              },
+                              "&:after": {
+                                borderBottom: "2px solid #824EF2",
+                              },
+                            },
+                            "& .MuiInputBase-input": {
+                              padding: "10px 4px",
+                              fontSize: "0.875rem",
+                            },
+                          },
+                        },
+                      }}
+                    />
+                  </LocalizationProvider>
                   {errors.startDate && (
                     <p className="mt-1 text-sm text-red-600">
                       {errors.startDate}
@@ -1159,8 +1196,8 @@ const NewHireForm = () => {
                   disabled={isSubmitting}
                   className={`w-full sm:w-auto rounded-md px-8 py-3.5 text-base font-semibold text-white shadow-sm transition-colors duration-300 ${
                     isSubmitting
-                      ? "bg-indigo-400 cursor-not-allowed"
-                      : "bg-blue-500 hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+                      ? "bg-brand-400 cursor-not-allowed"
+                      : "bg-brand-500 hover:bg-brand-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
                   }`}
                 >
                   {isSubmitting

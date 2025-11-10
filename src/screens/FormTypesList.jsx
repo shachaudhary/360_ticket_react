@@ -219,7 +219,7 @@ export default function FormTypesList() {
 
                       {/* Description */}
                       <td
-                        className="px-4 py-3 border-b border-[#E5E7EB] text-gray-600 max-w-[320px]"
+                        className="px-4 py-3 border-b border-[#E5E7EB] text-gray-600 max-w-[320px] first-letter:uppercase"
                         title={form.description}
                       >
                         {form.description?.length > 80
