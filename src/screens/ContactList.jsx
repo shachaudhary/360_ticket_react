@@ -368,6 +368,9 @@ export default function ContactList() {
                 borderRadius: "8px",
                 fontSize: "14px",
               },
+              "& .MuiInputAdornment-root": {
+               marginRight: "-6px !important",
+              },
             }}
           />
         </div>
