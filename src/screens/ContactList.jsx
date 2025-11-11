@@ -226,24 +226,24 @@ export default function ContactList() {
                       </td>
                       <td className="px-4 py-3 border-b border-[#E5E7EB]">
                         <Chip
-                          label={formatUSPhoneNumber(contact.phone) || "—"}
+                          label={formatUSPhoneNumber(contact.phone) || "N/A"}
                           variant="filled"
                           sx={chipStyle}
                         />
                       </td>
                       <td className="px-4 py-3 border-b border-[#E5E7EB]">
-                        {contact.email || "—"}
+                        {contact.email || "N/A"}
                       </td>
                       <td className="px-4 py-3 border-b max-w-56 border-[#E5E7EB] text-gray-600">
                         {contact.message?.length > 55
                           ? contact.message.slice(0, 55) + "..."
-                          : contact.message || "—"}
+                          : contact.message || "N/A"}
                       </td>
                       <td className="px-4 py-3 border-b border-[#E5E7EB]">
                         <Tooltip title="Click to change category" arrow>
                           <div className="cursor-pointer inline-block">
                             <Chip
-                              label={toProperCase(getPredictedCategory(contact.data)) || "—"}
+                              label={toProperCase(getPredictedCategory(contact.data)) || "N/A"}
                               deleteIcon={
                                 <KeyboardArrowDownIcon
                                   sx={{
@@ -296,7 +296,7 @@ export default function ContactList() {
                         <StatusBadge status={contact?.status} />
                       </td>
                       <td className="px-4 py-3 border-b text-gray-700">
-                        {convertToCST(contact?.created_at) || "—"}
+                        {convertToCST(contact?.created_at) || "N/A"}
                       </td>
                       <td className="px-4 py-3 border-b border-[#E5E7EB] text-center">
                         <Tooltip title="View Details">

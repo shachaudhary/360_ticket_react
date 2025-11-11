@@ -240,7 +240,7 @@ export default function SettingsCategories() {
                         {/* {toProperCase(cat.assignee_name) || "—"} */}
 
                         <Chip
-                          label={toProperCase(cat.assignee_name) || "—"}
+                          label={toProperCase(cat.assignee_name) || "N/A"}
                           variant="filled"
                           sx={chipStyle}
                         />

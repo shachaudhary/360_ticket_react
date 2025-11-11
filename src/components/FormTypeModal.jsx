@@ -9,6 +9,7 @@ import {
   CircularProgress,
   Autocomplete,
   IconButton,
+  Chip,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { createAPIEndPoint } from "../config/api/api";
@@ -161,6 +162,39 @@ export default function FormTypeModal({ open, onClose, onSaved, formType }) {
                     )}`.trim()
                   : toProperCase(option.username || "")
                 : ""
+            }
+            renderTags={(value, getTagProps) =>
+              value.map((option, index) => (
+                <Chip
+                  {...getTagProps({ index })}
+                  key={option.user_id}
+                  label={
+                    <div className="flex flex-col py-0.5">
+                      <span className="text-xs font-medium">
+                        {option.first_name
+                          ? `${toProperCase(option.first_name)} ${toProperCase(
+                              option.last_name || ""
+                            )}`.trim()
+                          : toProperCase(option.username || "")}
+                      </span>
+                      {option.email && (
+                        <span className="text-[10px] text-gray-500">
+                          {option.email}
+                        </span>
+                      )}
+                    </div>
+                  }
+                  sx={{
+                    height: "auto",
+                    py: 0.5,
+                    "& .MuiChip-label": {
+                      display: "block",
+                      whiteSpace: "normal",
+                      py: 0.25,
+                    },
+                  }}
+                />
+              ))
             }
             renderInput={(params) => (
               <TextField
