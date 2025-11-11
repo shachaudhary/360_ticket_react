@@ -41,6 +41,7 @@ export default function ConfirmationModal({
           gap: 1,
           pb: 2,
         }}
+        color="#EF4444"
       >
         {/* {danger && (
           <ExclamationTriangleIcon className="h-6 w-6 text-red-500" />

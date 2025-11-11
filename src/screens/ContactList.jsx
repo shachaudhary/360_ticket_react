@@ -302,7 +302,7 @@ export default function ContactList() {
                         <Tooltip title="View Details">
                           <IconButton
                             size="small"
-                            onClick={() => navigate(`/contacts/${contact.id}`)}
+                            onClick={() => window.open(`/contacts/${contact.id}`, "_blank")}
                             className="!bg-slate-50"
                           >
                             <EyeIcon className="h-5 w-5 text-gray-500 hover:text-brand-500 transition-colors" />

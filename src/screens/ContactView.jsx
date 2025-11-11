@@ -259,7 +259,7 @@ export default function ContactView() {
                 <Tooltip title="Click to change category" arrow>
                   <div className="cursor-pointer inline-block">
                     <Chip
-                      label={toProperCase(contact?.data?.predicted_category) || "—"}
+                      label={toProperCase(contact?.data?.predicted_category) || "N/A"}
                       deleteIcon={
                         <KeyboardArrowDownIcon
                           sx={{
