@@ -290,7 +290,7 @@ export default function Dashboard() {
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="flex flex-col items-center justify-center gap-2 p-6 rounded-xl border border-gray-200 bg-gray-50 bg-opacity-75 text-center shadow-sm">
+                <div className="flex flex-col items-center justify-center h-full gap-2 p-6 rounded-xl border border-gray-200 bg-gray-50 bg-opacity-75 text-center shadow-sm">
                   {/* <div className="flex items-center justify-center w-10 h-10 rounded-full bg-red-100 text-red-500">
                     <svg
                       className="w-6 h-6"
@@ -349,7 +349,7 @@ export default function Dashboard() {
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="flex flex-col items-center justify-center gap-2 p-6 rounded-xl border border-gray-200 bg-gray-50 bg-opacity-75  text-center shadow-sm">
+                <div className="flex flex-col items-center justify-center h-full gap-2 p-6 rounded-xl border border-gray-200 bg-gray-50 bg-opacity-75  text-center shadow-sm">
                   <p className="text-sm font-medium text-gray-600">
                     No priority data
                   </p>

@@ -16,6 +16,7 @@ export const statusColors = {
   received: "#C9F7C9", // Soft Green
   urgent: "#FFEBEE", // same as high (light red)
   high: "#FFF8E1", // move high to amber now
+  medium: "#FFF8E1", // move high to amber now
   update: "#FFF8E1", // move high to amber now
   low: "#E8F5E9", // green
   paid: "#C9F7C9", // Soft Green
@@ -73,6 +74,7 @@ export const textColors = {
   received: "#007A33", // Dark Green
   urgent: "#D32F2F", // same as high (strong red)
   high: "#F9A825", // amber
+  medium: "#F9A825", // amber
   update: "#F9A825", // amber
   low: "#388E3C", // green
   paid: "#007A33", // Dark Green

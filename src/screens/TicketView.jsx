@@ -151,8 +151,8 @@ function AssignModal({
           getOptionLabel={(option) =>
             option
               ? `${toProperCase(option.first_name)} ${toProperCase(
-                  option.last_name
-                )}`
+                option.last_name
+              )}`
               : ""
           }
           renderInput={(params) => (
@@ -232,6 +232,9 @@ export default function TicketView() {
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearch = useDebounce(searchTerm, 400);
   const [assignModalOpen, setAssignModalOpen] = useState(false);
+  
+  // 🔹 Notification logs state
+  const [notificationLogs, setNotificationLogs] = useState([]);
 
   // ✅ Fetch Ticket
   const fetchTicket = useCallback(async () => {
@@ -256,6 +259,25 @@ export default function TicketView() {
   useEffect(() => {
     fetchTicket();
   }, [fetchTicket]);
+
+  // ✅ Fetch Notification Logs
+  useEffect(() => {
+    const fetchNotificationLogs = async () => {
+      if (!user?.id || !id) return;
+
+      try {
+        const res = await createAPIEndPoint(
+          `notifications?user_id=${user.id}&ticket_id=${id}`
+        ).fetchAll();
+        setNotificationLogs(res.data?.notifications || res.data || []);
+      } catch (err) {
+        console.error("Failed to fetch notification logs:", err);
+        setNotificationLogs([]);
+      }
+    };
+
+    fetchNotificationLogs();
+  }, [id, user?.id]);
 
   useEffect(() => {
     const search = async () => {
@@ -296,8 +318,7 @@ export default function TicketView() {
         setSearchLoading(true);
         try {
           const res = await createAPIEndPointAuth(
-            `clinic_team/search?query=${
-              ticket.assignees[-1]?.assign_to_username
+            `clinic_team/search?query=${ticket.assignees[-1]?.assign_to_username
             }`
           ).fetchAll();
           setSearchResults(res?.data?.results || []);
@@ -543,6 +564,7 @@ export default function TicketView() {
               </div>
             )}
 
+
             <div className="grid md:grid-cols-1 gap-5">
               {/* 🔹 Assignment Logs Section */}
               <div className="mt-4">
@@ -568,8 +590,10 @@ export default function TicketView() {
                 </div>
               </div>
 
+              <Divider />
+
               {/* 🔹 Status Logs Section */}
-              <div className="mt-4">
+              <div className="mt-0">
                 <Typography
                   variant="subtitle1"
                   color="primary"
@@ -586,6 +610,32 @@ export default function TicketView() {
                           log.old_status
                         )} → ${toProperCase(log.new_status)}`,
                         timestamp: convertToCST(log.changed_at),
+                      })) || []
+                    }
+                  />
+                </div>
+              </div>
+
+              <Divider />
+
+              {/* 🔹 Notification Logs Section */}
+              <div className="mt-0">
+                <Typography
+                  variant="subtitle1"
+                  color="primary"
+                  sx={{ mb: 1, fontWeight: 600 }}
+                >
+                  Notification Logs
+                </Typography>
+                <div className="max-h-64 overflow-y-auto">
+                  <LogsList
+                    logs={
+                      notificationLogs?.map((log) => ({
+                        username: toProperCase(log.receiver_info?.username) || "N/A",
+                        action: `${log.message || "Notification sent"} to ${
+                          log.receiver_info?.email || "N/A"
+                        } - ${toProperCase(log.email_type?.replace(/_/g, " ")) || ""}`,
+                        timestamp: convertToCST(log.created_at),
                       })) || []
                     }
                   />

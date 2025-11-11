@@ -134,8 +134,8 @@ export default function Tickets() {
       ).fetchAll();
 
       setTickets(res.data.tickets || []);
-      setTotalPages(res.data?.pages || 1);
-      setTotalCount(res.data?.total || 0);
+      setTotalPages(res.data?.pagination?.pages || 1);
+      setTotalCount(res.data?.pagination?.total || 0);
     } catch (err) {
       console.error("Failed to fetch tickets", err);
       setTickets([]);
