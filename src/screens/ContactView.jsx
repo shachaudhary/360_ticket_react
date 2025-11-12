@@ -264,9 +264,12 @@ export default function ContactView() {
                         <KeyboardArrowDownIcon
                           sx={{
                             fontSize: 14,
-                            color: "#6B7280 !important",
-                            opacity: 0.7,
+                            color: categoryMenuAnchor
+                              ? "#824EF2 !important"
+                              : "#6B7280 !important",
+                            opacity: categoryMenuAnchor ? 1 : 0.7,
                             px: 0.25,
+                            transition: "all 0.2s ease-in-out",
                           }}
                         />
                       }
@@ -285,11 +288,16 @@ export default function ContactView() {
                         fontSize: 11.75,
                         fontWeight: 500,
                         borderRadius: "6px",
-                        color: "#6B7280",
-                        border: "1px solid #E5E7EB",
+                        color: categoryMenuAnchor
+                          ? "#824EF2 !important"
+                          : "#6B7280 !important",
+                        border: categoryMenuAnchor
+                          ? "1px solid #824EF2"
+                          : "1px solid #E5E7EB",
                         background: "white",
                         height: 27.5,
                         cursor: "pointer",
+                        transition: "all 0.2s ease-in-out",
                         "&:hover": {
                           backgroundColor: "#F3F4F6",
                         },

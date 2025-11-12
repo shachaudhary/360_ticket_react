@@ -117,7 +117,7 @@ export default function Tickets() {
       // params.append("user_id", user?.id);
 
       if (debouncedQuery) params.append("search", debouncedQuery); // 🔹 use debounced value
-      if (statusFilter) params.append("status", statusFilter.toLowerCase());
+      if (statusFilter) params.append("status", statusFilter.toLowerCase().replace(/\+/g, " "));
       if (categoryFilter) params.append("category_id", categoryFilter);
       if (startDate)
         params.append("start_date", startDate.format("YYYY-MM-DD"));
@@ -617,7 +617,7 @@ export default function Tickets() {
         <div className="px-2 py-1">
           <Typography
             variant="caption"
-            className="!px-2 !py-1 !text-brand-500 !font-medium !text-xs"
+            className="!px-2 !py-1 !text-gray-500 !font-medium !text-xs"
           >
             Update Status
           </Typography>

@@ -45,7 +45,7 @@ const CustomTablePagination = ({
             value={rowsPerPage}
             onChange={(e) => {
               setRowsPerPage(e.target.value);
-              setPage(1); // reset to first page
+              setPage(0); // reset to first page (0-indexed)
             }}
             disabled={totalCount === 0}
             variant="standard" // removes the filled bg + box

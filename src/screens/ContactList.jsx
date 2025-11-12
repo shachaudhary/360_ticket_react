@@ -248,9 +248,12 @@ export default function ContactList() {
                                 <KeyboardArrowDownIcon
                                   sx={{
                                     fontSize: 14,
-                                    color: "#6B7280 !important",
-                                    opacity: 0.7,
-                                    px: 0.25
+                                    color: categoryMenuAnchor && selectedContactForCategory?.id === contact.id
+                                      ? "#824EF2 !important"
+                                      : "#6B7280 !important",
+                                    opacity: categoryMenuAnchor && selectedContactForCategory?.id === contact.id ? 1 : 0.7,
+                                    px: 0.25,
+                                    transition: "all 0.2s ease-in-out",
                                   }}
                                 />
                               }
@@ -269,11 +272,16 @@ export default function ContactList() {
                                 fontSize: 11.75,
                                 fontWeight: 500,
                                 borderRadius: "6px",
-                                color: "#6B7280",
-                                border: "1px solid #E5E7EB",
+                                color: categoryMenuAnchor && selectedContactForCategory?.id === contact.id
+                                  ? "#824EF2 !important"
+                                  : "#6B7280 !important",
+                                border: categoryMenuAnchor && selectedContactForCategory?.id === contact.id
+                                  ? "1px solid #824EF2"
+                                  : "1px solid #E5E7EB",
                                 background: "white",
                                 height: 27.5,
                                 cursor: "pointer",
+                                transition: "all 0.2s ease-in-out",
                                 "&:hover": {
                                   backgroundColor: "#F3F4F6",
                                 },
@@ -369,7 +377,7 @@ export default function ContactList() {
                 fontSize: "14px",
               },
               "& .MuiInputAdornment-root": {
-               marginRight: "-6px !important",
+                marginRight: "-6px !important",
               },
             }}
           />
@@ -379,14 +387,14 @@ export default function ContactList() {
         <div className="px-2 py-1">
           <Typography
             variant="caption"
-            className="!px-2 !py-1 !text-brand-500 !font-medium !text-xs"
+            className="!px-2 !py-1 !text-gray-500 !font-medium !text-xs"
           >
             Update Category
           </Typography>
         </div>
 
         {/* Category List */}
-        <div className="max-h-60 overflow-auto">
+        <div className="max-h-[160px] overflow-auto">
           {filteredCategories.length > 0 ? (
             filteredCategories.map((category) => {
               const currentCategory = getPredictedCategory(
