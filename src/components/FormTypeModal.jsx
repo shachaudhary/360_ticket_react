@@ -10,6 +10,7 @@ import {
   Autocomplete,
   IconButton,
   Chip,
+  Typography,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { createAPIEndPoint } from "../config/api/api";
@@ -109,10 +110,17 @@ export default function FormTypeModal({ open, onClose, onSaved, formType }) {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" PaperProps={{
+      sx: {
+        borderRadius: "12px",
+        p: 1,
+      },
+    }}>
       <DialogTitle className="font-semibold text-brand-500 !text-lg flex justify-between items-center">
+      <Typography variant="h6" fontWeight={600}>
         {formType ? "Edit Form" : "Add Form"}
-        <IconButton
+      </Typography>
+        {/* <IconButton
           aria-label="close"
           onClick={onClose}
           size="small"
@@ -122,11 +130,11 @@ export default function FormTypeModal({ open, onClose, onSaved, formType }) {
           }}
         >
           <CloseIcon fontSize="medium" />
-        </IconButton>
+        </IconButton> */}
       </DialogTitle>
 
-      <DialogContent dividers>
-        <div className="space-y-4 py-2">
+      <DialogContent>
+        <div className="space-y-4 py-2 form-type-modal">
           <TextField
             label="Form Type Name"
             value={name}
@@ -158,8 +166,8 @@ export default function FormTypeModal({ open, onClose, onSaved, formType }) {
               option
                 ? option.first_name
                   ? `${toProperCase(option.first_name)} ${toProperCase(
-                      option.last_name || ""
-                    )}`.trim()
+                    option.last_name || ""
+                  )}`.trim()
                   : toProperCase(option.username || "")
                 : ""
             }
@@ -173,8 +181,8 @@ export default function FormTypeModal({ open, onClose, onSaved, formType }) {
                       <span className="text-xs font-medium">
                         {option.first_name
                           ? `${toProperCase(option.first_name)} ${toProperCase(
-                              option.last_name || ""
-                            )}`.trim()
+                            option.last_name || ""
+                          )}`.trim()
                           : toProperCase(option.username || "")}
                       </span>
                       {option.email && (

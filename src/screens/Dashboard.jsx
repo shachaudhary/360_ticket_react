@@ -146,11 +146,10 @@ export default function Dashboard() {
                   key={view}
                   onClick={() => setTimeView(view)}
                   className={`px-3 py-[6.15px] text-xs font-medium rounded-lg border transition-all duration-300
-          ${
-            timeView === view
-              ? "bg-brand-500 text-white border-brand-500 hover:bg-brand-600"
-              : "border border-gray-200 text-gray-500 hover:bg-gray-50"
-          }
+          ${timeView === view
+                      ? "bg-brand-500 text-white border-brand-500 hover:bg-brand-600"
+                      : "border border-gray-200 text-gray-500 hover:bg-gray-50"
+                    }
         `}
                 >
                   {toProperCase(view)}
@@ -222,10 +221,10 @@ export default function Dashboard() {
                       s.label === "Open Tickets"
                         ? "rgba(59, 130, 246, 0.12)" // light blue bg
                         : s.label === "In Progress"
-                        ? "rgba(250, 204, 21, 0.15)" // light yellow bg
-                        : s.label === "Completed"
-                        ? "rgba(34, 197, 94, 0.12)" // light green bg
-                        : "#f3f4f6", // fallback light gray
+                          ? "rgba(250, 204, 21, 0.15)" // light yellow bg
+                          : s.label === "Completed"
+                            ? "rgba(34, 197, 94, 0.12)" // light green bg
+                            : "#f3f4f6", // fallback light gray
                   }}
                 >
                   {s.icon}
@@ -290,7 +289,7 @@ export default function Dashboard() {
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="flex flex-col items-center justify-center h-full gap-2 p-6 rounded-xl border border-gray-200 bg-gray-50 bg-opacity-75 text-center shadow-sm">
+                <div className="flex flex-col items-center justify-center gap-2 p-6 rounded-xl border border-gray-200 bg-gray-50 bg-opacity-75 text-center shadow-sm">
                   {/* <div className="flex items-center justify-center w-10 h-10 rounded-full bg-red-100 text-red-500">
                     <svg
                       className="w-6 h-6"
@@ -349,7 +348,7 @@ export default function Dashboard() {
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="flex flex-col items-center justify-center h-full gap-2 p-6 rounded-xl border border-gray-200 bg-gray-50 bg-opacity-75  text-center shadow-sm">
+                <div className="flex flex-col items-center justify-center gap-2 p-6 rounded-xl border border-gray-200 bg-gray-50 bg-opacity-75  text-center shadow-sm">
                   <p className="text-sm font-medium text-gray-600">
                     No priority data
                   </p>

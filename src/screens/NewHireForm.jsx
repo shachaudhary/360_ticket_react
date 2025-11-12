@@ -12,6 +12,7 @@ import BackButton from "../components/BackButton";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { CircularProgress } from "@mui/material";
 dayjs.extend(isSameOrBefore);
 dayjs.extend(isSameOrAfter);
 
@@ -48,6 +49,7 @@ const NewHireForm = () => {
   const [submitStatus, setSubmitStatus] = useState(null);
   const [locations, setLocations] = useState([]);
   const [formTypes, setFormTypes] = useState([]);
+  const [loadingEditData, setLoadingEditData] = useState(isEditMode);
 
   // 🔹 Fetch Form Types (dynamic)
   // useEffect(() => {
@@ -177,6 +179,7 @@ const NewHireForm = () => {
     const loadEditData = async () => {
       if (!isEditMode || !id || locations.length === 0) return; // wait until locations loaded
 
+      setLoadingEditData(true);
       try {
         const res = await createAPIEndPoint(
           `form_entries/details/${id}`
@@ -224,7 +227,12 @@ const NewHireForm = () => {
         });
       } catch (err) {
         console.error("Failed to load form for edit:", err);
-        Swal.fire("Error", "Unable to load form data", "error");
+        setSubmitStatus({
+          type: "error",
+          message: "Unable to load form data",
+        });
+      } finally {
+        setLoadingEditData(false);
       }
     };
 
@@ -535,6 +543,18 @@ const NewHireForm = () => {
       setIsSubmitting(false);
     }
   };
+
+  // Show loader while fetching edit data
+  if (loadingEditData) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-purple-50">
+        <div className="text-center">
+          <CircularProgress size={50} sx={{ color: "#824EF2" }} />
+          <p className="mt-4 text-gray-600 font-medium">Loading form data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     // <div className="bg-[#e6eef8] flex items-center justify-center p-4 overflow-hidden">

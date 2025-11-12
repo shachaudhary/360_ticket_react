@@ -198,16 +198,16 @@ export default function ContactList() {
                     <th className="px-4 py-3 border-r border-b border-[#E5E7EB] font-medium">
                       Email
                     </th>
-                    <th className="px-4 py-3 border-r border-b border-[#E5E7EB] font-medium">
+                    {/* <th className="px-4 py-3 border-r border-b border-[#E5E7EB] font-medium">
                       Message
-                    </th>
+                    </th> */}
                     <th className="px-4 py-3 border-r border-b border-[#E5E7EB] font-medium">
                       Category
                     </th>
                     <th className="px-4 py-3 border-r border-b border-[#E5E7EB] font-medium">
                       Status
                     </th>
-                    <th className="px-4 py-3 border-r border-b border-[#E5E7EB] font-medium">
+                    <th className="px-4 py-3 border-r border-b border-[#E5E7EB] font-medium whitespace-nowrap">
                       Created At
                     </th>
                     <th className="px-4 py-3 border-b border-[#E5E7EB] text-center font-medium">
@@ -232,13 +232,15 @@ export default function ContactList() {
                         />
                       </td>
                       <td className="px-4 py-3 border-b border-[#E5E7EB]">
-                        {contact.email || "N/A"}
+                        <span className="word-break-all max-w-10">
+                          {contact.email || "N/A"}
+                        </span>
                       </td>
-                      <td className="px-4 py-3 border-b max-w-56 border-[#E5E7EB] text-gray-600">
-                        {contact.message?.length > 55
-                          ? contact.message.slice(0, 55) + "..."
+                      {/* <td className="px-4 py-3 border-b max-w-56 border-[#E5E7EB] text-gray-600">
+                        {contact.message?.length > 50
+                          ? contact.message.slice(0, 50) + "..."
                           : contact.message || "N/A"}
-                      </td>
+                      </td> */}
                       <td className="px-4 py-3 border-b border-[#E5E7EB]">
                         <Tooltip title="Click to change category" arrow>
                           <div className="cursor-pointer inline-block">
@@ -301,7 +303,7 @@ export default function ContactList() {
                         </Tooltip>
                       </td>
                       <td className="px-4 py-3 border-b border-[#E5E7EB] text-gray-600">
-                        <StatusBadge status={contact?.status} />
+                        <StatusBadge status={contact?.status} isInside />
                       </td>
                       <td className="px-4 py-3 border-b text-gray-700">
                         {convertToCST(contact?.created_at) || "N/A"}

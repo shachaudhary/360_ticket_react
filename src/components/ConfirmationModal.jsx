@@ -51,7 +51,7 @@ export default function ConfirmationModal({
         </Typography>
       </DialogTitle>
 
-      <DialogContent sx={{ pb: 2 }}>
+      <DialogContent sx={{ pb: 3 }}>
         <Typography variant="body2" color="text.secondary">
           {message}
         </Typography>

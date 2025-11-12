@@ -13,7 +13,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
-import { Menu, MenuItem, TextField, InputAdornment } from "@mui/material";
+import { Menu, MenuItem, TextField, InputAdornment, CircularProgress } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 
@@ -42,6 +42,7 @@ const AppointmentForm = () => {
   const [selectedProvider, setSelectedProvider] = useState(null);
   const [providerMenuAnchor, setProviderMenuAnchor] = useState(null);
   const [providerSearchTerm, setProviderSearchTerm] = useState("");
+  const [loadingEditData, setLoadingEditData] = useState(isEditMode);
 
   // Filter providers based on search term
   const filteredProviders = providers.filter((provider) =>
@@ -106,6 +107,7 @@ const AppointmentForm = () => {
       )
         return;
 
+      setLoadingEditData(true);
       try {
         const res = await createAPIEndPoint(
           `form_entries/details/${id}`
@@ -151,6 +153,8 @@ const AppointmentForm = () => {
           type: "error",
           message: "Unable to load form data",
         });
+      } finally {
+        setLoadingEditData(false);
       }
     };
 
@@ -348,6 +352,18 @@ const AppointmentForm = () => {
       setIsSubmitting(false);
     }
   };
+
+  // Show loader while fetching edit data
+  if (loadingEditData) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-purple-50">
+        <div className="text-center">
+          <CircularProgress size={50} sx={{ color: "#824EF2" }} />
+          <p className="mt-4 text-gray-600 font-medium">Loading form data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center justify-center overflow-hidden -ml-1">

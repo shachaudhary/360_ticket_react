@@ -29,6 +29,50 @@
   background-color: #249e56; 
 } */
 
+
+.MuiBackdrop-root {
+  /* backdrop-filter: blur(3px); */
+  background-color: rgba(0, 0, 0, 0.15) !important;
+}
+
+
+.form-type-modal .MuiChip-root {
+  background-color: #f9fafb !important;      /* light gray background */
+  color: #374151 !important;                 /* neutral dark text */
+  border: 1px solid #e5e7eb !important;      /* subtle border */
+  font-weight: 500;
+  font-size: 13px !important;
+  transition: all 0.2s ease-in-out;
+}
+
+/* Delete icon styling */
+.form-type-modal .MuiChip-deleteIcon {
+  color: #9ca3af !important;
+  font-size: 18px !important;
+  transition: color 0.2s ease-in-out;
+}
+
+.form-type-modal .MuiChip-deleteIcon:hover {
+  color: #ff6a6a !important;                 /* red on hover */
+}
+
+/* For filled variant specifically */
+.form-type-modal .MuiChip-filled {
+  background-color: #f9f9f9 !important;
+}
+
+.form-type-modal .MuiChip-filled:hover {
+  background-color: #f3f4f6 !important;
+}
+
+/* For outlined variant (if you ever use it) */
+.MuiChip-outlined {
+  background-color: transparent !important;
+  border: 1px solid #d1d5db !important;
+  color: #4b5563 !important;
+}
+
+
 .MuiPickersFilledInput-root::before {
   border-bottom: 1px solid rgb(209 213 219) !important;
 }

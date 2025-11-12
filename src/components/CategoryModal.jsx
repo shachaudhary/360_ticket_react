@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {
+  Typography,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -103,12 +104,19 @@ export default function CategoryModal({ open, onClose, onSaved, category }) {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs" className="cat-page">
-      <DialogTitle className="font-semibold text-brand-500 !text-lg flex justify-between items-center">
-        {category ? "Edit Category" : "Add Category"}
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs" className="cat-page" PaperProps={{
+      sx: {
+        borderRadius: "12px",
+        p: 1,
+      },
+    }}>
+      <DialogTitle className="font-semibold text-brand-500 !text-lg flex justify-between items-center" >
+        <Typography variant="h6" fontWeight={600}>
+          {category ? "Edit Category" : "Add Category"}
+        </Typography>
 
         {/* 🔹 Close button */}
-        <IconButton
+        {/* <IconButton
           aria-label="close"
           onClick={onClose}
           size="small"
@@ -118,10 +126,10 @@ export default function CategoryModal({ open, onClose, onSaved, category }) {
           }}
         >
           <CloseIcon fontSize="medium" />
-        </IconButton>
+        </IconButton> */}
       </DialogTitle>
 
-      <DialogContent dividers>
+      <DialogContent>
         <div className="space-y-4 py-2">
           <TextField
             label="Category Name"
@@ -143,8 +151,8 @@ export default function CategoryModal({ open, onClose, onSaved, category }) {
             getOptionLabel={(option) =>
               option
                 ? `${toProperCase(option.first_name)} ${toProperCase(
-                    option.last_name
-                  )}`.trim()
+                  option.last_name
+                )}`.trim()
                 : ""
             }
             renderOption={(props, option) => (
@@ -179,8 +187,8 @@ export default function CategoryModal({ open, onClose, onSaved, category }) {
               searchLoading
                 ? "Searching..."
                 : searchTerm.trim()
-                ? "No team members found"
-                : "Search to find team member"
+                  ? "No team members found"
+                  : "Search to find team member"
             }
             value={assignee} // ✅ keep selected object
             onChange={(e, newValue) => setAssignee(newValue)}
@@ -253,6 +261,6 @@ export default function CategoryModal({ open, onClose, onSaved, category }) {
           {submitting ? "Saving..." : "Save"}
         </Button>
       </DialogActions>
-    </Dialog>
+    </Dialog >
   );
 }
