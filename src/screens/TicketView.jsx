@@ -512,6 +512,27 @@ export default function TicketView() {
                 title="Created By"
                 value={toProperCase(ticket?.created_by?.username)}
               />
+              
+              {/* Contact Form Info */}
+              {ticket.contact_form_info?.name && (
+                <Label
+                  title="Contact Name"
+                  value={toProperCase(ticket.contact_form_info.name)}
+                />
+              )}
+              {ticket.contact_form_info?.phone && (
+                <Label
+                  title="Contact Phone"
+                  value={ticket.contact_form_info.phone}
+                />
+              )}
+              {ticket.contact_form_info?.email && (
+                <Label
+                  title="Contact Email"
+                  value={ticket.contact_form_info.email}
+                />
+              )}
+              
               <div className="sm:col-span-2 md:col-span-3">
                 <Label title="Details" value={ticket.details} />
               </div>
