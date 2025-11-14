@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   Card,
   Typography,
@@ -235,16 +235,6 @@ export default function TicketView() {
   
   // 🔹 Notification logs state
   const [notificationLogs, setNotificationLogs] = useState([]);
-  const contactFormInfo = ticket?.contact_form_info;
-  const parsedContactFormData = useMemo(() => {
-    if (!contactFormInfo?.data) return null;
-    try {
-      return JSON.parse(contactFormInfo.data);
-    } catch (error) {
-      console.warn("Failed to parse contact form data", error);
-      return null;
-    }
-  }, [contactFormInfo?.data]);
 
   // ✅ Fetch Ticket
   const fetchTicket = useCallback(async () => {
@@ -522,11 +512,30 @@ export default function TicketView() {
                 title="Created By"
                 value={toProperCase(ticket?.created_by?.username)}
               />
-              {!contactFormInfo && (
-                <div className="sm:col-span-2 md:col-span-3">
-                  <Label title="Details" value={ticket.details} />
-                </div>
+              
+              {/* Contact Form Info */}
+              {ticket.contact_form_info?.name && (
+                <Label
+                  title="Contact Name"
+                  value={toProperCase(ticket.contact_form_info.name)}
+                />
               )}
+              {ticket.contact_form_info?.phone && (
+                <Label
+                  title="Contact Phone"
+                  value={ticket.contact_form_info.phone}
+                />
+              )}
+              {ticket.contact_form_info?.email && (
+                <Label
+                  title="Contact Email"
+                  value={ticket.contact_form_info.email}
+                />
+              )}
+              
+              <div className="sm:col-span-2 md:col-span-3">
+                <Label title="Details" value={ticket.details} />
+              </div>
             </div>
 
             {/* Attached Files */}
@@ -574,65 +583,6 @@ export default function TicketView() {
                   })}
                 </div>
               </div>
-            )}
-
-            {contactFormInfo && (
-              <Box className="mt-5 rounded-2xl border border-gray-200 bg-gray-50/60 p-4">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <Typography
-                    variant="subtitle1"
-                    color="primary"
-                    sx={{ fontWeight: 600 }}
-                  >
-                    Contact Form Submission
-                  </Typography>
-                  {/* {contactFormInfo.status && (
-                    <StatusBadge
-                      status={contactFormInfo.status}
-                      isInside
-                      customRadius="999px"
-                    />
-                  )} */}
-                </div>
-                <Divider sx={{ my: 2 }} />
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <Label title="Form Name" value={contactFormInfo.form_name} />
-                  <Label title="Submission ID" value={`#${contactFormInfo.id}`} />
-                  <Label
-                    title="Submitted At"
-                    value={convertToCST(contactFormInfo.created_at)}
-                  />
-                  <Label
-                    title="Category"
-                    value={
-                      parsedContactFormData?.predicted_category
-                        ? toProperCase(parsedContactFormData.predicted_category)
-                        : "N/A"
-                    }
-                  />
-                  <Label
-                    title="Contact Name"
-                    value={toProperCase(contactFormInfo.name)}
-                  />
-                  <Label title="Email" value={contactFormInfo.email} />
-                  <Label title="Phone" value={contactFormInfo.phone} />
-                  <Label title="Status" value={toProperCase(contactFormInfo.status)} />
-                </div>
-                <Box className="mt-4">
-                  <Typography
-                    variant="body2"
-                    sx={{ fontWeight: 600, color: "#7E858D", mb: 0.5 }}
-                  >
-                    Message
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{ fontWeight: 500, color: "#2d3436" }}
-                  >
-                    {contactFormInfo.message?.trim() || "N/A"}
-                  </Typography>
-                </Box>
-              </Box>
             )}
 
 
