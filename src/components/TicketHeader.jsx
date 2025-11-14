@@ -117,8 +117,8 @@ export default function TicketHeader({ ticket, onUpdate, fetchAgain }) {
           Ticket #{ticket.id}
         </Typography> */}
 
-        <h2 className="text-lg md:text-xl font-bold text-sidebar">
-          Ticket #{ticket.id}
+        <h2 className="text-lg md:text-xl font-medium text-sidebar">
+          Ticket <span className="font-bwold">#{ticket.id}</span>
         </h2>
 
         <Button

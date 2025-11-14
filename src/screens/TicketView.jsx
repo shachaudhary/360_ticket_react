@@ -51,53 +51,91 @@ function useDebounce(value, delay = 400) {
   return debouncedValue;
 }
 
-// ✅ Reusable Comments List with transitions
-const CommentsList = ({ comments }) => (
-  <Box className="space-y-2">
-    {comments?.length > 0 ? (
-      <AnimatePresence>
-        {comments.map((c, idx) => (
-          <motion.div
-            key={c.id || idx} // 🔑 use stable id if available
-            initial={{ opacity: 0, y: 0 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 0 }}
-            transition={{ duration: 0.25 }}
-            layout // enables smooth reordering
-            className="rounded-lg border bg-[#E5E7EB] hover:bg-gray-50 bg-opacity-10 p-3 text-sm"
-          >
-            <div className="flex justify-between items-center mb-1">
-              <span className="font-semibold text-gray-500">
-                {toProperCase(c.username) || "N/A"}
-              </span>
-              <span className="text-xs text-gray-500">
-                {convertToCST(c.created_at)}
-              </span>
-            </div>
-            <div className="text-gray-700 break-words">
-              {c.comment.split(" ").map((word, i) => (
-                <span
-                  key={i}
-                  className={
-                    word.startsWith("@")
-                      ? "mr-1 text-blue-600 font-medium underline"
-                      : "mr-1"
+// ✅ Reusable Comments List with expandable body & transitions
+const CommentsList = ({ comments }) => {
+  const [expandedMap, setExpandedMap] = useState({});
+
+  const toggleComment = (key) => {
+    setExpandedMap((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+  };
+
+  const clampStyles = {
+    display: "-webkit-box",
+    WebkitLineClamp: 2,
+    WebkitBoxOrient: "vertical",
+    overflow: "hidden",
+  };
+
+  return (
+    <Box className="space-y-2">
+      {comments?.length > 0 ? (
+        <AnimatePresence>
+          {comments.map((c, idx) => {
+            const key = c.id || idx;
+            const isExpanded = !!expandedMap[key];
+
+            return (
+              <motion.div
+                key={key} // 🔑 use stable id if available
+                initial={{ opacity: 0, y: 0 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 0 }}
+                transition={{ duration: 0.25 }}
+                layout // enables smooth reordering
+                onClick={() => toggleComment(key)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    toggleComment(key);
                   }
+                }}
+                className="rounded-lg border bg-[#E5E7EB] hover:bg-gray-50 bg-opacity-10 p-3 text-sm cursor-pointer transition-colors"
+              >
+                <div className="flex justify-between items-center mb-1">
+                  <span className="font-semibold text-gray-500">
+                    {toProperCase(c.username) || "N/A"}
+                  </span>
+                  <span className="text-xs text-gray-500">
+                    {convertToCST(c.created_at)}
+                  </span>
+                </div>
+                <div
+                  className="text-gray-700 break-words transition-all duration-300"
+                  style={isExpanded ? undefined : clampStyles}
                 >
-                  {word}
+                  {c.comment.split(" ").map((word, i) => (
+                    <span
+                      key={i}
+                      className={
+                        word.startsWith("@")
+                          ? "mr-1 text-blue-600 font-medium underline"
+                          : "mr-1"
+                      }
+                    >
+                      {word}
+                    </span>
+                  ))}
+                </div>
+                <span className="mt-2 inline-block text-xs font-semibold text-brand-500">
+                  {isExpanded ? "Show less" : "Show more"}
                 </span>
-              ))}
-            </div>
-          </motion.div>
-        ))}
-      </AnimatePresence>
-    ) : (
-      <Typography variant="body2" color="text.secondary">
-        No comments yet
-      </Typography>
-    )}
-  </Box>
-);
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
+      ) : (
+        <Typography variant="body2" color="text.secondary">
+          No comments yet
+        </Typography>
+      )}
+    </Box>
+  );
+};
 
 function AssignModal({
   open,
