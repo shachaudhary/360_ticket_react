@@ -534,7 +534,7 @@ export default function TicketView() {
               )}
               
               <div className="sm:col-span-2 md:col-span-3">
-                <Label title="Details" value={ticket.details} />
+                <Label title="Message" value={ticket.details} />
               </div>
             </div>
 
