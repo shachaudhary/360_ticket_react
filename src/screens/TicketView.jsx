@@ -247,7 +247,7 @@ function AssignModal({
         sx={{ px: 2 }}
         className="!text-lg md:text-xl font-semibold text-sidebar"
       >
-        Update Assignee
+        {ticket?.assignees?.length > 0 ? "Update Assignee" : "Assign Ticket"}
       </DialogTitle>
       <DialogContent dividers sx={{ px: 2 }}>
         <Autocomplete
@@ -337,7 +337,7 @@ function AssignModal({
           {loading ? (
             <CircularProgress size={20} sx={{ color: "#6B7270" }} />
           ) : (
-            "Update"
+            ticket?.assignees?.length > 0 ? "Update" : "Assign"
           )}
         </Button>
       </DialogActions>
@@ -560,8 +560,8 @@ export default function TicketView() {
           <BackButton self="/tickets" />
 
           <div className="flex items-center gap-2 justify-between w-full pl-3">
-            {/* Assigned To */}
-            {ticket.assignees?.length > 0 && (
+            {/* Assigned To or Assign Ticket Button */}
+            {ticket.assignees?.length > 0 ? (
               <div className="flex items-center gap-1 !text-[13px] text-gray-500 mr-auto">
                 <span className="font-medium text-sm">Assigned To:</span>
                 <Tooltip title="Change Assignee" arrow>
@@ -581,6 +581,20 @@ export default function TicketView() {
                   </Box>
                 </Tooltip>
               </div>
+            ) : (
+              <Button
+                variant="contained"
+                size="small"
+                startIcon={<UserPlusIcon className="h-4 w-4" />}
+                onClick={() => {
+                  setAssignee(null);
+                  setAssignModalOpen(true);
+                }}
+                sx={{ borderRadius: 1.25, mr: "auto" }}
+                className="!bg-brand-500 hover:!bg-brand-600 !text-white !px-3 !py-1.5 !shadow-none"
+              >
+                Assign Ticket
+              </Button>
             )}
 
             {/* Edit Button */}
