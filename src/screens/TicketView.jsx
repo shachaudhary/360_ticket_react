@@ -51,6 +51,90 @@ function useDebounce(value, delay = 400) {
   return debouncedValue;
 }
 
+// ✅ URL detection regex
+const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+|[^\s]+\.[a-z]{2,}[^\s]*)/gi;
+
+// ✅ Function to render text with clickable links
+const renderCommentWithLinks = (text) => {
+  if (!text) return null;
+
+  const parts = [];
+  let lastIndex = 0;
+  let match;
+
+  // Reset regex lastIndex
+  urlRegex.lastIndex = 0;
+
+  while ((match = urlRegex.exec(text)) !== null) {
+    // Add text before the URL
+    if (match.index > lastIndex) {
+      const beforeText = text.substring(lastIndex, match.index);
+      parts.push(...renderTextParts(beforeText));
+    }
+
+    // Add the URL as a link
+    let url = match[0];
+    let href = url;
+
+    // Add protocol if missing
+    if (!url.startsWith("http://") && !url.startsWith("https://")) {
+      href = `https://${url}`;
+    }
+
+    parts.push(
+      <a
+        key={`link-${match.index}`}
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={(e) => e.stopPropagation()} // Prevent expand/collapse on link click
+        className="text-blue-600 hover:text-blue-800 underline break-all mr-1 lowercase"
+      >
+        {url}
+      </a>
+    );
+
+    lastIndex = match.index + match[0].length;
+  }
+
+  // Add remaining text after last URL
+  if (lastIndex < text.length) {
+    const afterText = text.substring(lastIndex);
+    parts.push(...renderTextParts(afterText));
+  }
+
+  // If no URLs found, render normally
+  if (parts.length === 0) {
+    return renderTextParts(text);
+  }
+
+  return parts;
+};
+
+// ✅ Function to render text parts (handles @mentions and regular text)
+const renderTextParts = (text) => {
+  if (!text) return null;
+  
+  const words = text.split(/(\s+)/); // Split but keep spaces
+  return words.map((word, i) => {
+    if (!word.trim()) {
+      // Preserve spaces
+      return <span key={i}>{word}</span>;
+    }
+    if (word.startsWith("@")) {
+      return (
+        <span
+          key={i}
+          className="text-blue-600 font-medium underline"
+        >
+          {word}
+        </span>
+      );
+    }
+    return <span key={i}>{word}</span>;
+  });
+};
+
 // ✅ Reusable Comments List with expandable body & transitions
 const CommentsList = ({ comments }) => {
   const [expandedMap, setExpandedMap] = useState({});
@@ -108,18 +192,7 @@ const CommentsList = ({ comments }) => {
                   className="text-gray-700 break-words transition-all duration-300"
                   style={isExpanded ? undefined : clampStyles}
                 >
-                  {c.comment.split(" ").map((word, i) => (
-                    <span
-                      key={i}
-                      className={
-                        word.startsWith("@")
-                          ? "mr-1 text-blue-600 font-medium underline"
-                          : "mr-1"
-                      }
-                    >
-                      {word}
-                    </span>
-                  ))}
+                  {renderCommentWithLinks(c.comment)}
                 </div>
                 <span className="mt-2 inline-block text-xs font-semibold text-brand-500">
                   {isExpanded ? "Show less" : "Show more"}
@@ -154,9 +227,9 @@ function AssignModal({
       const first = ticket.assignees[0]; // 👈 first index
       setAssignee({
         user_id: first.assign_to,
-        first_name: first.assign_to_username?.split(" ")[0] || "",
-        last_name:
-          first.assign_to_username?.split(" ").slice(1).join(" ") || "",
+        first_name: first.assign_to_first_name || first.assign_to_username?.split(" ")[0] || "",
+        last_name: first.assign_to_last_name || first.assign_to_username?.split(" ").slice(1).join(" ") || "",
+        email: first.assign_to_email || "",
       });
       setSearchTerm(""); // reset search
     }
@@ -188,11 +261,29 @@ function AssignModal({
           }
           getOptionLabel={(option) =>
             option
-              ? `${toProperCase(option.first_name)} ${toProperCase(
-                option.last_name
-              )}`
+              ? option.first_name
+                ? `${toProperCase(option.first_name)} ${toProperCase(
+                    option.last_name || ""
+                  )}`.trim()
+                : toProperCase(option.username || "")
               : ""
           }
+          renderOption={(props, option) => (
+            <li {...props} key={option.user_id}>
+              <div className="flex flex-col">
+                <span className="font-medium text-gray-600">
+                  {option.first_name
+                    ? `${toProperCase(option.first_name)} ${toProperCase(
+                        option.last_name || ""
+                      )}`.trim()
+                    : toProperCase(option.username || "")}
+                </span>
+                {option.email && (
+                  <span className="text-xs text-gray-500">{option.email}</span>
+                )}
+              </div>
+            </li>
+          )}
           renderInput={(params) => (
             <TextField
               {...params}
@@ -262,7 +353,6 @@ export default function TicketView() {
   const [isFetching, setIsFetching] = useState(true); // 👈 added
   const [fetchError, setFetchError] = useState(false); // 👈 for not found
   const [assignee, setAssignee] = useState(null);
-  console.log("🚀 ~ TicketView ~ assignee:", assignee);
   const [loading, setLoading] = useState(false);
 
   const [searchResults, setSearchResults] = useState([]);
@@ -324,8 +414,9 @@ export default function TicketView() {
         if (ticket?.assignees?.length > 0) {
           const current = {
             user_id: ticket.assignees[0]?.assign_to,
-            first_name: ticket.assignees[0]?.assign_to_first_name,
-            last_name: ticket.assignees[0]?.assign_to_last_name,
+            first_name: ticket.assignees[0]?.assign_to_first_name || ticket.assignees[0]?.assign_to_username?.split(" ")[0] || "",
+            last_name: ticket.assignees[0]?.assign_to_last_name || ticket.assignees[0]?.assign_to_username?.split(" ").slice(1).join(" ") || "",
+            email: ticket.assignees[0]?.assign_to_email || "",
           };
           setSearchResults([current]);
         } else {
@@ -337,11 +428,12 @@ export default function TicketView() {
       setSearchLoading(true);
       try {
         const res = await createAPIEndPointAuth(
-          `clinic_team/search?query=${debouncedSearch}`
+          `clinic_team/search?query=${encodeURIComponent(debouncedSearch)}`
         ).fetchAll();
         setSearchResults(res?.data?.results || []);
       } catch (err) {
         console.error("Failed to search team members", err);
+        setSearchResults([]);
       } finally {
         setSearchLoading(false);
       }
@@ -349,25 +441,44 @@ export default function TicketView() {
     search();
   }, [debouncedSearch, ticket]);
 
-  // ✅ Search Team Members
+  // ✅ Search Team Members - Fetch current assignee when modal opens
   useEffect(() => {
-    if (assignModalOpen && !debouncedSearch) {
+    if (assignModalOpen && !debouncedSearch && ticket?.assignees?.length > 0) {
       (async () => {
         setSearchLoading(true);
         try {
-          const res = await createAPIEndPointAuth(
-            `clinic_team/search?query=${ticket.assignees[-1]?.assign_to_username
-            }`
-          ).fetchAll();
-          setSearchResults(res?.data?.results || []);
+          const currentAssignee = ticket.assignees[0];
+          const username = currentAssignee?.assign_to_username || "";
+          
+          if (username) {
+            const res = await createAPIEndPointAuth(
+              `clinic_team/search?query=${encodeURIComponent(username)}`
+            ).fetchAll();
+            
+            // Include current assignee in results if not already present
+            const results = res?.data?.results || [];
+            const currentAssigneeObj = {
+              user_id: currentAssignee.assign_to,
+              first_name: currentAssignee.assign_to_first_name || username.split(" ")[0] || "",
+              last_name: currentAssignee.assign_to_last_name || username.split(" ").slice(1).join(" ") || "",
+              email: currentAssignee.assign_to_email || "",
+            };
+            
+            // Check if current assignee is already in results
+            const exists = results.some(r => r.user_id === currentAssigneeObj.user_id);
+            setSearchResults(exists ? results : [currentAssigneeObj, ...results]);
+          } else {
+            setSearchResults([]);
+          }
         } catch (err) {
           console.error("Failed to fetch team", err);
+          setSearchResults([]);
         } finally {
           setSearchLoading(false);
         }
       })();
     }
-  }, [assignModalOpen, debouncedSearch]);
+  }, [assignModalOpen, debouncedSearch, ticket]);
 
   // ✅ Assign Ticket
   const handleAssign = async () => {
