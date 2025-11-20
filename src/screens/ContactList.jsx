@@ -245,7 +245,8 @@ export default function ContactList() {
                         <Tooltip title="Click to change category" arrow>
                           <div className="cursor-pointer inline-block">
                             <Chip
-                              label={toProperCase(getPredictedCategory(contact.data)) || "N/A"}
+                              // label={toProperCase(getPredictedCategory(contact.data)) || "N/A"}
+                              label={toProperCase(contact?.predicted_category) || "N/A"}
                               deleteIcon={
                                 <KeyboardArrowDownIcon
                                   sx={{
