@@ -197,7 +197,7 @@ export default function ContactView() {
         {/* Header */}
         <div className="flex flex-wrap items-center justify-between w-full gap-3">
           <div className="flex items-center gap-3">
-            <BackButton />
+            <BackButton self="/contacts"/>
             <h2 className="text-lg md:text-xl font-semibold text-sidebar">
               Contact #{contact.id}
             </h2>

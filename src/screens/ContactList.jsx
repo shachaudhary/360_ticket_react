@@ -232,7 +232,7 @@ export default function ContactList() {
                         />
                       </td>
                       <td className="px-4 py-3 border-b border-[#E5E7EB]">
-                        <span className="word-break-all max-w-10">
+                        <span className="word-break-all max-w-10 lowercase">
                           {contact.email || "N/A"}
                         </span>
                       </td>

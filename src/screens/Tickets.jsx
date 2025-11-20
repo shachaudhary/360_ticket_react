@@ -44,8 +44,11 @@ export default function Tickets() {
   const [categoryFilter, setCategoryFilter] = useState("");
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
-  const [userFilter, setUserFilter] = useState("");
+  const [userFilter, setUserFilter] = useState("assign_to"); // Default to "assigned"
   const [categories, setCategories] = useState([]);
+  
+  // Check if user is admin
+  const isAdmin = user?.user_role?.toLowerCase() === "admin";
 
   // 🔹 Debounce effect
   useEffect(() => {
@@ -319,26 +322,36 @@ export default function Tickets() {
         <div className="mb-0.5 col-span-1 sm:col-span-2 lg:col-span-6 flex flex-col lg:flex-row items-stretch lg:items-center gap-2">
           {/* Filter Buttons */}
           <div className="flex flex-wrap gap-2">
-            {[
-              { value: "", label: "All" },
-              { value: "assign_to", label: "Assigned" },
-              { value: "assign_by", label: "Created" },
-              { value: "followup", label: "Following" },
-              { value: "tag", label: "Tagged" },
-            ].map((filter) => (
-              <button
-                key={filter.value}
-                onClick={() =>
-                  setUserFilter(userFilter === filter.value ? "" : filter.value)
-                }
-                className={`px-3 py-[6.15px] !text-xs font-medium rounded-lg border transition-all duration-500 ${userFilter === filter.value
-                    ? "bg-brand-500 text-white border-brand-500 hover:bg-brand-600"
-                    : "border border-[#E5E7EB] text-[#969AA1] hover:bg-gray-50"
-                  }`}
-              >
-                {filter.label}
-              </button>
-            ))}
+            {(() => {
+              // Base filters (without "All")
+              const baseFilters = [
+                { value: "assign_to", label: "Assigned" },
+                { value: "assign_by", label: "Created" },
+                { value: "followup", label: "Following" },
+                { value: "tag", label: "Tagged" },
+              ];
+              
+              // Add "All" at the end only for admins
+              const allFilter = { value: "", label: "All" };
+              const filters = isAdmin 
+                ? [...baseFilters, allFilter] 
+                : baseFilters;
+              
+              return filters.map((filter) => (
+                <button
+                  key={filter.value}
+                  onClick={() =>
+                    setUserFilter(userFilter === filter.value ? "assign_to" : filter.value)
+                  }
+                  className={`px-3 py-[6.15px] !text-xs font-medium rounded-lg border transition-all duration-500 ${userFilter === filter.value
+                      ? "bg-brand-500 text-white border-brand-500 hover:bg-brand-600"
+                      : "border border-[#E5E7EB] text-[#969AA1] hover:bg-gray-50"
+                    }`}
+                >
+                  {filter.label}
+                </button>
+              ));
+            })()}
           </div>
 
           {/* Clear Button on the right */}
@@ -350,7 +363,7 @@ export default function Tickets() {
                 setCategoryFilter("");
                 setStartDate(null);
                 setEndDate(null);
-                setUserFilter("");
+                setUserFilter("assign_to"); // Reset to default "assigned"
                 setPage(0);
               }}
               className={`px-3 py-[6.15px] shrink-0 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 transition-all ${query ||
@@ -358,7 +371,7 @@ export default function Tickets() {
                   categoryFilter ||
                   startDate ||
                   endDate ||
-                  userFilter
+                  (userFilter && userFilter !== "assign_to")
                   ? "border border-red-500 bg-red-500 text-white hover:bg-red-600 focus:ring-red-500"
                   : "border border-[#E5E7EB] text-gray-400 hover:border-gray-300 hover:text-gray-600 hover:bg-brand-50 focus:ring-gray-500"
                 }`}

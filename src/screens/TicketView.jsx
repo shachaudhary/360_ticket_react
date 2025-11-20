@@ -24,6 +24,8 @@ import {
   ArrowsRightLeftIcon,
   EyeIcon,
   UserPlusIcon,
+  ArrowUpTrayIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { motion, AnimatePresence } from "framer-motion";
 import { useParams } from "react-router-dom";
@@ -364,6 +366,11 @@ export default function TicketView() {
   // 🔹 Notification logs state
   const [notificationLogs, setNotificationLogs] = useState([]);
 
+  // 🔹 File upload state
+  const [files, setFiles] = useState([]);
+  const [dragActive, setDragActive] = useState(false);
+  const [uploadingFiles, setUploadingFiles] = useState(false);
+
   // ✅ Fetch Ticket
   const fetchTicket = useCallback(async () => {
     setIsFetching(true);
@@ -387,6 +394,20 @@ export default function TicketView() {
   useEffect(() => {
     fetchTicket();
   }, [fetchTicket]);
+
+  // 🔹 Initialize files from ticket when ticket is loaded
+  useEffect(() => {
+    if (ticket?.files) {
+      const existingFiles = ticket.files.map((f) => ({
+        name: f.name || f.url.split("/").pop(),
+        url: f.url,
+        isExisting: true,
+      }));
+      setFiles(existingFiles);
+    } else {
+      setFiles([]);
+    }
+  }, [ticket]);
 
   // ✅ Fetch Notification Logs
   useEffect(() => {
@@ -499,6 +520,50 @@ export default function TicketView() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // 🔹 Handle file upload
+  const handleFileUpload = async () => {
+    const newFiles = files.filter((f) => !f.isExisting);
+    if (newFiles.length === 0) {
+      toast.error("Please select files to upload");
+      return;
+    }
+
+    try {
+      setUploadingFiles(true);
+      const formData = new FormData();
+      formData.append("ticket_id", id); // Add ticket_id to FormData
+      newFiles.forEach((file) => {
+        formData.append("files", file.file || file);
+      });
+
+      await createAPIEndPoint(`ticket/${id}`).patch(formData);
+      toast.success("Files uploaded successfully");
+      fetchTicket(); // Refresh ticket to get updated files
+      // Clear new files from state after successful upload
+      setFiles((prev) => prev.filter((f) => f.isExisting));
+    } catch (err) {
+      console.error("Failed to upload files", err);
+      toast.error("Failed to upload files");
+    } finally {
+      setUploadingFiles(false);
+    }
+  };
+
+  // 🔹 Handle file selection
+  const handleFileSelect = (selectedFiles) => {
+    const newFiles = Array.from(selectedFiles).map((file) => ({
+      name: file.name,
+      file: file,
+      isExisting: false,
+    }));
+    setFiles((prev) => [...prev, ...newFiles]);
+  };
+
+  // 🔹 Remove file from list
+  const handleRemoveFile = (index) => {
+    setFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
   // ✅ Reusable Logs List
@@ -701,53 +766,234 @@ export default function TicketView() {
               </div>
             </div>
 
-            {/* Attached Files */}
-            {ticket.files?.length > 0 && (
-              <div className="mt-4">
-                <Typography variant="subtitle2" sx={{ mb: 1 }}>
+            {/* Attached Files Section */}
+            <div className="mt-4 border border-gray-200 rounded-lg py-2.5 px-3.5">
+              <div className="flex items-center justify-between mb-1">
+                <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
                   Attached Files
                 </Typography>
-
-                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-                  {ticket.files.map((file, idx) => {
-                    const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(
-                      file.url
-                    );
-                    const fileName = file.url.split("/").pop();
-
-                    // shorten file name if too long
-                    const shortName =
-                      fileName.length > 15
-                        ? fileName.substring(0, 8) + "..." + fileName.slice(-7)
-                        : fileName;
-
-                    return (
-                      <a
-                        key={idx}
-                        href={file.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="group relative flex items-center gap-2 rounded-md border border-gray-200 bg-gray-50 px-1.5 py-1.5 text-xs text-gray-600 hover:bg-white shadow-sm hover:shadow transition-all"
-                      >
-                        {isImage ? (
-                          <img
-                            src={file.url}
-                            alt={fileName}
-                            className="h-10 w-10 rounded object-cover border border-gray-300"
-                          />
-                        ) : (
-                          <div className="flex h-10 w-10 items-center justify-center rounded bg-gray-200 text-gray-500">
-                            📄
-                          </div>
-                        )}
-                        <span className="truncate">{shortName}</span>
-                      </a>
-                    );
-                  })}
+                <div className="flex items-center gap-2">
+                  <input
+                    type="file"
+                    id="fileUploadTicket"
+                    multiple
+                    className="hidden"
+                    onChange={(e) => {
+                      if (e.currentTarget.files && e.currentTarget.files.length > 0) {
+                        handleFileSelect(e.currentTarget.files);
+                      }
+                    }}
+                  />
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={() => document.getElementById("fileUploadTicket")?.click()}
+                    sx={{ px:1.5 }}
+                    // sx={{
+                    //   textTransform: "none",
+                    //   borderRadius: 1.25,
+                    //   borderColor: "#824EF2",
+                    //   color: "#824EF2",
+                    //   "&:hover": {
+                    //     borderColor: "#824EF2",
+                    //     backgroundColor: "#F3F4F6",
+                    //   },
+                    // }}
+                  >
+                    <ArrowUpTrayIcon className="h-4 w-4 mr-1" />
+                    Upload
+                  </Button>
                 </div>
               </div>
-            )}
 
+              {/* Existing Files Display */}
+              {files.filter((f) => f.isExisting).length > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-4">
+                  {files
+                    .filter((f) => f.isExisting)
+                    .map((file, idx) => {
+                      const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(
+                        file.url
+                      );
+                      const fileName = file.name || file.url.split("/").pop();
+
+                      // shorten file name if too long
+                      const shortName =
+                        fileName.length > 15
+                          ? fileName.substring(0, 8) + "..." + fileName.slice(-7)
+                          : fileName;
+
+                      return (
+                        <a
+                          key={idx}
+                          href={file.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="group relative flex items-center gap-2 rounded-md border border-gray-200 bg-gray-50 px-1.5 py-1.5 text-xs text-gray-600 hover:bg-white shadow-sm hover:shadow transition-all"
+                        >
+                          {isImage ? (
+                            <img
+                              src={file.url}
+                              alt={fileName}
+                              className="h-10 w-10 rounded object-cover border border-gray-300"
+                            />
+                          ) : (
+                            <div className="flex h-10 w-10 items-center justify-center rounded bg-gray-200 text-gray-500">
+                              📄
+                            </div>
+                          )}
+                          <span className="truncate">{shortName}</span>
+                        </a>
+                      );
+                    })}
+                </div>
+              ) : (
+                <Typography variant="body2" color="text.secondary">
+                  No files yet
+                </Typography>
+              )}
+
+              {/* File Upload Area - Commented out for now */}
+              {/* <div
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setDragActive(true);
+                }}
+                onDragLeave={() => setDragActive(false)}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setDragActive(false);
+                  if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                    handleFileSelect(e.dataTransfer.files);
+                  }
+                }}
+                className={`min-h-32 relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-center transition-all ${
+                  dragActive
+                    ? "border-brand-500 bg-purple-50 scale-[1.01]"
+                    : "border-[#D1D5DB] bg-[#FFF]"
+                }`}
+              >
+                <input
+                  type="file"
+                  id="fileUploadTicket"
+                  multiple
+                  className="hidden"
+                  onChange={(e) => {
+                    if (e.currentTarget.files && e.currentTarget.files.length > 0) {
+                      handleFileSelect(e.currentTarget.files);
+                    }
+                  }}
+                />
+                <label
+                  htmlFor="fileUploadTicket"
+                  className="cursor-pointer flex flex-col items-center text-sm font-medium text-gray-600"
+                >
+                  <ArrowUpTrayIcon
+                    className={`h-8 w-8 mb-2 transition-colors ${
+                      dragActive || files.filter((f) => !f.isExisting).length > 0
+                        ? "text-brand-500"
+                        : "text-gray-400"
+                    }`}
+                  />
+                  <span className="block">Drag & drop files here</span>
+                  <span className="text-gray-400">or click to upload</span>
+                </label>
+              </div> */}
+
+              {/* Preview New Files */}
+              {files.filter((f) => !f.isExisting).length > 0 && (
+                <div className="mt-4">
+                  <Typography variant="caption" sx={{ mb: 1, fontWeight: 600, color: "#7E858D" }}>
+                    New Files to Upload
+                  </Typography>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                    {files
+                      .map((file, originalIndex) => {
+                        if (file.isExisting) return null;
+                        
+                        const fileObj = file.file || file;
+                        const isImage = fileObj.type?.startsWith("image/");
+                        const fileName = file.name || fileObj.name;
+
+                        return (
+                          <div
+                            key={originalIndex}
+                            className="relative flex flex-col items-center border rounded-lg p-2 bg-gray-50"
+                          >
+                            {/* Show preview if image */}
+                            {isImage ? (
+                              <img
+                                src={URL.createObjectURL(fileObj)}
+                                alt={fileName}
+                                className="h-20 w-full object-cover rounded"
+                              />
+                            ) : (
+                              <div className="h-20 w-full flex items-center justify-center bg-gray-100 text-xs text-gray-600 rounded">
+                                {fileName.endsWith(".pdf") ? "📄 PDF File" : fileName}
+                              </div>
+                            )}
+
+                            {/* Filename */}
+                            <Typography
+                              variant="caption"
+                              className="!mt-1 truncate w-full text-center text-xs"
+                            >
+                              {fileName}
+                            </Typography>
+
+                            {/* Remove button */}
+                            <Button
+                              size="small"
+                              onClick={() => handleRemoveFile(originalIndex)}
+                              sx={{
+                                position: "absolute",
+                                top: -8,
+                                right: -8,
+                                minWidth: 0,
+                                width: 24,
+                                height: 24,
+                                borderRadius: "50%",
+                                p: 0,
+                                backgroundColor: "#ef4444",
+                                color: "white",
+                                "&:hover": {
+                                  backgroundColor: "#dc2626",
+                                },
+                              }}
+                            >
+                              <XMarkIcon className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        );
+                      })
+                      .filter(Boolean)}
+                  </div>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleFileUpload}
+                    disabled={uploadingFiles}
+                    sx={{
+                      mt: 2,
+                      textTransform: "none",
+                      borderRadius: 1.25,
+                      boxShadow: "none",
+                    }}
+                  >
+                    {uploadingFiles ? (
+                      <>
+                        <CircularProgress size={16} sx={{ color: "white", mr: 1 }} />
+                        Uploading...
+                      </>
+                    ) : (
+                      "Upload Files"
+                    )}
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            <Divider  sx={{ mt: 2 }}/>
 
             <div className="grid md:grid-cols-1 gap-5">
               {/* 🔹 Assignment Logs Section */}
