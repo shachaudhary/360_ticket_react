@@ -63,10 +63,16 @@ const AppointmentForm = () => {
         const filtered = data.filter((loc) => {
           const name = (loc.location_name || "").trim().toLowerCase();
           return (
+            loc.id !== 29 &&
+            loc.id !== 32 &&
+            loc.id !== 30 &&
             loc.id !== 25 &&
             loc.id !== 28 &&
             name !== "sales team" &&
-            name !== "insurance"
+            name !== "insurance" &&
+            name !== "anonymous" &&
+            name !== "pediatrics" &&
+            name !== "orthodontics"
           );
         });
 

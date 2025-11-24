@@ -83,10 +83,16 @@ const NewHireForm = () => {
         const filtered = data.filter((loc) => {
           const name = (loc.location_name || "").trim().toLowerCase();
           return (
+            loc.id !== 29 &&
+            loc.id !== 32 &&
+            loc.id !== 30 &&
             loc.id !== 25 &&
             loc.id !== 28 &&
             name !== "sales team" &&
-            name !== "insurance"
+            name !== "insurance" &&
+            name !== "anonymous" &&
+            name !== "pediatrics" &&
+            name !== "orthodontics"
           );
         });
 
@@ -639,11 +645,10 @@ const NewHireForm = () => {
           <div className="bg-white p-8 lg:p-12 rounded-b-2xl">
             {submitStatus && (
               <div
-                className={`mb-6 p-4 rounded-md ${
-                  submitStatus.type === "success"
+                className={`mb-6 p-4 rounded-md ${submitStatus.type === "success"
                     ? "bg-purple-50 border border-green-200 text-green-800"
                     : "bg-red-50 border border-red-200 text-red-800"
-                }`}
+                  }`}
               >
                 {submitStatus.message}
               </div>
@@ -804,9 +809,8 @@ const NewHireForm = () => {
                     id="newHireName"
                     value={formData.newHireName}
                     onChange={handleInputChange}
-                    className={`mt-2 block w-full border-b ${
-                      errors.newHireName ? "border-red-500" : "border-gray-300"
-                    } bg-transparent py-2.5 px-1 text-gray-900 placeholder-gray-400 focus:border-brand-500 focus:outline-none focus:ring-0 sm:text-sm`}
+                    className={`mt-2 block w-full border-b ${errors.newHireName ? "border-red-500" : "border-gray-300"
+                      } bg-transparent py-2.5 px-1 text-gray-900 placeholder-gray-400 focus:border-brand-500 focus:outline-none focus:ring-0 sm:text-sm`}
                   />
                   {errors.newHireName && (
                     <p className="mt-1 text-sm text-red-600">
@@ -828,9 +832,8 @@ const NewHireForm = () => {
                     id="email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    className={`mt-2 block w-full border-b ${
-                      errors.email ? "border-red-500" : "border-gray-300"
-                    } bg-transparent py-2.5 px-1 text-gray-900 placeholder-gray-400 focus:border-brand-500 focus:outline-none focus:ring-0 sm:text-sm`}
+                    className={`mt-2 block w-full border-b ${errors.email ? "border-red-500" : "border-gray-300"
+                      } bg-transparent py-2.5 px-1 text-gray-900 placeholder-gray-400 focus:border-brand-500 focus:outline-none focus:ring-0 sm:text-sm`}
                   />
                   {errors.email && (
                     <p className="mt-1 text-sm text-red-600">{errors.email}</p>
@@ -845,11 +848,10 @@ const NewHireForm = () => {
                     {jobTitleOptions.map((title) => (
                       <label
                         key={title}
-                        className={`flex items-center p-3 border rounded-lg cursor-pointer transition-all duration-200 ${
-                          formData.jobTitle === title
+                        className={`flex items-center p-3 border rounded-lg cursor-pointer transition-all duration-200 ${formData.jobTitle === title
                             ? "ring-2 ring-brand-500 border-brand-500 bg-purple-50"
                             : "border-gray-300 hover:border-brand-300"
-                        }`}
+                          }`}
                       >
                         <input
                           type="checkbox"
@@ -885,11 +887,10 @@ const NewHireForm = () => {
                         value={formData.jobTitleOther}
                         onChange={handleInputChange}
                         placeholder="e.g., Treatment Coordinator (Floater)"
-                        className={`mt-2 block w-full border-b ${
-                          errors.jobTitleOther
+                        className={`mt-2 block w-full border-b ${errors.jobTitleOther
                             ? "border-red-500"
                             : "border-gray-300"
-                        } bg-transparent py-2.5 px-1 text-gray-900 placeholder-gray-400 focus:border-brand-500 focus:outline-none focus:ring-0 sm:text-sm`}
+                          } bg-transparent py-2.5 px-1 text-gray-900 placeholder-gray-400 focus:border-brand-500 focus:outline-none focus:ring-0 sm:text-sm`}
                       />
                       {errors.jobTitleOther && (
                         <p className="mt-1 text-sm text-red-600">
@@ -910,11 +911,10 @@ const NewHireForm = () => {
                     {hireTypes.map((type) => (
                       <label
                         key={type}
-                        className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all duration-200 ${
-                          formData.hireType === type
+                        className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all duration-200 ${formData.hireType === type
                             ? "ring-2 ring-brand-500 border-brand-500 bg-purple-50"
                             : "border-gray-300 hover:border-brand-300"
-                        }`}
+                          }`}
                       >
                         <input
                           type="radio"
@@ -943,11 +943,10 @@ const NewHireForm = () => {
                     {departments.map((dept) => (
                       <label
                         key={dept}
-                        className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all duration-200 ${
-                          formData.department === dept
+                        className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all duration-200 ${formData.department === dept
                             ? "ring-2 ring-brand-500 border-brand-500 bg-purple-50"
                             : "border-gray-300 hover:border-brand-300"
-                        }`}
+                          }`}
                       >
                         <input
                           type="radio"
@@ -983,11 +982,10 @@ const NewHireForm = () => {
                       {locations.map((loc) => (
                         <label
                           key={loc.id}
-                          className={`flex items-center p-2 border rounded-lg cursor-pointer transition-all duration-200 ${
-                            formData.location === loc.location_name
+                          className={`flex items-center p-2 border rounded-lg cursor-pointer transition-all duration-200 ${formData.location === loc.location_name
                               ? "ring-2 ring-brand-500 border-brand-500 bg-purple-50"
                               : "border-gray-300 bg-white hover:border-brand-300"
-                          }`}
+                            }`}
                         >
                           <input
                             type="radio"
@@ -1075,11 +1073,10 @@ const NewHireForm = () => {
                     {payTypes.map((type) => (
                       <label
                         key={type}
-                        className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all duration-200 ${
-                          formData.payType === type
+                        className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all duration-200 ${formData.payType === type
                             ? "ring-2 ring-brand-500 border-brand-500 bg-purple-50"
                             : "border-gray-300 hover:border-brand-300"
-                        }`}
+                          }`}
                       >
                         <input
                           type="radio"
@@ -1114,9 +1111,8 @@ const NewHireForm = () => {
                     value={formData.payRate}
                     onChange={handleInputChange}
                     placeholder="e.g., 25.00 or 75,000"
-                    className={`mt-2 block w-full border-b ${
-                      errors.payRate ? "border-red-500" : "border-gray-300"
-                    } bg-transparent py-2.5 px-1 text-gray-900 placeholder-gray-400 focus:border-brand-500 focus:outline-none focus:ring-0 sm:text-sm`}
+                    className={`mt-2 block w-full border-b ${errors.payRate ? "border-red-500" : "border-gray-300"
+                      } bg-transparent py-2.5 px-1 text-gray-900 placeholder-gray-400 focus:border-brand-500 focus:outline-none focus:ring-0 sm:text-sm`}
                   />
                   {errors.payRate && (
                     <p className="mt-1 text-sm text-red-600">
@@ -1139,9 +1135,8 @@ const NewHireForm = () => {
                     value={formData.supervisor}
                     onChange={handleInputChange}
                     placeholder="Full Name of Manager"
-                    className={`mt-2 block w-full border-b ${
-                      errors.supervisor ? "border-red-500" : "border-gray-300"
-                    } bg-transparent py-2.5 px-1 text-gray-900 placeholder-gray-400 focus:border-brand-500 focus:outline-none focus:ring-0 sm:text-sm`}
+                    className={`mt-2 block w-full border-b ${errors.supervisor ? "border-red-500" : "border-gray-300"
+                      } bg-transparent py-2.5 px-1 text-gray-900 placeholder-gray-400 focus:border-brand-500 focus:outline-none focus:ring-0 sm:text-sm`}
                   />
                   {errors.supervisor && (
                     <p className="mt-1 text-sm text-red-600">
@@ -1214,19 +1209,18 @@ const NewHireForm = () => {
                   type="button"
                   onClick={handleSubmit}
                   disabled={isSubmitting}
-                  className={`w-full sm:w-auto rounded-md px-8 py-3.5 text-base font-semibold text-white shadow-sm transition-colors duration-300 ${
-                    isSubmitting
+                  className={`w-full sm:w-auto rounded-md px-8 py-3.5 text-base font-semibold text-white shadow-sm transition-colors duration-300 ${isSubmitting
                       ? "bg-brand-400 cursor-not-allowed"
                       : "bg-brand-500 hover:bg-brand-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
-                  }`}
+                    }`}
                 >
                   {isSubmitting
                     ? isEditMode
                       ? "Updating..."
                       : "Submitting..."
                     : isEditMode
-                    ? "Update"
-                    : "Submit"}
+                      ? "Update"
+                      : "Submit"}
                 </button>
               </div>
             </div>

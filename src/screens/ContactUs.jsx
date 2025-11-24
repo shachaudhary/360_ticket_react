@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   MapPin,
@@ -9,9 +9,14 @@ import {
   AlertTriangle,
   Loader2,
 } from "lucide-react";
+import { Autocomplete, TextField } from "@mui/material";
 import { createAPIEndPoint } from "../config/api/api";
+import { createAPIEndPointAuth } from "../config/api/apiAuth";
+import { useApp } from "../state/AppContext";
+import { toProperCase1 } from "../utils/formatting";
 
 export default function ContactForm() {
+  const { user } = useApp();
   const [formData, setFormData] = useState({
     clinic_id: 1,
     first_name: "",
@@ -19,6 +24,8 @@ export default function ContactForm() {
     phone: "+1 ",
     email: "",
     message: "",
+    location_id: null,
+    location: "",
   });
 
   const [errors, setErrors] = useState({});
@@ -33,6 +40,45 @@ export default function ContactForm() {
   const [errorMessage, setErrorMessage] = useState("");
 
   const [loading, setLoading] = useState(false);
+  const [locations, setLocations] = useState([]);
+
+  // Fetch Locations
+  useEffect(() => {
+    const fetchLocations = async () => {
+      try {
+        const res = await createAPIEndPointAuth(
+          `clinic_locations/get_all/${user?.clinic_id || 1}`
+        ).fetchAll();
+
+        const data = res.data?.locations || [];
+        const filtered = data.filter((loc) => {
+          const name = (loc.location_name || "").trim().toLowerCase();
+          return (
+            loc.id !== 25 && // Sales Team
+            loc.id !== 28 && // Insurance
+            loc.id !== 30 && // Anonymous
+            name !== "sales team" &&
+            name !== "insurance" &&
+            name !== "anonymous"
+          );
+        });
+
+        // Sort locations alphabetically - check display_name first, then location_name
+        const sorted = filtered.sort((a, b) => {
+          const nameA = (a.display_name?.trim() || a.location_name?.trim() || "").toLowerCase();
+          const nameB = (b.display_name?.trim() || b.location_name?.trim() || "").toLowerCase();
+          return nameA.localeCompare(nameB);
+        });
+
+        setLocations(sorted);
+      } catch (err) {
+        console.error("Error fetching locations:", err);
+      }
+    };
+    if (user?.clinic_id) {
+      fetchLocations();
+    }
+  }, [user?.clinic_id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -67,6 +113,38 @@ export default function ContactForm() {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
+
+  // Helper function to get location display name with prefix
+  const getLocationDisplayName = (location) => {
+    if (!location) return "";
+    const name = location.display_name?.trim() || location.location_name?.trim() || "";
+    if (!name) return "";
+    // Add "Dental 360 - " prefix if not already present
+    return name.startsWith("Dental 360 - ") ? name : `Dental 360 - ${name}`;
+  };
+
+  const handleLocationChange = (event, newValue) => {
+    if (newValue) {
+      setFormData((prev) => ({
+        ...prev,
+        location: getLocationDisplayName(newValue),
+        location_id: newValue.id,
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        location: "",
+        location_id: null,
+      }));
+    }
+    if (errors.location) {
+      setErrors((prev) => ({ ...prev, location: "" }));
+    }
+  };
+
+  const selectedLocation = locations.find(
+    (loc) => loc.id === formData.location_id
+  ) || null;
 
   const validateField = (name, value) => {
     let error = "";
@@ -140,9 +218,11 @@ export default function ContactForm() {
         setFormData({
           first_name: "",
           last_name: "",
-          phone: "",
+          phone: "+1 ",
           email: "",
           message: "",
+          location_id: null,
+          location: "",
         });
         setTouched({});
         setErrors({});
@@ -381,6 +461,153 @@ export default function ContactForm() {
                 />
               </div>
 
+              {/* Location Section - Optional */}
+              <div>
+                <label className="text-gray-700 font-semibold text-xs block mb-2">
+                  Location (Optional)
+                </label>
+                <Autocomplete
+                  size="small"
+                  fullWidth
+                  options={locations}
+                  value={selectedLocation}
+                  onChange={handleLocationChange}
+                  getOptionLabel={(option) => {
+                    if (!option) return "";
+                    return getLocationDisplayName(option);
+                  }}
+                  filterOptions={(options, { inputValue }) => {
+                    const searchTerm = inputValue.toLowerCase();
+                    return options.filter((option) => {
+                      const displayName = (option.display_name || option.location_name || "").toLowerCase();
+                      const address = (option.address || "").toLowerCase();
+                      const city = (option.city || "").toLowerCase();
+                      const state = (option.state || "").toLowerCase();
+                      return (
+                        displayName.includes(searchTerm) ||
+                        address.includes(searchTerm) ||
+                        city.includes(searchTerm) ||
+                        state.includes(searchTerm)
+                      );
+                    });
+                  }}
+                  isOptionEqualToValue={(option, value) =>
+                    option.id === value.id
+                  }
+                  renderOption={(props, option) => {
+                    const addressParts = [
+                      option.address && option.address !== "N/A" ? toProperCase1(option.address) : null,
+                      // option.city && option.city !== "N/A" ? toProperCase1(option.city) : null,
+                      option.state && option.state !== "N/A" ? toProperCase1(option.state) : null,
+                      option.postal_code && option.postal_code !== "0" ? option.postal_code : null,
+                    ].filter(Boolean);
+                    const fullAddress = addressParts.join(", ");
+                    const isSelected = selectedLocation && selectedLocation.id === option.id;
+                    
+                    return (
+                      <li 
+                        {...props} 
+                        key={option.id} 
+                        className={`py-2.5 px-3 cursor-pointer transition-all duration-200 ${
+                          isSelected 
+                            ? "bg-gray-100" 
+                            : "hover:bg-gray-100"
+                        }`}
+                      >
+                        <div className="flex flex-col">
+                          <span className="font-semibold text-gray-800 text-sm">
+                            {getLocationDisplayName(option)}
+                          </span>
+                          {fullAddress && (
+                            <span className="text-xs text-gray-600 mt-0.5">
+                              {fullAddress}
+                            </span>
+                          )}
+                    
+                        </div>
+                      </li>
+                    );
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      placeholder="Search location by name or address..."
+                      className="!bg-white"
+                      autoComplete="off"
+                      inputProps={{
+                        ...params.inputProps,
+                        autoComplete: "off",
+                        autoCorrect: "off",
+                        autoCapitalize: "off",
+                        spellCheck: "false",
+                      }}
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "12px",
+                          border: "2px solid #E5E7EB",
+                          "&:hover": {
+                            borderColor: "#93C5FD",
+                          },
+                          "&.Mui-focused": {
+                            borderColor: "#3B82F6",
+                            "& fieldset": {
+                              borderColor: "#3B82F6",
+                            },
+                          },
+                          "& fieldset": {
+                            border: "none",
+                          },
+                        },
+                      }}
+                    />
+                  )}
+                  noOptionsText={
+                    locations.length === 0
+                      ? "Loading locations..."
+                      : "No locations found"
+                  }
+                />
+                {/* Display selected location details */}
+                {selectedLocation && (
+                  <div className="mt-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <div className="flex flex-col gap-1">
+                      {getLocationDisplayName(selectedLocation) && (
+                        <div className="mb-2">
+                          <span className="text-sm font-semibold text-gray-800">
+                            {getLocationDisplayName(selectedLocation)}
+                          </span>
+                        </div>
+                      )}
+                      {selectedLocation.address && selectedLocation.address !== "N/A" && (
+                        <div className="flex items-start gap-2">
+                          <MapPin className="w-3.5 h-3.5 text-gray-500 mt-0.5 flex-shrink-0" />
+                          <span className="text-xs text-gray-700">
+                            {[
+                              selectedLocation.address && selectedLocation.address !== "N/A" ? toProperCase1(selectedLocation.address) : null,
+                              // selectedLocation.city && selectedLocation.city !== "N/A" ? toProperCase1(selectedLocation.city) : null,
+                              selectedLocation.state && selectedLocation.state !== "N/A" ? toProperCase1(selectedLocation.state) : null,
+                              selectedLocation.postal_code && selectedLocation.postal_code !== "0" ? selectedLocation.postal_code : null,
+                            ].filter(Boolean).join(", ")}
+                          </span>
+                        </div>
+                      )}
+                      {selectedLocation.phone && (
+                        <div className="flex items-center gap-2">
+                          <Phone className="w-3.5 h-3.5 text-gray-500 flex-shrink-0" />
+                          <span className="text-xs text-gray-700">{selectedLocation.phone}</span>
+                        </div>
+                      )}
+                      {selectedLocation.email && (
+                        <div className="flex items-center gap-2">
+                          <Mail className="w-3.5 h-3.5 text-gray-500 flex-shrink-0" />
+                          <span className="text-xs text-gray-700">{selectedLocation.email}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <motion.button
                 type="button"
                 onClick={handleSubmit}
@@ -389,9 +616,8 @@ export default function ContactForm() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 disabled={loading}
-                className={`w-full sm:w-auto ${
-                  loading ? "cursor-not-allowed opacity-80" : ""
-                } bg-gradient-to-r from-blue-600 to-blue-600 hover:from-blue-700 hover:to-blue-700 text-white font-semibold text-sm px-10 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 group`}
+                className={`w-full sm:w-auto ${loading ? "cursor-not-allowed opacity-80" : ""
+                  } bg-gradient-to-r from-blue-600 to-blue-600 hover:from-blue-700 hover:to-blue-700 text-white font-semibold text-sm px-10 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 group`}
               >
                 {loading ? (
                   <>

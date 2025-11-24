@@ -426,7 +426,7 @@ export default function TicketView() {
     };
 
     fetchNotificationLogs();
-  }, [id, user?.id]);
+  }, [id, user?.id, ticket]);
 
   useEffect(() => {
     const search = async () => {
