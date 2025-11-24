@@ -26,6 +26,8 @@ import ContactView from "../screens/ContactView.jsx";
 import NotFound from "../screens/NotFound.jsx";
 import AppointmentForm from "../screens/AppointmentForm.jsx";
 import FormEntryEdit from "../screens/FormEntryEdit.jsx";
+import PediatricAppointmentForm from "../screens/PediatricAppointmentForm.jsx";
+import OrthoAppointmentForm from "../screens/OrthoAppointmentForm.jsx";
 
 // ✅ Add your favicon paths (public/ folder ke relative)
 const DEFAULT_FAVICON = "/favicon.ico";
@@ -49,6 +51,8 @@ export default function App() {
     "/forms/new-hire-form": "New Hire Form", // ✅ add careers
     "/forms/appointment-form": "Appointment Form", // ✅ add appointment
     "/contact-us": "Contact Us", // ✅ add careers
+    "/pediatric-appointment": "Pediatric Appointment", // ✅ add pediatric appointment
+    "/ortho-appointment": "Ortho Appointment Form", // ✅ add ortho appointment
   };
 
   useEffect(() => {
@@ -74,6 +78,8 @@ export default function App() {
         <Route path="/auth/reset-password" element={<ResetPassword />} />
 
         <Route path="/contact-us" element={<ContactForm />} />
+        <Route path="/pediatric-appointment" element={<PediatricAppointmentForm />} />
+        <Route path="/ortho-appointment" element={<OrthoAppointmentForm />} />
 
         <Route
           path="/"
