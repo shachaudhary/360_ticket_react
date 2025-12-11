@@ -28,6 +28,9 @@ import AppointmentForm from "../screens/AppointmentForm.jsx";
 import FormEntryEdit from "../screens/FormEntryEdit.jsx";
 import PediatricAppointmentForm from "../screens/PediatricAppointmentForm.jsx";
 import OrthoAppointmentForm from "../screens/OrthoAppointmentForm.jsx";
+import ProjectsList from "../screens/ProjectsList.jsx";
+import ProjectForm from "../screens/ProjectForm.jsx";
+import ProjectView from "../screens/ProjectView.jsx";
 
 // ✅ Add your favicon paths (public/ folder ke relative)
 const DEFAULT_FAVICON = "/favicon.ico";
@@ -53,6 +56,8 @@ export default function App() {
     "/contact-us": "Contact Us", // ✅ add careers
     "/pediatric-appointment": "Pediatric Appointment", // ✅ add pediatric appointment
     "/ortho-appointment": "Ortho Appointment Form", // ✅ add ortho appointment
+    "/projects": "Projects",
+    "/projects/new": "Create Project",
   };
 
   useEffect(() => {
@@ -65,6 +70,13 @@ export default function App() {
     // Handle dynamic routes (like /tickets/:id)
     if (!pageTitle && currentPath.startsWith("/tickets/")) {
       pageTitle = "Ticket Details";
+    }
+    if (!pageTitle && currentPath.startsWith("/projects/")) {
+      if (currentPath.includes("/edit")) {
+        pageTitle = "Edit Project";
+      } else if (currentPath !== "/projects") {
+        pageTitle = "Project Details";
+      }
     }
 
     document.title = pageTitle ? ` Support 360 | ${pageTitle}` : defaultTitle;
@@ -206,6 +218,38 @@ export default function App() {
             element={
               <PageTransition>
                 <SettingsFormTypes />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="/projects"
+            element={
+              <PageTransition>
+                <ProjectsList />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="/projects/new"
+            element={
+              <PageTransition>
+                <ProjectForm />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="/projects/:id/edit"
+            element={
+              <PageTransition>
+                <ProjectForm isEdit={true} />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="/projects/:id"
+            element={
+              <PageTransition>
+                <ProjectView />
               </PageTransition>
             }
           />

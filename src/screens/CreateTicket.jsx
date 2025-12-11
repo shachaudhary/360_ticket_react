@@ -13,7 +13,7 @@ import {
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { ArrowUpTrayIcon } from "@heroicons/react/24/outline";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import dayjs from "dayjs";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -29,6 +29,8 @@ export default function TicketForm({ isEdit = false }) {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useApp();
+  const [searchParams] = useSearchParams();
+  const projectId = searchParams.get("project_id");
   const [loadingTicket, setLoadingTicket] = useState(isEdit);
   const [dragActive, setDragActive] = useState(false);
   const [categories, setCategories] = useState([]);
@@ -135,6 +137,9 @@ export default function TicketForm({ isEdit = false }) {
         formData.append("user_id", user?.id);
         formData.append("clinic_id", 1);
         formData.append("location_id", 30);
+        if (projectId) {
+          formData.append("project_id", projectId);
+        }
 
         let res;
         if (isEdit && id) {
@@ -144,7 +149,11 @@ export default function TicketForm({ isEdit = false }) {
         } else {
           res = await createAPIEndPoint("ticket").create(formData);
           toast.success("Ticket created successfully!");
-          navigate("/tickets");
+          if (projectId) {
+            navigate(`/projects/${projectId}`);
+          } else {
+            navigate("/tickets");
+          }
         }
       } catch (err) {
         toast.error("Error saving ticket");
@@ -191,12 +200,16 @@ export default function TicketForm({ isEdit = false }) {
 
   return (
     <Box component="form" onSubmit={formik.handleSubmit} className=" bg-white">
-      <BackButton self={isEdit ? -1 : "/tickets"} />
 
       <div className="space-y-4 mt-4 border-0">
-        <h2 className="text-lg md:text-xl font-semibold text-sidebar mb-1">
-          {isEdit ? "Edit Ticket" : "Create New Ticket"}
-        </h2>
+        <div className="!flex !items-center !justify-start !gap-2 !mb-1">
+          <BackButton self={isEdit ? -1 : "/tickets"} />
+          <h2 className="text-lg md:text-2xl font-semibold text-sidebar mb-1">
+            {isEdit ? "Edit Ticket" : "Create New Ticket"}
+          </h2>
+        </div>
+
+
 
         {/* Title */}
         <TextField
@@ -311,11 +324,10 @@ export default function TicketForm({ isEdit = false }) {
               ]);
             }
           }}
-          className={`min-h-36 relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-center transition-all ${
-            dragActive
-              ? "border-brand-500 bg-purple-50 scale-[1.01]"
-              : "border-[#D1D5DB] bg-[#FFF]"
-          }`}
+          className={`min-h-36 relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-center transition-all ${dragActive
+            ? "border-brand-500 bg-purple-50 scale-[1.01]"
+            : "border-[#D1D5DB] bg-[#FFF]"
+            }`}
         >
           <input
             type="file"
@@ -335,12 +347,11 @@ export default function TicketForm({ isEdit = false }) {
             className="cursor-pointer flex flex-col items-center text-sm font-medium text-gray-600"
           >
             <ArrowUpTrayIcon
-              className={`h-8 w-8 mb-2 transition-colors ${
-                dragActive ||
+              className={`h-8 w-8 mb-2 transition-colors ${dragActive ||
                 (formik.values.files && formik.values.files.length > 0)
-                  ? "text-brand-500"
-                  : "text-gray-400"
-              }`}
+                ? "text-brand-500"
+                : "text-gray-400"
+                }`}
             />
             <span className="block">Drag & drop files here</span>
             <span className="text-gray-400">or click to upload</span>

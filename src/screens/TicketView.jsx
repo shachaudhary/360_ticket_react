@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import {
   Card,
   Typography,
@@ -18,6 +18,8 @@ import {
   DialogContent,
   DialogActions,
   Tooltip,
+  Chip,
+  IconButton,
 } from "@mui/material";
 import {
   ArrowPathIcon,
@@ -26,7 +28,13 @@ import {
   UserPlusIcon,
   ArrowUpTrayIcon,
   XMarkIcon,
+  MapPinIcon,
+  UserGroupIcon,
+  PaperClipIcon,
+  ChevronRightIcon,
+  ChevronLeftIcon,
 } from "@heroicons/react/24/outline";
+import { MapPin, Phone, Mail } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useParams } from "react-router-dom";
 import { createAPIEndPoint } from "../config/api/api";
@@ -140,6 +148,8 @@ const renderTextParts = (text) => {
 // ✅ Reusable Comments List with expandable body & transitions
 const CommentsList = ({ comments }) => {
   const [expandedMap, setExpandedMap] = useState({});
+  const [needsTruncationMap, setNeedsTruncationMap] = useState({});
+  const contentRefs = useRef({});
 
   const toggleComment = (key) => {
     setExpandedMap((prev) => ({
@@ -155,6 +165,45 @@ const CommentsList = ({ comments }) => {
     overflow: "hidden",
   };
 
+  const expandedStyles = {
+    display: "block",
+    WebkitLineClamp: "unset",
+    WebkitBoxOrient: "unset",
+    overflow: "visible",
+  };
+
+  // Check if content needs truncation by comparing scrollHeight to clientHeight
+  useEffect(() => {
+    const checkTruncation = () => {
+      const newNeedsTruncation = {};
+      Object.keys(contentRefs.current).forEach((key) => {
+        const element = contentRefs.current[key];
+        if (element && !expandedMap[key]) {
+          // Check if content is actually truncated
+          // scrollHeight is the full content height
+          // clientHeight is the visible height (clamped to 2 lines)
+          const scrollHeight = element.scrollHeight;
+          const clientHeight = element.clientHeight;
+          // Add small threshold (2px) to account for rounding differences
+          newNeedsTruncation[key] = scrollHeight > clientHeight + 2;
+        } else {
+          // If expanded, we don't need truncation
+          newNeedsTruncation[key] = false;
+        }
+      });
+      setNeedsTruncationMap(newNeedsTruncation);
+    };
+
+    // Check after render
+    const timeoutId = setTimeout(checkTruncation, 100);
+    // Also check on window resize
+    window.addEventListener("resize", checkTruncation);
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener("resize", checkTruncation);
+    };
+  }, [comments, expandedMap]);
+
   return (
     <Box className="space-y-2">
       {comments?.length > 0 ? (
@@ -162,25 +211,30 @@ const CommentsList = ({ comments }) => {
           {comments.map((c, idx) => {
             const key = c.id || idx;
             const isExpanded = !!expandedMap[key];
+            const needsTruncation = needsTruncationMap[key] ?? false;
+            const isClickable = needsTruncation || isExpanded;
 
             return (
               <motion.div
                 key={key} // 🔑 use stable id if available
-                initial={{ opacity: 0, y: 0 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 0 }}
-                transition={{ duration: 0.25 }}
-                layout // enables smooth reordering
-                onClick={() => toggleComment(key)}
-                role="button"
-                tabIndex={0}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ 
+                  duration: 0.3,
+                  ease: [0.25, 0.1, 0.25, 1]
+                }}
+                onClick={() => isClickable && toggleComment(key)}
+                role={isClickable ? "button" : undefined}
+                tabIndex={isClickable ? 0 : undefined}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
+                  if (isClickable && (e.key === "Enter" || e.key === " ")) {
                     e.preventDefault();
                     toggleComment(key);
                   }
                 }}
-                className="rounded-lg border bg-[#E5E7EB] hover:bg-gray-50 bg-opacity-10 p-3 text-sm cursor-pointer transition-colors"
+                className={`rounded-lg border bg-[#E5E7EB] hover:bg-gray-50 bg-opacity-10 p-3 text-sm transition-colors duration-200 ${isClickable ? "cursor-pointer" : ""
+                  }`}
               >
                 <div className="flex justify-between items-center mb-1">
                   <span className="font-semibold text-gray-500">
@@ -190,15 +244,38 @@ const CommentsList = ({ comments }) => {
                     {convertToCST(c.created_at)}
                   </span>
                 </div>
-                <div
-                  className="text-gray-700 break-words transition-all duration-300"
-                  style={isExpanded ? undefined : clampStyles}
+                <motion.div
+                  ref={(el) => {
+                    if (el) {
+                      contentRefs.current[key] = el;
+                      // Check truncation immediately after ref is set
+                      setTimeout(() => {
+                        if (el && !expandedMap[key]) {
+                          const scrollHeight = el.scrollHeight;
+                          const clientHeight = el.clientHeight;
+                          setNeedsTruncationMap((prev) => ({
+                            ...prev,
+                            [key]: scrollHeight > clientHeight + 2,
+                          }));
+                        }
+                      }, 0);
+                    }
+                  }}
+                  className="text-gray-700 break-words"
+                  initial={false}
+                  animate={isExpanded ? expandedStyles : clampStyles}
+                  transition={{
+                    duration: 0.3,
+                    ease: [0.25, 0.1, 0.25, 1]
+                  }}
                 >
                   {renderCommentWithLinks(c.comment)}
-                </div>
+                </motion.div>
+                {isClickable && (
                 <span className="mt-2 inline-block text-xs font-semibold text-brand-500">
                   {isExpanded ? "Show less" : "Show more"}
                 </span>
+                )}
               </motion.div>
             );
           })}
@@ -371,6 +448,23 @@ export default function TicketView() {
   const [dragActive, setDragActive] = useState(false);
   const [uploadingFiles, setUploadingFiles] = useState(false);
 
+  // 🔹 Location state
+  const [locations, setLocations] = useState([]);
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [locationModalOpen, setLocationModalOpen] = useState(false);
+  const [locationSearchTerm, setLocationSearchTerm] = useState("");
+  const [savingLocation, setSavingLocation] = useState(false);
+
+  // 🔹 Followers state
+  const [followers, setFollowers] = useState([]);
+  const [followerSearchResults, setFollowerSearchResults] = useState([]);
+  const [followerSearchTerm, setFollowerSearchTerm] = useState("");
+  const [followerSearchLoading, setFollowerSearchLoading] = useState(false);
+  const [followerModalOpen, setFollowerModalOpen] = useState(false);
+  const [selectedFollowers, setSelectedFollowers] = useState([]);
+  const [savingFollowers, setSavingFollowers] = useState(false);
+  const debouncedFollowerSearch = useDebounce(followerSearchTerm, 400);
+
   // ✅ Fetch Ticket
   const fetchTicket = useCallback(async () => {
     setIsFetching(true);
@@ -408,6 +502,92 @@ export default function TicketView() {
       setFiles([]);
     }
   }, [ticket]);
+
+  // 🔹 Fetch Locations
+  useEffect(() => {
+    const fetchLocations = async () => {
+      try {
+        const res = await createAPIEndPointAuth(
+          `clinic_locations/get_all/${user?.clinic_id || 1}`
+        ).fetchAll();
+
+        const data = res.data?.locations || [];
+        const filtered = data.filter((loc) => {
+          const name = (loc.location_name || "").trim().toLowerCase();
+          return (
+            loc.id !== 25 && // Sales Team
+            loc.id !== 28 && // Insurance
+            loc.id !== 30 && // Anonymous
+            loc.id !== 29 && // Pediatrics
+            loc.id !== 32 && // Orthodontics
+            name !== "sales team" &&
+            name !== "insurance" &&
+            name !== "anonymous" &&
+            name !== "pediatrics" &&
+            name !== "orthodontics"
+          );
+        });
+
+        const sorted = filtered.sort((a, b) => {
+          const nameA = (a.display_name?.trim() || a.location_name?.trim() || "").toLowerCase();
+          const nameB = (b.display_name?.trim() || b.location_name?.trim() || "").toLowerCase();
+          return nameA.localeCompare(nameB);
+        });
+
+        setLocations(sorted);
+      } catch (err) {
+        console.error("Error fetching locations:", err);
+      }
+    };
+    if (user?.clinic_id) {
+      fetchLocations();
+    }
+  }, [user?.clinic_id]);
+
+  // 🔹 Initialize location from ticket
+  useEffect(() => {
+    if (ticket?.location_id && locations.length > 0) {
+      const location = locations.find((loc) => loc.id === ticket.location_id);
+      if (location) {
+        setSelectedLocation(location);
+      }
+    } else if (ticket?.location_id === null) {
+      setSelectedLocation(null);
+    }
+  }, [ticket?.location_id, locations]);
+
+  // 🔹 Initialize followers from ticket followups
+  useEffect(() => {
+    if (ticket?.followups && Array.isArray(ticket.followups)) {
+      setFollowers(ticket.followups);
+    } else {
+      setFollowers([]);
+    }
+  }, [ticket?.followups]);
+
+  // 🔹 Search followers
+  useEffect(() => {
+    const search = async () => {
+      if (!debouncedFollowerSearch) {
+        setFollowerSearchResults([]);
+        return;
+      }
+
+      setFollowerSearchLoading(true);
+      try {
+        const res = await createAPIEndPointAuth(
+          `clinic_team/search?query=${encodeURIComponent(debouncedFollowerSearch)}`
+        ).fetchAll();
+        setFollowerSearchResults(res?.data?.results || []);
+      } catch (err) {
+        console.error("Failed to search team members", err);
+        setFollowerSearchResults([]);
+      } finally {
+        setFollowerSearchLoading(false);
+      }
+    };
+    search();
+  }, [debouncedFollowerSearch]);
 
   // ✅ Fetch Notification Logs
   useEffect(() => {
@@ -564,6 +744,95 @@ export default function TicketView() {
   // 🔹 Remove file from list
   const handleRemoveFile = (index) => {
     setFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // 🔹 Handle location save
+  const handleSaveLocation = async () => {
+    if (!selectedLocation) {
+      toast.error("Please select a location");
+      return;
+    }
+    try {
+      setSavingLocation(true);
+      await createAPIEndPoint(`ticket/${id}`).patch({
+        location_id: selectedLocation.id,
+        updated_by: user?.id,
+      });
+      toast.success("Location updated successfully");
+      fetchTicket();
+      setLocationModalOpen(false);
+    } catch (err) {
+      console.error("Failed to update location", err);
+      toast.error("Failed to update location");
+    } finally {
+      setSavingLocation(false);
+    }
+  };
+
+  // 🔹 Handle followers save
+  const handleSaveFollowers = async () => {
+    try {
+      setSavingFollowers(true);
+      const followerIds = selectedFollowers.map((f) => f.user_id);
+      
+      // Get current follower IDs from followups
+      const currentFollowerIds = followers.map((f) => f.user_id);
+      
+      // Find IDs to add (new followers)
+      const idsToAdd = followerIds.filter((id) => !currentFollowerIds.includes(id));
+      
+      // Make API call for add
+      if (idsToAdd.length > 0) {
+        await createAPIEndPoint(`ticket/${id}`).patch({
+          follower_ids: idsToAdd,
+          updated_by: user?.id,
+        });
+      }
+      
+      // For remove, send the complete list of remaining follower IDs
+      const idsToRemove = currentFollowerIds.filter((id) => !followerIds.includes(id));
+      if (idsToRemove.length > 0) {
+        // Send the updated list of all remaining follower IDs
+        const remainingFollowerIds = followerIds;
+        await createAPIEndPoint(`ticket/${id}`).patch({
+          follower_ids: remainingFollowerIds,
+          updated_by: user?.id,
+        });
+      }
+      
+      if (idsToAdd.length > 0 || idsToRemove.length > 0) {
+        toast.success("Followers updated successfully");
+        fetchTicket();
+      }
+      
+      setFollowerModalOpen(false);
+      setSelectedFollowers([]);
+    } catch (err) {
+      console.error("Failed to update followers", err);
+      toast.error("Failed to update followers");
+    } finally {
+      setSavingFollowers(false);
+    }
+  };
+
+  // 🔹 Remove follower
+  const handleRemoveFollower = async (followerId) => {
+    try {
+      // Get remaining follower IDs (all current followers except the one being removed)
+      const remainingFollowerIds = followers
+        .filter((f) => f.user_id !== followerId)
+        .map((f) => f.user_id);
+      
+      await createAPIEndPoint(`ticket/${id}`).patch({
+        follower_ids: remainingFollowerIds,
+        updated_by: user?.id,
+      });
+      toast.success("Follower removed successfully");
+      fetchTicket();
+    } catch (err) {
+      console.error("Failed to remove follower", err);
+      toast.error("Failed to remove follower");
+    }
   };
 
   // ✅ Reusable Logs List
@@ -766,44 +1035,182 @@ export default function TicketView() {
               </div>
             </div>
 
+            <Divider sx={{ my: 2 }} />
+
+            {/* Location Section */}
+            <div className="mt-4 border border-gray-200 rounded-lg p-4 bg-gray-50">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <MapPinIcon className="h-5 w-5 text-brand-500" />
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                    Location
+                  </Typography>
+                </div>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  startIcon={<PencilSquareIcon className="h-4 w-4" />}
+                  onClick={() => {
+                    setSelectedLocation(ticket?.location_id ? locations.find(l => l.id === ticket.location_id) : null);
+                    setLocationModalOpen(true);
+                  }}
+                  sx={{ textTransform: "none", borderRadius: 1.25 }}
+                  className="!border !border-brand-500 !text-brand-500 hover:!bg-purple-50"
+                >
+                  {selectedLocation ? "Change" : "Add"}
+                </Button>
+              </div>
+              {selectedLocation ? (
+                <div className="bg-white rounded-lg p-3 border border-gray-200">
+                  <div className="flex items-start gap-3">
+                    {/* <div className="flex-shrink-0 mt-0.5">
+                      <MapPin className="h-4 w-4 text-gray-500" />
+                    </div> */}
+                    <div className="flex-1 min-w-0">
+                      <Typography variant="body2" className="!font-semibold !text-gray-800 !mb-1">
+                        {selectedLocation.display_name || selectedLocation.location_name}
+                      </Typography>
+                      {selectedLocation.address && selectedLocation.address !== "N/A" && (
+                        <Typography variant="caption" className="!text-gray-600 !block !mb-0.5">
+                          <span className="!inline-flex !items-center !gap-1">
+                            <MapPin className="!h-3 !w-3" />
+                            {toProperCase(selectedLocation.address)}
+                            {selectedLocation.city && selectedLocation.city !== "N/A" && `, ${toProperCase(selectedLocation.city)}`}
+                            {selectedLocation.state && selectedLocation.state !== "N/A" && `, ${toProperCase(selectedLocation.state)}`}
+                            {selectedLocation.postal_code && selectedLocation.postal_code !== "0" && ` ${selectedLocation.postal_code}`}
+                          </span>
+                        </Typography>
+                      )}
+                      {selectedLocation.phone && (
+                        <Typography variant="caption" className="!text-gray-600 !block !mb-0.5">
+                          <span className="!inline-flex !items-center !gap-1">
+                            <Phone className="!h-3 !w-3" />
+                            {selectedLocation.phone}
+                          </span>
+                        </Typography>
+                      )}
+                      {selectedLocation.email && (
+                        <Typography variant="caption" className="!text-gray-600 !block">
+                          <span className="!inline-flex !items-center !gap-1">
+                            <Mail className="!h-3 !w-3" />
+                            {selectedLocation.email}
+                          </span>
+                        </Typography>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <Typography variant="body2" className="!text-gray-500 !italic">
+                  No location assigned
+                </Typography>
+              )}
+            </div>
+
+            {/* Followers Section */}
+            <div className="mt-4 border border-gray-200 rounded-lg p-4 bg-gray-50">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <UserGroupIcon className="h-5 w-5 text-brand-500" />
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                    Followers ({followers.length})
+                  </Typography>
+                </div>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  startIcon={<UserPlusIcon className="h-4 w-4" />}
+                  onClick={() => {
+                    setSelectedFollowers([]);
+                    setFollowerSearchTerm("");
+                    setFollowerModalOpen(true);
+                  }}
+                  sx={{ textTransform: "none", borderRadius: 1.25 }}
+                  className="!border !border-brand-500 !text-brand-500 hover:!bg-purple-50"
+                >
+                  {followers.length > 0 ? "Manage" : "Add"}
+                </Button>
+              </div>
+              {followers.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {followers.map((follower) => (
+                    <Box
+                      key={follower.user_id || follower.id}
+                      className="!relative !bg-white !border !border-gray-200 !rounded-lg !px-3 !py-2 !pr-8 !min-w-[140px]"
+                      sx={{
+                        "&:hover": {
+                          boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                        },
+                      }}
+                    >
+                      <Typography
+                        variant="body2"
+                        className="!font-medium !text-gray-800 !mb-0.5"
+                      >
+                        {toProperCase(follower.username || follower.name || "N/A")}
+                      </Typography>
+                      {follower.email && (
+                        <Typography
+                          variant="caption"
+                          className="!text-gray-500 !text-xs !block"
+                        >
+                          {follower.email}
+                        </Typography>
+                      )}
+                      <IconButton
+                        size="small"
+                        onClick={() => handleRemoveFollower(follower.user_id)}
+                        className="!absolute !top-1 !right-1 !p-0.5"
+                        sx={{
+                          color: "#ef4444",
+                          "&:hover": {
+                            color: "#dc2626",
+                            backgroundColor: "rgba(239, 68, 68, 0.1)",
+                          },
+                        }}
+                      >
+                        <XMarkIcon className="!w-3 !h-3" />
+                      </IconButton>
+                    </Box>
+                  ))}
+                </div>
+              ) : (
+                <Typography variant="body2" className="!text-gray-500 !italic">
+                  No followers yet
+                </Typography>
+              )}
+            </div>
+
             {/* Attached Files Section */}
-            <div className="mt-4 border border-gray-200 rounded-lg py-2.5 px-3.5">
+            <div className="mt-4 border border-gray-200 rounded-lg p-4 bg-gray-50">
               <div className="flex items-center justify-between mb-1">
-                <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                <div className="flex items-center gap-2">
+                  <PaperClipIcon className="h-5 w-5 text-brand-500" />
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
                   Attached Files
                 </Typography>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="file"
-                    id="fileUploadTicket"
-                    multiple
-                    className="hidden"
-                    onChange={(e) => {
-                      if (e.currentTarget.files && e.currentTarget.files.length > 0) {
-                        handleFileSelect(e.currentTarget.files);
-                      }
-                    }}
-                  />
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    onClick={() => document.getElementById("fileUploadTicket")?.click()}
-                    sx={{ px:1.5 }}
-                    // sx={{
-                    //   textTransform: "none",
-                    //   borderRadius: 1.25,
-                    //   borderColor: "#824EF2",
-                    //   color: "#824EF2",
-                    //   "&:hover": {
-                    //     borderColor: "#824EF2",
-                    //     backgroundColor: "#F3F4F6",
-                    //   },
-                    // }}
-                  >
-                    <ArrowUpTrayIcon className="h-4 w-4 mr-1" />
-                    Upload
-                  </Button>
                 </div>
+                <input
+                  type="file"
+                  id="fileUploadTicket"
+                  multiple
+                  className="hidden"
+                  onChange={(e) => {
+                    if (e.currentTarget.files && e.currentTarget.files.length > 0) {
+                      handleFileSelect(e.currentTarget.files);
+                    }
+                  }}
+                />
+                <Button
+                  variant="outlined"
+                  size="small"
+                  startIcon={<ArrowUpTrayIcon className="h-4 w-4" />}
+                  onClick={() => document.getElementById("fileUploadTicket")?.click()}
+                  sx={{ textTransform: "none", borderRadius: 1.25 }}
+                  className="!border !border-brand-500 !text-brand-500 hover:!bg-purple-50"
+                >
+                  Upload
+                </Button>
               </div>
 
               {/* Existing Files Display */}
@@ -812,40 +1219,40 @@ export default function TicketView() {
                   {files
                     .filter((f) => f.isExisting)
                     .map((file, idx) => {
-                      const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(
-                        file.url
-                      );
+                    const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(
+                      file.url
+                    );
                       const fileName = file.name || file.url.split("/").pop();
 
-                      // shorten file name if too long
-                      const shortName =
-                        fileName.length > 15
-                          ? fileName.substring(0, 8) + "..." + fileName.slice(-7)
-                          : fileName;
+                    // shorten file name if too long
+                    const shortName =
+                      fileName.length > 15
+                        ? fileName.substring(0, 8) + "..." + fileName.slice(-7)
+                        : fileName;
 
-                      return (
-                        <a
-                          key={idx}
-                          href={file.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="group relative flex items-center gap-2 rounded-md border border-gray-200 bg-gray-50 px-1.5 py-1.5 text-xs text-gray-600 hover:bg-white shadow-sm hover:shadow transition-all"
-                        >
-                          {isImage ? (
-                            <img
-                              src={file.url}
-                              alt={fileName}
-                              className="h-10 w-10 rounded object-cover border border-gray-300"
-                            />
-                          ) : (
-                            <div className="flex h-10 w-10 items-center justify-center rounded bg-gray-200 text-gray-500">
-                              📄
-                            </div>
-                          )}
-                          <span className="truncate">{shortName}</span>
-                        </a>
-                      );
-                    })}
+                    return (
+                      <a
+                        key={idx}
+                        href={file.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group relative flex items-center gap-2 rounded-md border border-gray-200 bg-gray-50 px-1.5 py-1.5 text-xs text-gray-600 hover:bg-white shadow-sm hover:shadow transition-all"
+                      >
+                        {isImage ? (
+                          <img
+                            src={file.url}
+                            alt={fileName}
+                            className="h-10 w-10 rounded object-cover border border-gray-300"
+                          />
+                        ) : (
+                          <div className="flex h-10 w-10 items-center justify-center rounded bg-gray-200 text-gray-500">
+                            📄
+                          </div>
+                        )}
+                        <span className="truncate">{shortName}</span>
+                      </a>
+                    );
+                  })}
                 </div>
               ) : (
                 <Typography variant="body2" color="text.secondary">
@@ -910,7 +1317,7 @@ export default function TicketView() {
                     {files
                       .map((file, originalIndex) => {
                         if (file.isExisting) return null;
-                        
+
                         const fileObj = file.file || file;
                         const isImage = fileObj.type?.startsWith("image/");
                         const fileName = file.name || fileObj.name;
@@ -930,8 +1337,8 @@ export default function TicketView() {
                             ) : (
                               <div className="h-20 w-full flex items-center justify-center bg-gray-100 text-xs text-gray-600 rounded">
                                 {fileName.endsWith(".pdf") ? "📄 PDF File" : fileName}
-                              </div>
-                            )}
+              </div>
+            )}
 
                             {/* Filename */}
                             <Typography
@@ -993,7 +1400,7 @@ export default function TicketView() {
               )}
             </div>
 
-            <Divider  sx={{ mt: 2 }}/>
+            <Divider sx={{ mt: 2 }} />
 
             <div className="grid md:grid-cols-1 gap-5">
               {/* 🔹 Assignment Logs Section */}
@@ -1062,8 +1469,7 @@ export default function TicketView() {
                     logs={
                       notificationLogs?.map((log) => ({
                         username: toProperCase(log.receiver_info?.username) || "N/A",
-                        action: `${log.message || "Notification sent"} to ${
-                          log.receiver_info?.email || "N/A"
+                        action: `${log.message || "Notification sent"} to ${log.receiver_info?.email || "N/A"
                         } - ${toProperCase(log.email_type?.replace(/_/g, " ")) || ""}`,
                         timestamp: convertToCST(log.created_at),
                       })) || []
@@ -1293,6 +1699,304 @@ export default function TicketView() {
         setSearchTerm={setSearchTerm}
         loading={loading} // 👈 pass it
       />
+
+      {/* Location Modal */}
+      <Dialog
+        open={locationModalOpen}
+        onClose={() => setLocationModalOpen(false)}
+        fullWidth
+        maxWidth="sm"
+        PaperProps={{ sx: { borderRadius: 2 } }}
+      >
+        <DialogTitle className="!text-lg !font-semibold !flex !items-center !gap-2">
+          <MapPinIcon className="!h-5 !w-5 !text-brand-500" />
+          {selectedLocation ? "Change Location" : "Add Location"}
+        </DialogTitle>
+        <DialogContent dividers>
+          <Autocomplete
+            size="small"
+            fullWidth
+            options={locations}
+            value={selectedLocation}
+            onChange={(e, newValue) => setSelectedLocation(newValue)}
+            onInputChange={(e, newInputValue) => setLocationSearchTerm(newInputValue)}
+            filterOptions={(options, params) => {
+              const filtered = options.filter((option) => {
+                const searchLower = params.inputValue.toLowerCase();
+                const name = (option.display_name || option.location_name || "").toLowerCase();
+                const address = (option.address || "").toLowerCase();
+                const city = (option.city || "").toLowerCase();
+                const state = (option.state || "").toLowerCase();
+                return (
+                  name.includes(searchLower) ||
+                  address.includes(searchLower) ||
+                  city.includes(searchLower) ||
+                  state.includes(searchLower)
+                );
+              });
+              return filtered;
+            }}
+            getOptionLabel={(option) =>
+              option ? (option.display_name || option.location_name || "") : ""
+            }
+            isOptionEqualToValue={(option, value) => option.id === value?.id}
+            renderOption={(props, option) => {
+              const isSelected = selectedLocation && selectedLocation.id === option.id;
+
+              return (
+                <li
+                  {...props}
+                  key={option.id}
+                  className={`!py-2.5 !px-3 !cursor-pointer !transition-all !duration-200 ${isSelected
+                      ? "!bg-gray-100"
+                      : "hover:!bg-gray-100"
+                    }`}
+                >
+                  <div className="!flex !flex-col">
+                    <span className="!font-semibold !text-gray-800 !text-sm">
+                      {option.display_name || option.location_name}
+                    </span>
+                    {option.email && (
+                      <span className="!text-xs !text-gray-500 !mt-1">
+                        <Mail className="!w-3.5 !h-3.5 !inline !mr-1" /> {option.email}
+                      </span>
+                    )}
+                  </div>
+                </li>
+              );
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Search Location"
+                placeholder="Type to search locations..."
+                autoComplete="off"
+                inputProps={{
+                  ...params.inputProps,
+                  autoComplete: "off",
+                }}
+              />
+            )}
+            noOptionsText="No locations found"
+          />
+          {selectedLocation && (
+            <div className="!mt-4 !p-3 !bg-purple-50 !rounded-lg !border !border-purple-200">
+              <Typography variant="caption" className="!text-gray-600 !block !mb-2 !font-medium">
+                Selected Location:
+              </Typography>
+              <Typography variant="body2" className="!font-semibold !text-gray-800 !mb-1">
+                {selectedLocation.display_name || selectedLocation.location_name}
+              </Typography>
+              {selectedLocation.address && selectedLocation.address !== "N/A" && (
+                <Typography variant="caption" className="!text-gray-600 !block">
+                  {toProperCase(selectedLocation.address)}
+                  {selectedLocation.city && selectedLocation.city !== "N/A" && `, ${toProperCase(selectedLocation.city)}`}
+                  {selectedLocation.state && selectedLocation.state !== "N/A" && `, ${toProperCase(selectedLocation.state)}`}
+                </Typography>
+              )}
+            </div>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ px: 2, py: 1.5 }}>
+          <Button
+            onClick={() => setLocationModalOpen(false)}
+            variant="outlined"
+            sx={{
+              textTransform: "none",
+              borderColor: "#E5E7EB",
+              color: "#6B7270",
+              "&:hover": { borderColor: "#E5E7EB", backgroundColor: "#Fafafa" },
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSaveLocation}
+            variant="contained"
+            disabled={!selectedLocation || savingLocation}
+            sx={{
+              boxShadow: "none",
+              textTransform: "none",
+              color: "white",
+              minWidth: 90,
+            }}
+          >
+            {savingLocation ? (
+              <CircularProgress size={20} sx={{ color: "white" }} />
+            ) : (
+              "Save"
+            )}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Followers Modal */}
+      <Dialog
+        open={followerModalOpen}
+        onClose={() => setFollowerModalOpen(false)}
+        fullWidth
+        maxWidth="sm"
+        PaperProps={{ sx: { borderRadius: 2 } }}
+      >
+        <DialogTitle className="!text-lg !font-semibold !flex !items-center !gap-2">
+          <UserGroupIcon className="!h-5 !w-5 !text-brand-500" />
+          Manage Followers
+        </DialogTitle>
+        <DialogContent dividers>
+          <Autocomplete
+            size="small"
+            fullWidth
+            multiple
+            options={followerSearchResults}
+            value={selectedFollowers}
+            onChange={(e, newValue) => setSelectedFollowers(newValue)}
+            onInputChange={(e, newInputValue) => setFollowerSearchTerm(newInputValue)}
+            isOptionEqualToValue={(option, value) =>
+              option.user_id === value?.user_id
+            }
+            getOptionLabel={(option) =>
+              option
+                ? option.first_name
+                  ? `${toProperCase(option.first_name)} ${toProperCase(
+                    option.last_name || ""
+                  )}`.trim()
+                  : toProperCase(option.username || "")
+                : ""
+            }
+            renderOption={(props, option) => (
+              <li {...props} key={option.user_id}>
+                <div className="!flex !flex-col">
+                  <span className="!font-medium !text-gray-600">
+                    {option.first_name
+                      ? `${toProperCase(option.first_name)} ${toProperCase(
+                        option.last_name || ""
+                      )}`.trim()
+                      : toProperCase(option.username || "")}
+                  </span>
+                  {option.email && (
+                    <span className="!text-xs !text-gray-500">{option.email}</span>
+                  )}
+                </div>
+              </li>
+            )}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Search Team Members"
+                placeholder="Type to search..."
+                InputProps={{
+                  ...params.InputProps,
+                  endAdornment: (
+                    <>
+                      {followerSearchLoading && <CircularProgress size={20} />}
+                      {params.InputProps.endAdornment}
+                    </>
+                  ),
+                }}
+              />
+            )}
+            noOptionsText={
+              followerSearchLoading
+                ? "Searching..."
+                : followerSearchTerm
+                  ? "No team members found"
+                  : "Start typing to search"
+            }
+          />
+          {selectedFollowers.length > 0 && (
+            <div className="!mt-4">
+              <Typography variant="caption" className="!text-gray-600 !block !mb-2 !font-medium">
+                Selected Followers ({selectedFollowers.length}):
+              </Typography>
+              <div className="!flex !flex-wrap !gap-2">
+                {selectedFollowers.map((follower) => (
+                  <Chip
+                    key={follower.user_id}
+                    label={
+                      follower.first_name
+                        ? `${toProperCase(follower.first_name)} ${toProperCase(
+                          follower.last_name || ""
+                        )}`.trim()
+                        : toProperCase(follower.username || "")
+                    }
+                    onDelete={() =>
+                      setSelectedFollowers((prev) =>
+                        prev.filter((f) => f.user_id !== follower.user_id)
+                      )
+                    }
+                    size="small"
+                    className="!bg-purple-50 !border !border-purple-200 !text-gray-700"
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+          {followers.length > 0 && (
+            <div className="!mt-4 !pt-4 !border-t !border-gray-200">
+              <Typography variant="caption" className="!text-gray-600 !block !mb-2 !font-medium">
+                Current Followers ({followers.length}):
+              </Typography>
+              <div className="!flex !flex-wrap !gap-2">
+                {followers.map((follower) => (
+                  <Box
+                    key={follower.user_id}
+                    className="!bg-gray-100 !border !border-gray-200 !rounded-lg !px-3 !py-2 !min-w-[140px]"
+                  >
+                    <Typography
+                      variant="body2"
+                      className="!font-medium !text-gray-800 !mb-0.5"
+                    >
+                      {toProperCase(follower.username || "N/A")}
+                    </Typography>
+                    {follower.email && (
+                      <Typography
+                        variant="caption"
+                        className="!text-gray-500 !text-xs !block"
+                      >
+                        {follower.email}
+                      </Typography>
+                    )}
+                  </Box>
+                ))}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ px: 2, py: 1.5 }}>
+          <Button
+            onClick={() => {
+              setFollowerModalOpen(false);
+              setSelectedFollowers([]);
+            }}
+            variant="outlined"
+            sx={{
+              textTransform: "none",
+              borderColor: "#E5E7EB",
+              color: "#6B7270",
+              "&:hover": { borderColor: "#E5E7EB", backgroundColor: "#Fafafa" },
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSaveFollowers}
+            variant="contained"
+            disabled={savingFollowers}
+            sx={{
+              boxShadow: "none",
+              textTransform: "none",
+              color: "white",
+              minWidth: 90,
+            }}
+          >
+            {savingFollowers ? (
+              <CircularProgress size={20} sx={{ color: "white" }} />
+            ) : (
+              "Save"
+            )}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

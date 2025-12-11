@@ -17,6 +17,7 @@ import {
   Cog6ToothIcon,
   ClipboardDocumentListIcon,
   TagIcon,
+  FolderIcon,
 } from "@heroicons/react/24/outline";
 
 import { useApp } from "../state/AppContext.jsx";
@@ -96,7 +97,7 @@ export default function Layout() {
   const SidebarContent = (
     <>
       {/* {!sidebarOpen && ( */}
-      <div className="mb-8  items-center gap-2 lg992:flex hidden">
+      <div className="mt-0.5 mb-8  items-center gap-2 lg992:flex hidden">
         {/* <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-500 font-semibold">
             S
           </div> */}
@@ -127,6 +128,7 @@ export default function Layout() {
         />
 
         <NavItem to="/tickets" icon={TicketIcon} label="Tickets" />
+        {/* <NavItem to="/projects" icon={FolderIcon} label="Projects" matchChildren /> */}
         {/* <NavItem to="/careers" icon={PlusCircleIcon} label="New Hire Form" /> */}
         {user?.is_form_access && (
           <>
