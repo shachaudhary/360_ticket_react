@@ -37,7 +37,7 @@ export default function Dashboard() {
   const [loadingStats, setLoadingStats] = useState(false);
   const [startDate, setStartDate] = useState(dayjs());
   const [endDate, setEndDate] = useState(dayjs());
-  const [timeView, setTimeView] = useState("today");
+  const [timeView, setTimeView] = useState("week");
 
   useEffect(() => {
     const fetchAuth = async () => {
