@@ -58,6 +58,14 @@ export default function Dashboard() {
       tickets: d.count,
     })) || [];
 
+  const handleClearFilters = () => {
+    setTimeView("week");
+    setStartDate(dayjs());
+    setEndDate(dayjs());
+  };
+
+  const hasActiveFilters = timeView !== "week";
+
   useEffect(() => {
     const fetchStats = async () => {
       try {
@@ -178,22 +186,24 @@ export default function Dashboard() {
             </h2>
 
             {/* Right: Filters */}
-            <div className="flex flex-row flex-wrap gap-3 w-auto justify-start md:justify-end items-stretch sm:items-center">
+            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
               {/* Quick Filters */}
-              {["today", "week", "month", "custom"].map((view) => (
-                <button
-                  key={view}
-                  onClick={() => setTimeView(view)}
-                  className={`px-3 py-[6.15px] text-xs font-medium rounded-lg border transition-all duration-300
+              <div className="flex flex-row flex-wrap gap-3 items-center">
+                {["today", "week", "month", "custom"].map((view) => (
+                  <button
+                    key={view}
+                    onClick={() => setTimeView(view)}
+                    className={`px-3 py-[6.15px] text-xs font-medium rounded-lg border transition-all duration-300 shrink-0
           ${timeView === view
-                      ? "bg-brand-500 text-white border-brand-500 hover:bg-brand-600"
-                      : "border border-gray-200 text-gray-500 hover:bg-gray-50"
-                    }
+                        ? "bg-brand-500 text-white border-brand-500 hover:bg-brand-600"
+                        : "border border-gray-200 text-gray-500 hover:bg-gray-50"
+                      }
         `}
-                >
-                  {toProperCase(view)}
-                </button>
-              ))}
+                  >
+                    {toProperCase(view)}
+                  </button>
+                ))}
+              </div>
 
               {/* Show DatePickers only if custom */}
               {timeView === "custom" && (
@@ -236,6 +246,18 @@ export default function Dashboard() {
                   </LocalizationProvider>
                 </div>
               )}
+
+              {/* Clear Button */}
+              <button
+                onClick={handleClearFilters}
+                className={`px-3 py-[6.15px] text-xs font-medium rounded-lg border transition-all duration-300 shrink-0 self-start sm:self-center ${
+                  hasActiveFilters
+                    ? "border-red-500 text-red-500 hover:bg-red-50 focus:ring-2 focus:ring-red-500"
+                    : "border border-gray-200 text-gray-400 hover:border-gray-300 hover:text-gray-600 hover:bg-gray-50"
+                }`}
+              >
+                Clear
+              </button>
             </div>
           </div>
 
