@@ -65,12 +65,20 @@ export default function ConfirmationModal({
           sx={{
             textTransform: "none",
             borderColor: "#E5E7EB",
-            color: "#6B7280",
-            "&:hover": {
-              borderColor: "#D1D5DB",
-              backgroundColor: "#F9FAFB",
+            color: "#6B7270",
+            "&:hover": { 
+              borderColor: "#E5E7EB", 
+              backgroundColor: "#Fafafa",
             },
+            "&:disabled": {
+              borderColor: "#E5E7EB",
+              color: "#9CA3AF",
+              opacity: 0.6,
+              cursor: "not-allowed",
+            },
+            transition: "all 0.2s ease",
           }}
+          className="!px-6"
         >
           {cancelText}
         </Button>
@@ -81,16 +89,34 @@ export default function ConfirmationModal({
           sx={{
             textTransform: "none",
             boxShadow: "none",
-            backgroundColor: danger ? "#EF4444" : "#824EF2",
-            color: "white",
+            color: loading ? "#6B7280" : "white",
+            backgroundColor: loading ? "#F3F4F6" : (danger ? "#EF4444" : "#824EF2"),
             minWidth: 90,
             "&:hover": {
-              backgroundColor: danger ? "#DC2626" : "#6B3BC4",
+              backgroundColor: loading ? "#F3F4F6" : (danger ? "#DC2626" : "#6B3BC4"),
             },
+            "&:disabled": {
+              backgroundColor: "#F3F4F6",
+              color: "#6B7280",
+              cursor: "not-allowed",
+            },
+            transition: "all 0.2s ease",
           }}
         >
           {loading ? (
-            <CircularProgress size={20} sx={{ color: "white" }} />
+            <>
+              <CircularProgress 
+                size={18} 
+                sx={{ 
+                  color: "#6B7280",
+                  mr: 1,
+                  "& .MuiCircularProgress-circle": {
+                    strokeLinecap: "round",
+                  },
+                }} 
+              />
+              {confirmText}
+            </>
           ) : (
             confirmText
           )}

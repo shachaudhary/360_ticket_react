@@ -3,19 +3,19 @@ import {
   Box,
   Button,
   CircularProgress,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
   TextField,
   Typography,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
   Card,
   Divider,
 } from "@mui/material";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { ArrowUpTrayIcon } from "@heroicons/react/24/outline";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import dayjs from "dayjs";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -24,48 +24,13 @@ import { createAPIEndPoint } from "../config/api/api";
 import { useApp } from "../state/AppContext";
 import toast from "react-hot-toast";
 
-// const priorities = ["Low", "Medium", "High"];
 const priorities = ["Low", "High", "Urgent"];
 
-export default function TicketForm({ isEdit = false, projectId }) {
-  const { id } = useParams();
+export default function ProjectTicketCreate({ projectId }) {
   const navigate = useNavigate();
   const { user } = useApp();
-  const [loadingTicket, setLoadingTicket] = useState(isEdit);
   const [dragActive, setDragActive] = useState(false);
   const [categories, setCategories] = useState([]);
-
-  useEffect(() => {
-    if (isEdit && id) {
-      const fetchTicket = async () => {
-        try {
-          const res = await createAPIEndPoint(`ticket/${id}`).fetchAll();
-          const t = res.data;
-
-          // Normalize existing files
-          const existingFiles = (t.files || []).map((f) => ({
-            name: f.name,
-            previewUrl: f.url,
-            isExisting: true, // mark so we don’t re-upload
-          }));
-
-          formik.setValues({
-            title: t.title || "",
-            details: t.details || "",
-            category_id: t.category?.id || "",
-            due_date: t.due_date ? dayjs(t.due_date) : null,
-            priority: t.priority || "Low",
-            files: existingFiles,
-          });
-        } catch (err) {
-          toast.error("Failed to load ticket");
-        } finally {
-          setLoadingTicket(false);
-        }
-      };
-      fetchTicket();
-    }
-  }, [id, isEdit]);
 
   // Fetch categories from API
   useEffect(() => {
@@ -75,7 +40,6 @@ export default function TicketForm({ isEdit = false, projectId }) {
         setCategories(res.data || []);
       } catch (err) {
         console.error("Error fetching categories:", err);
-        // fallback fake categories
         setCategories([
           { id: 1, name: "Hardware" },
           { id: 2, name: "Software" },
@@ -86,14 +50,6 @@ export default function TicketForm({ isEdit = false, projectId }) {
     };
     fetchCategories();
   }, []);
-
-  const handleCancel = () => {
-    if (isEdit && id) {
-      navigate(`/tickets/${id}`);
-    } else {
-      navigate(projectId ? `/projects/${projectId}` : "/tickets");
-    }
-  };
 
   const formik = useFormik({
     initialValues: {
@@ -110,7 +66,6 @@ export default function TicketForm({ isEdit = false, projectId }) {
       category_id: Yup.string().required("Please select a category"),
       priority: Yup.string().required("Please select a priority"),
       due_date: Yup.date().nullable().required("Please select a due date"),
-      // .min(new Date(), "Due date cannot be in the past"),
       files: Yup.array().nullable(),
     }),
     onSubmit: async (values, { setSubmitting }) => {
@@ -120,7 +75,6 @@ export default function TicketForm({ isEdit = false, projectId }) {
           if (key === "files" && values.files?.length > 0) {
             values.files.forEach((f) => {
               if (!f.isExisting) {
-                // only append new files, not already existing ones
                 formData.append("files", f);
               }
             });
@@ -137,23 +91,19 @@ export default function TicketForm({ isEdit = false, projectId }) {
         formData.append("user_id", user?.id);
         formData.append("clinic_id", 1);
         formData.append("location_id", 30);
+        
+        // Use project-specific ticket creation endpoint
         if (projectId) {
-          formData.append("project_id", projectId);
-        }
-
-        let res;
-        if (isEdit && id) {
-          res = await createAPIEndPoint(`ticket/${id}`).patch(formData);
-          toast.success("Ticket updated successfully!");
-          navigate(`/tickets/${id}`);
+          await createAPIEndPoint(`project/${projectId}/ticket`).create(formData);
         } else {
-          res = await createAPIEndPoint("ticket").create(formData);
-          toast.success("Ticket created successfully!");
-          if (projectId) {
-            navigate(`/projects/${projectId}`);
-          } else {
-            navigate("/tickets");
-          }
+          await createAPIEndPoint("ticket").create(formData);
+        }
+        
+        toast.success("Ticket created successfully!");
+        if (projectId) {
+          navigate(`/projects/${projectId}`);
+        } else {
+          navigate("/tickets");
         }
       } catch (err) {
         toast.error("Error saving ticket");
@@ -170,11 +120,11 @@ export default function TicketForm({ isEdit = false, projectId }) {
 
     let newDate = null;
     if (priority === "Low") {
-      newDate = dayjs().add(7, "day"); // +7 days
+      newDate = dayjs().add(7, "day");
     } else if (priority === "High") {
-      newDate = dayjs().add(1, "day"); // Next day
+      newDate = dayjs().add(1, "day");
     } else if (priority === "Urgent") {
-      newDate = dayjs(); // Today
+      newDate = dayjs();
     }
 
     formik.setFieldValue("due_date", newDate, true);
@@ -188,25 +138,8 @@ export default function TicketForm({ isEdit = false, projectId }) {
     }
   };
 
-  if (loadingTicket) {
-    return (
-      <div className="overflow-hidden">
-        <div className="overflow-auto h-[calc(100dvh-92px)] flex items-center justify-center">
-          <CircularProgress size={40} color="primary" />
-        </div>
-      </div>
-    );
-  }
-
   return (
     <Box>
-      <div className="!flex !items-center !justify-start !gap-2 !mb-4">
-        <BackButton self={isEdit ? -1 : projectId ? `/projects/${projectId}` : "/tickets"} />
-        <h2 className="text-lg md:text-2xl font-semibold text-sidebar mb-1">
-          {isEdit ? "Edit Ticket" : "Create New Ticket"}
-        </h2>
-      </div>
-
       {/* Main Form Card */}
       <Card className="!p-6 !shadow-md !bg-white !rounded-lg !border !border-gray-100">
         <Box component="form" onSubmit={formik.handleSubmit} className="space-y-6">
@@ -406,64 +339,61 @@ export default function TicketForm({ isEdit = false, projectId }) {
             {/* Preview Uploaded Files */}
             {formik.values.files && formik.values.files.length > 0 && (
               <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
-            {formik.values.files.map((file, index) => {
-              const isImage =
-                file.type?.startsWith("image/") ||
-                file.previewUrl?.match(/\.(jpg|jpeg|png|gif|webp)$/i);
+                {formik.values.files.map((file, index) => {
+                  const isImage =
+                    file.type?.startsWith("image/") ||
+                    file.previewUrl?.match(/\.(jpg|jpeg|png|gif|webp)$/i);
 
-              return (
-                <div
-                  key={index}
-                  className="relative flex flex-col items-center border rounded-lg p-2"
-                >
-                  {/* Show preview if image */}
-                  {isImage ? (
-                    <img
-                      src={file.previewUrl || URL.createObjectURL(file)}
-                      alt={file.name}
-                      className="h-28 w-full object-cover rounded"
-                    />
-                  ) : (
-                    <div className="h-28 w-full flex items-center justify-center bg-gray-100 text-xs text-gray-600 rounded">
-                      {file.name.endsWith(".pdf") ? "📄 PDF File" : file.name}
+                  return (
+                    <div
+                      key={index}
+                      className="relative flex flex-col items-center border rounded-lg p-2"
+                    >
+                      {isImage ? (
+                        <img
+                          src={file.previewUrl || URL.createObjectURL(file)}
+                          alt={file.name}
+                          className="h-28 w-full object-cover rounded"
+                        />
+                      ) : (
+                        <div className="h-28 w-full flex items-center justify-center bg-gray-100 text-xs text-gray-600 rounded">
+                          {file.name.endsWith(".pdf") ? "📄 PDF File" : file.name}
+                        </div>
+                      )}
+
+                      <Typography
+                        variant="caption"
+                        className="!mt-1 truncate w-full text-center capitalize"
+                      >
+                        {file.name}
+                      </Typography>
+
+                      <Button
+                        size="small"
+                        color="error"
+                        variant="outlined"
+                        onClick={() => {
+                          const updated = [...formik.values.files];
+                          updated.splice(index, 1);
+                          formik.setFieldValue("files", updated);
+                        }}
+                        sx={{
+                          position: "absolute",
+                          top: -8,
+                          right: -8,
+                          minWidth: 0,
+                          width: 24,
+                          height: 24,
+                          borderRadius: "50%",
+                          p: 0,
+                          fontSize: 12,
+                        }}
+                      >
+                        ✕
+                      </Button>
                     </div>
-                  )}
-
-                  {/* Filename */}
-                  <Typography
-                    variant="caption"
-                    className="!mt-1 truncate w-full text-center capitalize"
-                  >
-                    {file.name}
-                  </Typography>
-
-                  {/* Remove button */}
-                  <Button
-                    size="small"
-                    color="error"
-                    variant="outlined"
-                    onClick={() => {
-                      const updated = [...formik.values.files];
-                      updated.splice(index, 1);
-                      formik.setFieldValue("files", updated);
-                    }}
-                    sx={{
-                      position: "absolute",
-                      top: -8,
-                      right: -8,
-                      minWidth: 0,
-                      width: 24,
-                      height: 24,
-                      borderRadius: "50%",
-                      p: 0,
-                      fontSize: 12,
-                    }}
-                  >
-                    ✕
-                  </Button>
-                </div>
-              );
-            })}
+                  );
+                })}
               </div>
             )}
           </div>
@@ -472,7 +402,7 @@ export default function TicketForm({ isEdit = false, projectId }) {
           <div className="!flex !justify-end !gap-3 !pt-4 !border-t !border-gray-200 !mt-6">
             <Button
               variant="outlined"
-              onClick={handleCancel}
+              onClick={() => navigate(`/projects/${projectId}`)}
               disabled={formik.isSubmitting}
               sx={{
                 textTransform: "none",
@@ -527,10 +457,8 @@ export default function TicketForm({ isEdit = false, projectId }) {
                       },
                     }} 
                   />
-                  <span>{isEdit ? "Updating..." : "Creating..."}</span>
+                  <span>Creating...</span>
                 </Box>
-              ) : isEdit ? (
-                "Update"
               ) : (
                 "Create Ticket"
               )}
@@ -542,13 +470,3 @@ export default function TicketForm({ isEdit = false, projectId }) {
   );
 }
 
-const Label = ({ title, value }) => (
-  <div>
-    <Typography variant="caption" sx={{ fontWeight: 500, color: "#7E858D" }}>
-      {title}
-    </Typography>
-    <Typography variant="body2" sx={{ fontWeight: 500, color: "#202321" }}>
-      {value || "--"}
-    </Typography>
-  </div>
-);

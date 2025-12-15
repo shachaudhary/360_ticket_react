@@ -66,6 +66,7 @@ export const statusColors = {
   tag: "#EDE7F6",
   followup: "#E3F2FD",
   assign: "#E8F5E9",
+  archived: "#F3E8FF", // Light Purple
   default: "#F0F0F0",
 };
 
@@ -124,6 +125,7 @@ export const textColors = {
   tag: "#4527A0",
   followup: "#0B409C",
   assign: "#2E7D32",
+  archived: "#7C3AED", // Deep Purple
   default: "#6C757D",
 };
 
@@ -173,6 +175,7 @@ export const shortenStatus = (status) => {
     followup: "Follow-up",
     assign: "Assigned",
     draft: "Draft",
+    archived: "Archived",
   };
 
   return statusMap[status] || status || "Unknown";

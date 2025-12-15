@@ -24,6 +24,15 @@ function ProtectedRoute({ children }) {
 
     // 🔹 Token Validation Function
     const validateToken = async () => {
+        // If we're coming in with a token in the URL (OAuth / magic-link redirect),
+        // skip validation for this cycle – the dedicated token handler / dashboard
+        // bootstrap will set the new token and do its own profile check.
+        const urlParams = new URLSearchParams(window.location.search);
+        const tokenFromUrl = urlParams.get("token");
+        if (tokenFromUrl) {
+            return;
+        }
+
         if (!accessToken) return;
 
         try {

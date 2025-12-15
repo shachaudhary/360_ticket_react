@@ -128,7 +128,7 @@ export default function Layout() {
         />
 
         <NavItem to="/tickets" icon={TicketIcon} label="Tickets" />
-        {/* <NavItem to="/projects" icon={FolderIcon} label="Projects" matchChildren /> */}
+        <NavItem to="/projects" icon={FolderIcon} label="Projects" matchChildren />
         {/* <NavItem to="/careers" icon={PlusCircleIcon} label="New Hire Form" /> */}
         {user?.is_form_access && (
           <>
@@ -317,7 +317,7 @@ export default function Layout() {
         </header>
 
         {/* Content */}
-        <main className="flex-1 overflow-y-auto bg-white  lg992:rounded-tl-2xl shadow-sm relative">
+        <main className="flex-1 overflow-y-auto bg-[#fefeff]  lg992:rounded-tl-2xl shadow-sm relative">
           <div
             className={`${
               isViewPage

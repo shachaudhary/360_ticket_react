@@ -31,6 +31,7 @@ import OrthoAppointmentForm from "../screens/OrthoAppointmentForm.jsx";
 import ProjectsList from "../screens/ProjectsList.jsx";
 import ProjectForm from "../screens/ProjectForm.jsx";
 import ProjectView from "../screens/ProjectView.jsx";
+import ProjectTicketForm from "../screens/ProjectTicketForm.jsx";
 
 // ✅ Add your favicon paths (public/ folder ke relative)
 const DEFAULT_FAVICON = "/favicon.ico";
@@ -58,6 +59,7 @@ export default function App() {
     "/ortho-appointment": "Ortho Appointment Form", // ✅ add ortho appointment
     "/projects": "Projects",
     "/projects/new": "Create Project",
+    "/projects/:projectId/tickets/new": "Create Ticket for Project",
   };
 
   useEffect(() => {
@@ -72,7 +74,9 @@ export default function App() {
       pageTitle = "Ticket Details";
     }
     if (!pageTitle && currentPath.startsWith("/projects/")) {
-      if (currentPath.includes("/edit")) {
+      if (currentPath.includes("/tickets/new")) {
+        pageTitle = "Create Ticket for Project";
+      } else if (currentPath.includes("/edit")) {
         pageTitle = "Edit Project";
       } else if (currentPath !== "/projects") {
         pageTitle = "Project Details";
@@ -250,6 +254,14 @@ export default function App() {
             element={
               <PageTransition>
                 <ProjectView />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="/projects/:projectId/tickets/new"
+            element={
+              <PageTransition>
+                <ProjectTicketForm />
               </PageTransition>
             }
           />

@@ -5,6 +5,7 @@ import {
   TicketIcon,
   CheckCircleIcon,
   WrenchScrewdriverIcon,
+  ClockIcon,
 } from "@heroicons/react/24/outline";
 import { checkTokenAndAuth } from "../utils/checkTokenAndAuth";
 import { useNavigate } from "react-router-dom";
@@ -68,7 +69,7 @@ export default function Dashboard() {
         if (timeView === "today") {
           apiUrl += "?timeframe=today";
         } else if (timeView === "week") {
-          apiUrl += "?timeframe=last_7_days&clinic_id=2";
+          apiUrl += "?timeframe=last_7_days";
         } else if (timeView === "month") {
           apiUrl += "?timeframe=last_30_days";
         } else if (timeView === "custom") {
@@ -105,16 +106,48 @@ export default function Dashboard() {
 
   const COLORS = ["#60a5fa", "#fbbf24", "#34d399", "#f87171"];
 
+  // Format resolution time (value is in hours from API)
+  const formatResolutionTime = (timeInHours) => {
+    // Handle null, undefined, or 0
+    if (!timeInHours || timeInHours === 0) return "N/A";
+    
+    // Compact Format: Convert to days, hours, minutes
+    const days = Math.floor(timeInHours / 24);
+    const hours = Math.floor(timeInHours % 24);
+    const minutes = Math.round((timeInHours % 1) * 60);
+    
+    // Build compact string (e.g., "2d 5h 30m")
+    const parts = [];
+    if (days > 0) {
+      parts.push(`${days}d`);
+    }
+    if (hours > 0) {
+      parts.push(`${hours}h`);
+    }
+    if (minutes > 0) {
+      parts.push(`${minutes}m`);
+    }
+    
+    // If no parts (shouldn't happen, but safety check)
+    if (parts.length === 0) {
+      return "< 1m";
+    }
+    
+    return parts.join(" ");
+  };
+
   const stats = [
     {
       label: "Open Tickets",
       value: statsData?.by_status?.Pending ?? 0,
+      total: statsData?.total_tickets ?? 0,
       icon: <TicketIcon className="h-6 w-6 text-blue-400" />,
     },
     {
       label: "In Progress",
       value: statsData?.by_status?.["In Progress"] ?? 0,
       icon: <WrenchScrewdriverIcon className="h-6 w-6 text-yellow-400" />,
+      resolutionTime: formatResolutionTime(statsData?.avg_resolution_time_hours),
     },
     {
       label: "Completed",
@@ -212,27 +245,53 @@ export default function Dashboard() {
             {stats.map((s) => (
               <div
                 key={s.label}
-                className="rounded-md border border-gray-100 bg-white p-5 shadow-card hover:shadow-md flex items-center gap-4 transition-all duration-300"
+                className={`rounded-md border border-gray-100 bg-white p-5 shadow-card hover:shadow-md transition-all duration-300 ${
+                  s.resolutionTime ? "flex items-center justify-between gap-4" : "flex items-center gap-4"
+                }`}
               >
-                <div
-                  className="flex h-11 w-11 items-center justify-center rounded-lg"
-                  style={{
-                    backgroundColor:
-                      s.label === "Open Tickets"
-                        ? "rgba(59, 130, 246, 0.12)" // light blue bg
-                        : s.label === "In Progress"
-                          ? "rgba(250, 204, 21, 0.15)" // light yellow bg
-                          : s.label === "Completed"
-                            ? "rgba(34, 197, 94, 0.12)" // light green bg
-                            : "#f3f4f6", // fallback light gray
-                  }}
-                >
-                  {s.icon}
+                <div className="flex items-center gap-4">
+                  <div
+                    className="flex h-11 w-11 items-center justify-center rounded-lg"
+                    style={{
+                      backgroundColor:
+                        s.label === "Open Tickets"
+                          ? "rgba(59, 130, 246, 0.12)" // light blue bg
+                          : s.label === "In Progress"
+                            ? "rgba(250, 204, 21, 0.15)" // light yellow bg
+                            : s.label === "Completed"
+                              ? "rgba(34, 197, 94, 0.12)" // light green bg
+                              : "#f3f4f6", // fallback light gray
+                    }}
+                  >
+                    {s.icon}
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-500">{s.label}</div>
+                    <div className="mt-1 text-2xl font-bold">
+                      {s.label === "Open Tickets" && typeof s.total === "number"
+                        ? s.total
+                          ? `${s.value} / ${s.total}`
+                          : s.value
+                        : s.value}
+                    </div>
+                    {s.label === "Open Tickets" && typeof s.total === "number" && s.total > 0 && (
+                      <div className="mt-0.5 text-xs text-gray-500">
+                        of {s.total} total
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <div>
-                  <div className="text-sm text-gray-500">{s.label}</div>
-                  <div className="mt-1 text-2xl font-bold">{s.value}</div>
-                </div>
+                {s.resolutionTime && (
+                  <div className="text-right flex flex-col items-end">
+                    <div className="text-xs text-gray-500 font-medium flex items-center gap-1.5 justify-end mb-2">
+                      <ClockIcon className="h-4 w-4 text-gray-400" />
+                      <span>Avg Resolution Time</span>
+                    </div>
+                    <div className="px-3 py-1.5 rounded-md bg-white border border-gray-200 shadow-sm">
+                      <div className="!text-[13px] font-semibold text-gray-700">{s.resolutionTime}</div>
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>

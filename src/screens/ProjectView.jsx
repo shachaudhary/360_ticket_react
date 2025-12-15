@@ -36,6 +36,7 @@ import BackButton from "../components/BackButton";
 import { useApp } from "../state/AppContext";
 import StatusBadge from "../components/StatusBadge";
 import DateWithTooltip from "../components/DateWithTooltip";
+import DraggableTicketCard from "../components/DraggableTicketCard";
 import { convertToCST } from "../utils";
 import { toProperCase } from "../utils/formatting";
 import toast from "react-hot-toast";
@@ -47,127 +48,18 @@ export default function ProjectView() {
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
   const [assignModalOpen, setAssignModalOpen] = useState(false);
-  const [assignee, setAssignee] = useState(null);
+  const [assignees, setAssignees] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [savingAssignees, setSavingAssignees] = useState(false);
   const [viewMode, setViewMode] = useState("board"); // 'board', 'list', 'timeline'
   const [activeTab, setActiveTab] = useState(0);
-
-  // Dummy data for fallback UI
-  const dummyProject = {
-    id: id || 1,
-    name: "Website Redesign Project",
-    description: "Complete redesign of company website with modern UI/UX. This project includes frontend development, backend integration, and user testing phases.",
-    status: "active",
-    priority: "high",
-    color: "#FF3838",
-    tags: ["Design", "Frontend", "UI/UX"],
-    due_date: "2024-12-31",
-    created_at: "2024-01-15T10:00:00Z",
-    created_by: {
-      id: 1,
-      username: "John Doe",
-      name: "John Doe",
-    },
-    assignees: [
-      {
-        id: 1,
-        user_id: 1,
-        username: "Jane Smith",
-        name: "Jane Smith",
-        first_name: "Jane",
-        last_name: "Smith",
-      },
-    ],
-    tickets: [
-      {
-        id: 1,
-        title: "Design Homepage Layout",
-        details: "Create modern and responsive homepage design with hero section, features, and call-to-action buttons.",
-        status: "completed",
-        priority: "High",
-        due_date: "2024-11-15",
-        assignees: [
-          {
-            assign_to_username: "Jane Smith",
-          },
-        ],
-        category: {
-          id: 1,
-          name: "Design",
-        },
-      },
-      {
-        id: 2,
-        title: "Implement Responsive Navigation",
-        details: "Build responsive navigation menu that works on all device sizes with mobile hamburger menu.",
-        status: "in-progress",
-        priority: "Medium",
-        due_date: "2024-11-20",
-        assignees: [
-          {
-            assign_to_username: "Bob Wilson",
-          },
-        ],
-        category: {
-          id: 2,
-          name: "Frontend",
-        },
-      },
-      {
-        id: 3,
-        title: "Setup Backend API Endpoints",
-        details: "Create RESTful API endpoints for user authentication, data fetching, and form submissions.",
-        status: "pending",
-        priority: "High",
-        due_date: "2024-11-25",
-        assignees: [
-          {
-            assign_to_username: "Alice Johnson",
-          },
-        ],
-        category: {
-          id: 3,
-          name: "Backend",
-        },
-      },
-      {
-        id: 4,
-        title: "User Testing and Feedback",
-        details: "Conduct user testing sessions and gather feedback for improvements.",
-        status: "pending",
-        priority: "Low",
-        due_date: "2024-12-10",
-        assignees: [
-          {
-            assign_to_username: "Jane Smith",
-          },
-        ],
-        category: {
-          id: 4,
-          name: "Testing",
-        },
-      },
-      {
-        id: 5,
-        title: "Deploy to Production",
-        details: "Final deployment to production server with all optimizations and security measures.",
-        status: "pending",
-        priority: "High",
-        due_date: "2024-12-31",
-        assignees: [
-          {
-            assign_to_username: "Bob Wilson",
-          },
-        ],
-        category: {
-          id: 5,
-          name: "DevOps",
-        },
-      },
-    ],
-  };
+  const [draggedOverColumn, setDraggedOverColumn] = useState(null);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [optimisticTickets, setOptimisticTickets] = useState(null); // For optimistic updates
+  const [draggedTicketId, setDraggedTicketId] = useState(null);
+  const [updatingTicketId, setUpdatingTicketId] = useState(null); // Track which ticket is being updated
 
   const fetchProject = useCallback(async () => {
     try {
@@ -176,9 +68,8 @@ export default function ProjectView() {
       setProject(res.data);
     } catch (err) {
       console.error("Failed to fetch project", err);
-      // Use dummy data on error for UI preview
-      setProject(dummyProject);
       toast.error("Failed to load project");
+      setProject(null);
     } finally {
       setLoading(false);
     }
@@ -188,20 +79,28 @@ export default function ProjectView() {
     fetchProject();
   }, [fetchProject]);
 
+  // Initialize assignees when modal opens
+  useEffect(() => {
+    if (assignModalOpen && project) {
+      // API returns team_members, but support both for backward compatibility
+      const teamMembers = project.team_members || project.assignees || [];
+      const mappedAssignees = teamMembers.map((member) => ({
+        user_id: member.user_id || member.id,
+        first_name: member.first_name || member.username?.split(" ")[0] || "",
+        last_name: member.last_name || member.username?.split(" ").slice(1).join(" ") || "",
+        username: member.username || member.name || "",
+      }));
+      setAssignees(mappedAssignees);
+      setSearchTerm("");
+    } else if (assignModalOpen) {
+      setAssignees([]);
+      setSearchTerm("");
+    }
+  }, [assignModalOpen, project]);
+
   useEffect(() => {
     if (!searchTerm) {
-      if (project?.assignees?.length > 0) {
-        const current = project.assignees[0];
-        setSearchResults([
-          {
-            user_id: current.id || current.user_id,
-            first_name: current.first_name || current.username?.split(" ")[0],
-            last_name: current.last_name || current.username?.split(" ").slice(1).join(" "),
-          },
-        ]);
-      } else {
-        setSearchResults([]);
-      }
+      setSearchResults([]);
       return;
     }
 
@@ -214,39 +113,179 @@ export default function ProjectView() {
         setSearchResults(res?.data?.results || []);
       } catch (err) {
         console.error("Failed to search team members", err);
+        setSearchResults([]);
       } finally {
         setSearchLoading(false);
       }
     };
     search();
-  }, [searchTerm, project]);
+  }, [searchTerm]);
 
   const handleAssign = async () => {
-    if (!assignee) return toast.error("Please select a team member");
+    if (assignees.length === 0) return toast.error("Please select at least one team member");
     try {
-      await createAPIEndPoint(`project/${id}`).patch({
-        assignee_ids: [assignee.user_id],
-        updated_by: user?.id,
+      setSavingAssignees(true);
+      await createAPIEndPoint(`project/${id}/assign`).createWithJSONFormat({
+        user_ids: assignees.map((a) => a.user_id || a.id),
+        assigned_by: user?.id,
+        replace: false, // Add to existing, don't replace
       });
-      toast.success("Project assigned successfully");
+      toast.success("Team members assigned successfully");
       fetchProject();
       setAssignModalOpen(false);
+      setAssignees([]);
     } catch (err) {
-      console.error("Failed to assign project", err);
-      toast.error("Failed to assign project");
+      console.error("Failed to assign team members", err);
+      toast.error("Failed to assign team members");
+    } finally {
+      setSavingAssignees(false);
+    }
+  };
+
+  // Handle drag start - optimistic update
+  const handleDragStart = (ticketId, currentStatus) => {
+    setDraggedTicketId(ticketId);
+    // Create optimistic update immediately with current status
+    const currentTickets = project?.tickets || [];
+    const ticketToMove = currentTickets.find((t) => t.id === ticketId);
+    if (ticketToMove) {
+      setOptimisticTickets({
+        ...ticketToMove,
+        status: currentStatus,
+      });
+    }
+  };
+
+  // Handle drag and drop for ticket status updates
+  const handleDragOver = (e, targetStatus) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    setDraggedOverColumn(targetStatus);
+
+    // Optimistically update ticket status when dragging over a column
+    if (draggedTicketId) {
+      const statusMap = {
+        "Pending": "pending",
+        "In Progress": "in_progress",
+        "Completed": "completed",
+      };
+      const targetStatusApi = statusMap[targetStatus] || targetStatus.toLowerCase().replace(" ", "_");
+
+      // Get the original ticket
+      const currentTickets = project?.tickets || [];
+      const originalTicket = currentTickets.find((t) => t.id === draggedTicketId);
+
+      if (originalTicket) {
+        // Update optimistic ticket status to target
+        setOptimisticTickets({
+          ...originalTicket,
+          status: targetStatusApi,
+        });
+      }
+    }
+  };
+
+  const handleDragLeave = (e) => {
+    // Only clear if we're actually leaving the drop zone (not entering a child)
+    const relatedTarget = e.relatedTarget;
+    if (!relatedTarget || !e.currentTarget.contains(relatedTarget)) {
+      setDraggedOverColumn(null);
+    }
+  };
+
+  const handleDrop = async (e, targetStatus) => {
+    e.preventDefault();
+    setDraggedOverColumn(null);
+
+    try {
+      const data = JSON.parse(e.dataTransfer.getData("text/plain"));
+      const { ticketId, currentStatus } = data;
+
+      // Map display status to API status format
+      const statusMap = {
+        "Pending": "pending",
+        "In Progress": "in_progress",
+        "Completed": "completed",
+      };
+
+      const targetStatusApi = statusMap[targetStatus] || targetStatus.toLowerCase().replace(" ", "_");
+
+      // Normalize current status for comparison
+      let currentStatusApi = currentStatus?.toLowerCase() || "pending";
+      if (currentStatusApi === "in progress") {
+        currentStatusApi = "in_progress";
+      }
+      if (currentStatusApi === "open") {
+        currentStatusApi = "pending";
+      }
+      if (currentStatusApi === "closed") {
+        currentStatusApi = "completed";
+      }
+
+      // Don't update if status hasn't changed
+      if (targetStatusApi === currentStatusApi) {
+        setOptimisticTickets(null);
+        setDraggedTicketId(null);
+        setUpdatingTicketId(null);
+        return;
+      }
+
+      // Show loader immediately
+      setUpdatingTicketId(ticketId);
+      setUpdatingStatus(true);
+
+      // Update API in background (non-blocking)
+      createAPIEndPoint(`ticket/${ticketId}`).patch({
+        status: targetStatusApi,
+        updated_by: user?.id,
+      })
+        .then(() => {
+          toast.success(`Ticket status updated to ${targetStatus}`);
+          fetchProject(); // Refresh project data to get updated tickets
+        })
+        .catch((err) => {
+          console.error("Failed to update ticket status", err);
+          toast.error("Failed to update ticket status");
+          // Revert optimistic update on error
+          fetchProject();
+        })
+        .finally(() => {
+          setUpdatingStatus(false);
+          setOptimisticTickets(null);
+          setDraggedTicketId(null);
+          setUpdatingTicketId(null);
+        });
+    } catch (err) {
+      console.error("Failed to parse drag data", err);
+      setOptimisticTickets(null);
+      setDraggedTicketId(null);
+      setUpdatingTicketId(null);
     }
   };
 
   if (loading) {
     return (
-      <Box className="!flex !items-center !justify-center !h-96">
-        <CircularProgress size={40} />
+      <Box className="absolute inset-0 flex items-center justify-center bg-purple-50">
+        <CircularProgress color="primary" />
       </Box>
     );
   }
 
-  // Use dummy data if project is null (for UI preview)
-  const displayProject = project || dummyProject;
+  if (!project) {
+    return (
+      <Box className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gray-50">
+        <Typography variant="h6" fontWeight={600} color="text.secondary">
+          Project not found
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          The project may have been deleted or the link is invalid.
+        </Typography>
+        <BackButton textBtn self={"/projects"} />
+      </Box>
+    );
+  }
+
+  const displayProject = project;
 
   const tickets = displayProject.tickets || [];
   const totalTickets = tickets.length;
@@ -256,12 +295,21 @@ export default function ProjectView() {
   const progress = totalTickets > 0 ? Math.round((completedTickets / totalTickets) * 100) : 0;
   const projectColor = displayProject.color || "#5F27CD";
 
-  // Group tickets by status for Kanban board
+  // Group tickets by status for Kanban board (with optimistic updates)
   const getTicketsByStatus = () => {
     const statuses = ["Pending", "In Progress", "Completed"];
     const grouped = {};
+
+    // Use optimistic tickets if available
+    let ticketsToUse = tickets;
+    if (optimisticTickets && draggedTicketId) {
+      ticketsToUse = tickets.map((t) =>
+        t.id === draggedTicketId ? optimisticTickets : t
+      );
+    }
+
     statuses.forEach((status) => {
-      grouped[status] = tickets.filter((t) => {
+      grouped[status] = ticketsToUse.filter((t) => {
         const tStatus = t.status || "Pending";
         if (status === "Pending") {
           return tStatus.toLowerCase() === "pending" || tStatus.toLowerCase() === "open";
@@ -277,22 +325,20 @@ export default function ProjectView() {
   };
 
   return (
-    <div className="!space-y-6 !bg-gray-50 min-h-screen">
+    <div className="!space-y-6 min-h-screen">
       {/* Header */}
       <div className="!flex !items-center !justify-between !mb-4">
         <BackButton self="/projects" />
         <div className="!flex !items-center !gap-2">
-          {displayProject.assignees?.length > 0 ? (
-            <Tooltip title="Change Assignee" arrow>
+          {(displayProject.team_members || displayProject.assignees)?.length > 0 ? (
+            <Tooltip title="Manage Team Members" arrow>
               <Box
-                onClick={() => {
-                  setAssignee(null);
-                  setAssignModalOpen(true);
-                }}
+                onClick={() => setAssignModalOpen(true)}
                 className="!flex !items-center !gap-1.5 !text-brand-500 !border !border-brand-500 !bg-purple-50 hover:!bg-purple-100 !py-2 !px-4 !rounded-lg !cursor-pointer !transition-all !text-sm !font-medium !shadow-sm"
               >
+                <UserPlusIcon className="!h-4 !w-4" />
                 <span>
-                  {toProperCase(displayProject.assignees[0]?.username || displayProject.assignees[0]?.name)}
+                  Team Members ({(displayProject.team_members || displayProject.assignees || []).length})
                 </span>
                 <ArrowsRightLeftIcon className="!h-4 !w-4" />
               </Box>
@@ -306,7 +352,7 @@ export default function ProjectView() {
               className="!bg-brand-500 hover:!bg-brand-600 !shadow-sm"
               sx={{ textTransform: "none" }}
             >
-              Assign Project
+              Assign Team Members
             </Button>
           )}
           <Button
@@ -314,7 +360,8 @@ export default function ProjectView() {
             size="small"
             startIcon={<PencilSquareIcon className="!h-4 !w-4" />}
             onClick={() => navigate(`/projects/${id}/edit`)}
-            sx={{ textTransform: "none" }}
+            sx={{ borderRadius: 1.25 }}
+            className="min-h-[37.6px] !border !border-[#E5E7EB] hover:!border-[#ddd]  !text-gray-500 hover:!bg-gray-50 focus:!ring-gray-500 !px-1 !py-1.5"
           >
             Edit
           </Button>
@@ -339,14 +386,19 @@ export default function ProjectView() {
               <StatusBadge status={displayProject.priority || "low"} isInside />
               {displayProject.tags && displayProject.tags.length > 0 && (
                 <div className="!flex !gap-1.5 !flex-wrap">
-                  {displayProject.tags.map((tag, idx) => (
-                    <Chip 
-                      key={idx} 
-                      label={tag} 
-                      size="small" 
-                      className="!bg-gray-100 !text-gray-700 !border !border-gray-200"
-                    />
-                  ))}
+                  {displayProject.tags.map((tag, idx) => {
+                    // Handle both string tags and tag objects from API
+                    const tagName = typeof tag === 'string' ? tag : (tag.tag_name || tag.name || tag);
+                    const tagId = typeof tag === 'object' ? tag.id : idx;
+                    return (
+                      <Chip
+                        key={tagId}
+                        label={tagName}
+                        size="small"
+                        className="!bg-gray-100 !text-gray-700 !border !border-gray-200"
+                      />
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -362,11 +414,11 @@ export default function ProjectView() {
 
         {/* Stats Grid */}
         <div className="!grid !grid-cols-2 md:!grid-cols-4 !gap-4 !mb-6">
-          <div className="!bg-gray-50 !p-4 !rounded-lg !border !border-gray-200 !shadow-sm hover:!shadow-md !transition-shadow">
-            <Typography variant="caption" className="!text-gray-500 !block !mb-2 !text-xs !font-medium">
+          <div className="!bg-amber-50 !p-4 !rounded-lg !border !border-amber-200 !shadow-sm hover:!shadow-md !transition-shadow">
+            <Typography variant="caption" className="!text-amber-600 !block !mb-2 !text-xs !font-medium">
               Total Tickets
             </Typography>
-            <Typography variant="h5" className="!font-semibold !text-gray-800 !text-2xl">
+            <Typography variant="h5" className="!font-semibold !text-amber-700 !text-2xl">
               {totalTickets}
             </Typography>
           </div>
@@ -409,7 +461,7 @@ export default function ProjectView() {
           <div className="!w-full !bg-gray-200 !rounded-full !h-3 !overflow-hidden !shadow-inner">
             <div
               className="!h-3 !rounded-full !transition-all !duration-500"
-              style={{ 
+              style={{
                 width: `${progress}%`,
                 backgroundColor: projectColor,
               }}
@@ -420,7 +472,7 @@ export default function ProjectView() {
         <Divider className="!my-6" />
 
         {/* Project Details */}
-        <div className="!grid !grid-cols-1 md:!grid-cols-3 !gap-6">
+        <div className="!grid !grid-cols-1 md:!grid-cols-2 lg:!grid-cols-4 !gap-6">
           <div>
             <Typography variant="caption" className="!text-gray-500 !block !mb-2 !text-xs !font-medium">
               Created At
@@ -445,6 +497,27 @@ export default function ProjectView() {
               {toProperCase(displayProject.created_by?.username || "N/A")}
             </Typography>
           </div>
+          <div>
+            <Typography variant="caption" className="!text-gray-500 !block !mb-2 !text-xs !font-medium">
+              Team Members
+            </Typography>
+            {(displayProject.team_members || displayProject.assignees)?.length > 0 ? (
+              <div className="!flex !flex-wrap !gap-1.5">
+                {(displayProject.team_members || displayProject.assignees || []).map((member) => (
+                  <Chip
+                    key={member.user_id || member.id}
+                    label={toProperCase(member.username || member.name || "N/A")}
+                    size="small"
+                    className="!bg-purple-50 !border !border-purple-200 !text-gray-700"
+                  />
+                ))}
+              </div>
+            ) : (
+              <Typography variant="body2" className="!text-gray-400 !text-sm !italic">
+                No team members assigned
+              </Typography>
+            )}
+          </div>
         </div>
       </Card>
 
@@ -460,7 +533,7 @@ export default function ProjectView() {
             </Typography>
           </div>
           <div className="!flex !items-center !gap-2">
-            <div className="!flex !items-center !gap-1 !border !border-gray-200 !rounded-lg !p-0.5 !bg-gray-50">
+            <div className="!flex !items-center !gap-1 !border !border-gray-200 !rounded-lg !py-0.5 !px-1 !bg-gray-50">
               <Tooltip title="Board View">
                 <IconButton
                   size="small"
@@ -471,7 +544,7 @@ export default function ProjectView() {
                       : "!text-gray-500 hover:!bg-gray-100"
                   }
                 >
-                  <Squares2X2Icon className="!h-5 !w-5" />
+                  <Squares2X2Icon className="!h-4 !w-4" />
                 </IconButton>
               </Tooltip>
               <Tooltip title="List View">
@@ -484,7 +557,7 @@ export default function ProjectView() {
                       : "!text-gray-500 hover:!bg-gray-100"
                   }
                 >
-                  <ViewColumnsIcon className="!h-5 !w-5" />
+                  <ViewColumnsIcon className="!h-4 !w-4" />
                 </IconButton>
               </Tooltip>
             </div>
@@ -492,7 +565,7 @@ export default function ProjectView() {
               variant="contained"
               size="small"
               startIcon={<PlusIcon className="!h-4 !w-4" />}
-              onClick={() => navigate(`/tickets/new?project_id=${id}`)}
+              onClick={() => navigate(`/projects/${id}/tickets/new`)}
               className="!bg-brand-500 hover:!bg-brand-600 !shadow-sm"
               sx={{ textTransform: "none" }}
             >
@@ -511,60 +584,52 @@ export default function ProjectView() {
                   "In Progress": "bg-blue-50 border-blue-200",
                   "Completed": "bg-green-50 border-green-200",
                 };
+                const statusBorderColors = {
+                  "Pending": "!border-yellow-400",
+                  "In Progress": "!border-blue-500",
+                  "Completed": "!border-green-500",
+                };
+                const isDraggedOver = draggedOverColumn === status;
                 return (
-                  <Paper 
-                    key={status} 
-                    className={`!p-4 !border-2 ${statusColors[status] || "!bg-gray-50 !border-gray-200"} !rounded-lg !shadow-sm`}
+                  <Paper
+                    key={status}
+                    onDragOver={(e) => handleDragOver(e, status)}
+                    onDragLeave={handleDragLeave}
+                    onDrop={(e) => handleDrop(e, status)}
+                    className={`!p-4 !border-2 !rounded-lg !shadow-sm !transition-all ${isDraggedOver
+                        ? `${statusColors[status]} ${statusBorderColors[status]} !border-4 !bg-opacity-90 !shadow-md`
+                        : `${statusColors[status] || "!bg-gray-50 !border-gray-200"}`
+                      }`}
                   >
                     <div className="!flex !items-center !justify-between !mb-4 !pb-3 !border-b !border-gray-200">
                       <Typography variant="subtitle1" className="!font-semibold !text-gray-800 !text-sm">
                         {status}
                       </Typography>
-                      <Chip 
-                        label={statusTickets.length} 
-                        size="small" 
+                      <Chip
+                        label={statusTickets.length}
+                        size="small"
                         className="!bg-white !font-semibold !text-xs"
                       />
                     </div>
                     <div className="!space-y-3 !min-h-[300px]">
                       {statusTickets.map((ticket) => (
-                        <Card
+                        <DraggableTicketCard
                           key={ticket.id}
-                          className="!p-4 hover:!shadow-lg !transition-all !cursor-pointer !bg-white !border !border-gray-200 !rounded-lg !shadow-none"
-                          onClick={() => navigate(`/tickets/${ticket.id}`)}
-                        >
-                          <div className="!flex !items-start !justify-between !mb-2">
-                            <Typography variant="subtitle2" className="!font-semibold !text-gray-800 !flex-1 !text-sm">
-                              #{ticket.id} - {ticket.title}
-                            </Typography>
-                            <StatusBadge status={ticket.priority} isInside />
-                          </div>
-                          {ticket.details && (
-                            <Typography
-                              variant="caption"
-                              className="!text-gray-600 !line-clamp-2 !mb-3 !block !text-xs"
-                            >
-                              {ticket.details}
-                            </Typography>
-                          )}
-                          <div className="!flex !items-center !justify-between !pt-2 !border-t !border-gray-100">
-                            {ticket.category && (
-                              <Chip 
-                                label={ticket.category.name} 
-                                size="small" 
-                                className="!text-xs !bg-gray-100"
-                              />
-                            )}
-                            {ticket.due_date && (
-                              <DateWithTooltip date={ticket.due_date} />
-                            )}
-                          </div>
-                        </Card>
+                          ticket={ticket}
+                          onStatusChange={fetchProject}
+                          onDragStart={handleDragStart}
+                          isDragging={draggedTicketId === ticket.id}
+                          isUpdating={updatingTicketId === ticket.id}
+                        />
                       ))}
                       {statusTickets.length === 0 && (
-                        <div className="!flex !items-center !justify-center !py-12">
-                          <Typography variant="caption" className="!text-gray-400 !text-xs">
-                            No tickets
+                        <div className={`!flex !items-center !justify-center !py-12 !rounded-lg !border-2 !border-dashed !transition-all ${isDraggedOver
+                            ? `${statusBorderColors[status]} !bg-opacity-20 ${statusColors[status]}`
+                            : "!border-gray-200 !bg-transparent"
+                          }`}>
+                          <Typography variant="caption" className={`!text-xs ${isDraggedOver ? "!font-medium" : "!text-gray-400"
+                            }`}>
+                            {isDraggedOver ? "Drop ticket here" : "No tickets"}
                           </Typography>
                         </div>
                       )}
@@ -660,7 +725,7 @@ export default function ProjectView() {
             <Button
               variant="contained"
               startIcon={<PlusIcon className="!h-5 !w-5" />}
-              onClick={() => navigate(`/tickets/new?project_id=${id}`)}
+              onClick={() => navigate(`/projects/${id}/tickets/new`)}
               className="!bg-brand-500 hover:!bg-brand-600 !shadow-sm"
               sx={{ textTransform: "none" }}
             >
@@ -670,58 +735,159 @@ export default function ProjectView() {
         )}
       </Card>
 
-      {/* Assign Modal */}
+      {/* Assign Team Members Modal */}
       <Dialog
         open={assignModalOpen}
-        onClose={() => setAssignModalOpen(false)}
+        onClose={() => {
+          setAssignModalOpen(false);
+          setAssignees([]);
+        }}
         fullWidth
         maxWidth="sm"
       >
-        <DialogTitle>Assign Project</DialogTitle>
-        <DialogContent>
+        <DialogTitle className="!text-lg md:text-xl !font-semibold !text-sidebar">
+          {(displayProject.team_members || displayProject.assignees)?.length > 0 ? "Manage Team Members" : "Assign Team Members"}
+        </DialogTitle>
+        <DialogContent dividers sx={{ px: 2 }}>
           <Autocomplete
+            multiple
             size="small"
             fullWidth
             options={searchResults}
-            value={assignee}
-            onChange={(e, newValue) => setAssignee(newValue)}
+            value={assignees}
+            onChange={(e, newValue) => setAssignees(newValue)}
             onInputChange={(e, newInputValue) => setSearchTerm(newInputValue)}
             isOptionEqualToValue={(option, value) =>
-              option.user_id === value?.user_id
+              option.user_id === value?.user_id || option.id === value?.id
             }
             getOptionLabel={(option) =>
-              option
-                ? option.first_name
-                  ? `${toProperCase(option.first_name)} ${toProperCase(
-                      option.last_name || ""
-                    )}`.trim()
-                  : toProperCase(option.username || "")
-                : ""
+              option.first_name && option.last_name
+                ? `${toProperCase(option.first_name)} ${toProperCase(option.last_name)}`
+                : toProperCase(option.username || "")
             }
             loading={searchLoading}
             renderInput={(params) => (
               <TextField
                 {...params}
-                label="Assign To"
-                placeholder="Search team member..."
+                label="Assign Team Members"
+                placeholder="Search team members..."
+                InputProps={{
+                  ...params.InputProps,
+                  endAdornment: (
+                    <>
+                      {searchLoading ? <CircularProgress size={20} /> : null}
+                      {params.InputProps.endAdornment}
+                    </>
+                  ),
+                }}
               />
             )}
+            renderTags={(value, getTagProps) =>
+              value.map((option, index) => (
+                <Chip
+                  {...getTagProps({ index })}
+                  key={option.user_id || option.id}
+                  label={
+                    option.first_name && option.last_name
+                      ? `${toProperCase(option.first_name)} ${toProperCase(option.last_name)}`
+                      : toProperCase(option.username || "")
+                  }
+                  size="small"
+                  className="!bg-purple-50 !border !border-purple-200 !text-gray-700"
+                />
+              ))
+            }
+            noOptionsText={
+              searchLoading
+                ? "Searching..."
+                : searchTerm
+                  ? "No team members found"
+                  : "Search to find team members"
+            }
           />
+          {(displayProject.team_members || displayProject.assignees)?.length > 0 && (
+            <Box className="!mt-4 !pt-4 !border-t !border-gray-200">
+              <Typography variant="caption" className="!text-gray-600 !block !mb-2 !font-medium">
+                Current Team Members ({(displayProject.team_members || displayProject.assignees || []).length}):
+              </Typography>
+              <div className="!flex !flex-wrap !gap-2">
+                {(displayProject.team_members || displayProject.assignees || []).map((member) => (
+                  <Chip
+                    key={member.user_id || member.id}
+                    label={toProperCase(member.username || member.name || "N/A")}
+                    size="small"
+                    className="!bg-gray-100 !text-gray-700"
+                  />
+                ))}
+              </div>
+            </Box>
+          )}
         </DialogContent>
-        <DialogActions className="!px-6 !pb-4">
-          <Button 
-            onClick={() => setAssignModalOpen(false)}
-            sx={{ textTransform: "none" }}
+        <DialogActions sx={{ px: 2, py: 1.5 }}>
+          <Button
+            onClick={() => {
+              setAssignModalOpen(false);
+              setAssignees([]);
+            }}
+            disabled={savingAssignees}
+            sx={{
+              textTransform: "none",
+              borderColor: "#E5E7EB",
+              color: "#6B7270",
+              "&:hover": {
+                borderColor: "#E5E7EB",
+                backgroundColor: "#Fafafa",
+              },
+              "&:disabled": {
+                borderColor: "#E5E7EB",
+                color: "#9CA3AF",
+                opacity: 0.6,
+                cursor: "not-allowed",
+              },
+              transition: "all 0.2s ease",
+            }}
+            className="!px-6"
           >
             Cancel
           </Button>
           <Button
             onClick={handleAssign}
             variant="contained"
-            className="!bg-brand-500 hover:!bg-brand-600"
-            sx={{ textTransform: "none" }}
+            disabled={savingAssignees}
+            sx={{
+              textTransform: "none",
+              backgroundColor: savingAssignees ? "#F3F4F6" : "#824EF2",
+              color: savingAssignees ? "#6B7280" : "white",
+              "&:hover": {
+                backgroundColor: savingAssignees ? "#F3F4F6" : "#6B3BC4",
+              },
+              "&:disabled": {
+                backgroundColor: "#F3F4F6",
+                color: "#6B7280",
+                cursor: "not-allowed",
+              },
+              transition: "all 0.2s ease",
+              minWidth: 100,
+            }}
           >
-            Assign
+            {savingAssignees ? (
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <CircularProgress
+                  size={16}
+                  sx={{
+                    color: "#6B7280",
+                    "& .MuiCircularProgress-circle": {
+                      strokeLinecap: "round",
+                    },
+                  }}
+                />
+                <span>Saving...</span>
+              </Box>
+            ) : (displayProject.team_members || displayProject.assignees)?.length > 0 ? (
+              "Update"
+            ) : (
+              "Assign"
+            )}
           </Button>
         </DialogActions>
       </Dialog>

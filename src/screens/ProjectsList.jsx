@@ -16,18 +16,15 @@ import {
   Select,
   InputLabel,
 } from "@mui/material";
+import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import ClearIcon from "@mui/icons-material/Clear";
 import {
   PlusIcon,
-  MagnifyingGlassIcon,
-  FunnelIcon,
   ViewColumnsIcon,
   Squares2X2Icon,
   EllipsisVerticalIcon,
-  CalendarIcon,
   ChartBarIcon,
-  ArrowUpIcon,
-  ArrowDownIcon,
 } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
 import { createAPIEndPoint } from "../config/api/api";
@@ -37,6 +34,9 @@ import { convertToCST } from "../utils";
 import { toProperCase } from "../utils/formatting";
 import StatusBadge from "../components/StatusBadge";
 import DateWithTooltip from "../components/DateWithTooltip";
+import CustomTablePagination from "../components/CustomTablePagination";
+import ConfirmationModal from "../components/ConfirmationModal";
+import dayjs from "dayjs";
 
 export default function ProjectsList() {
   const navigate = useNavigate();
@@ -45,125 +45,67 @@ export default function ProjectsList() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState("board"); // 'board', 'table', 'timeline', 'calendar'
-  const [statusFilter, setStatusFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("my_projects");
+  const [priorityFilter, setPriorityFilter] = useState("");
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedProject, setSelectedProject] = useState(null);
   const [sortBy, setSortBy] = useState("name"); // 'name', 'status', 'due_date', 'created_at'
   const [sortOrder, setSortOrder] = useState("asc"); // 'asc', 'desc'
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  // Static status options
+  const statusOptions = [
+    { value: "active", label: "Active" },
+    { value: "completed", label: "Completed" },
+    { value: "archived", label: "Archived" },
+  ];
+
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [totalCount, setTotalCount] = useState(0);
 
   useEffect(() => {
     fetchProjects();
-  }, [searchQuery, statusFilter, sortBy, sortOrder]);
-
-  // Dummy data for fallback UI
-  const dummyProjects = [
-    {
-      id: 1,
-      name: "Website Redesign",
-      description: "Complete redesign of company website with modern UI/UX",
-      status: "active",
-      priority: "high",
-      color: "#FF3838",
-      tags: ["Design", "Frontend"],
-      due_date: "2024-12-31",
-      created_at: "2024-01-15T10:00:00Z",
-      tickets: [
-        { id: 1, status: "completed", priority: "High" },
-        { id: 2, status: "in-progress", priority: "Medium" },
-        { id: 3, status: "pending", priority: "Low" },
-      ],
-      assignees: [{ id: 1, username: "John Doe", name: "John Doe" }],
-    },
-    {
-      id: 2,
-      name: "Mobile App Development",
-      description: "Build native mobile app for iOS and Android",
-      status: "active",
-      priority: "medium",
-      color: "#5F27CD",
-      tags: ["Mobile", "Development"],
-      due_date: "2024-11-30",
-      created_at: "2024-02-01T10:00:00Z",
-      tickets: [
-        { id: 4, status: "in-progress", priority: "High" },
-        { id: 5, status: "pending", priority: "Medium" },
-      ],
-      assignees: [{ id: 2, username: "Jane Smith", name: "Jane Smith" }],
-    },
-    {
-      id: 3,
-      name: "Database Migration",
-      description: "Migrate legacy database to cloud infrastructure",
-      status: "completed",
-      priority: "low",
-      color: "#7BED9F",
-      tags: ["Backend", "Infrastructure"],
-      due_date: "2024-10-15",
-      created_at: "2024-01-10T10:00:00Z",
-      tickets: [
-        { id: 6, status: "completed", priority: "Low" },
-        { id: 7, status: "completed", priority: "Low" },
-      ],
-      assignees: [{ id: 3, username: "Bob Wilson", name: "Bob Wilson" }],
-    },
-  ];
+  }, [searchQuery, statusFilter, priorityFilter, startDate, endDate, page, rowsPerPage]);
 
   const fetchProjects = async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
       if (searchQuery) params.append("search", searchQuery);
-      if (statusFilter) params.append("status", statusFilter);
-      if (sortBy) params.append("sort_by", sortBy);
-      if (sortOrder) params.append("sort_order", sortOrder);
+      if (statusFilter && statusFilter !== "my_projects") {
+        params.append("status", statusFilter);
+      }
+      if (statusFilter === "my_projects" && user?.id) {
+        params.append("created_by", user.id.toString());
+      }
+      if (priorityFilter) params.append("priority", priorityFilter);
+      if (startDate) params.append("start_date", dayjs(startDate).format("YYYY-MM-DD"));
+      if (endDate) params.append("end_date", dayjs(endDate).format("YYYY-MM-DD"));
+      params.append("page", (page + 1).toString()); // API uses 1-indexed
+      params.append("per_page", rowsPerPage.toString());
 
       const res = await createAPIEndPoint(
         `projects?${params.toString()}`
       ).fetchAll();
-      let fetchedProjects = res.data?.projects || res.data || [];
 
-      // Use dummy data if no projects found (for UI preview)
-      if (fetchedProjects.length === 0 && !searchQuery && !statusFilter) {
-        fetchedProjects = dummyProjects;
-      }
-
-      // Client-side sorting if API doesn't support it
-      if (fetchedProjects.length > 0) {
-        fetchedProjects = [...fetchedProjects].sort((a, b) => {
-          let aVal, bVal;
-          switch (sortBy) {
-            case "name":
-              aVal = (a.name || "").toLowerCase();
-              bVal = (b.name || "").toLowerCase();
-              break;
-            case "status":
-              aVal = a.status || "";
-              bVal = b.status || "";
-              break;
-            case "due_date":
-              aVal = a.due_date ? new Date(a.due_date).getTime() : 0;
-              bVal = b.due_date ? new Date(b.due_date).getTime() : 0;
-              break;
-            case "created_at":
-              aVal = a.created_at ? new Date(a.created_at).getTime() : 0;
-              bVal = b.created_at ? new Date(b.created_at).getTime() : 0;
-              break;
-            default:
-              return 0;
-          }
-          if (sortOrder === "asc") {
-            return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
-          } else {
-            return aVal < bVal ? 1 : aVal > bVal ? -1 : 0;
-          }
-        });
-      }
+      const fetchedProjects = res.data?.projects || [];
+      const paginationData = res.data?.pagination || {
+        page: 1,
+        per_page: 10,
+        total: 0,
+        pages: 1,
+      };
 
       setProjects(fetchedProjects);
+      setTotalCount(paginationData.total || 0);
     } catch (err) {
       console.error("Failed to fetch projects", err);
-      // Use dummy data on error for UI preview
-      setProjects(dummyProjects);
+      toast.error("Failed to load projects");
+      setProjects([]);
+      setTotalCount(0);
     } finally {
       setLoading(false);
     }
@@ -179,25 +121,36 @@ export default function ProjectsList() {
     setSelectedProject(null);
   };
 
-  const handleDelete = async () => {
-    if (!selectedProject) return;
-    try {
-      await createAPIEndPoint(`project/${selectedProject.id}`).delete();
-      toast.success("Project deleted successfully");
-      fetchProjects();
-    } catch (err) {
-      toast.error("Failed to delete project");
-    }
+  const handleDeleteClick = () => {
+    setDeleteModalOpen(true);
     handleMenuClose();
   };
 
+  const handleDelete = async () => {
+    if (!selectedProject) return;
+    try {
+      setDeleting(true);
+      await createAPIEndPoint(`project/${selectedProject.id}`).delete();
+      toast.success("Project deleted successfully");
+      fetchProjects();
+      setDeleteModalOpen(false);
+      setSelectedProject(null);
+    } catch (err) {
+      toast.error("Failed to delete project");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const getProjectStats = (project) => {
-    const tickets = project.tickets || [];
-    const total = tickets.length;
-    const completed = tickets.filter((t) => t.status === "completed").length;
-    const inProgress = tickets.filter(
-      (t) => t.status === "in-progress" || t.status === "in_progress"
-    ).length;
+    // Use ticket_count from API instead of calculating from tickets array
+    const total = project.ticket_count || 0;
+
+    // Get status counts from ticket_status_counts if available
+    const statusCounts = project.ticket_status_counts || {};
+    const completed = statusCounts.completed || 0;
+    const inProgress = statusCounts.in_progress || statusCounts["in progress"] || 0;
+
     return { total, completed, inProgress };
   };
 
@@ -220,14 +173,13 @@ export default function ProjectsList() {
       {/* Filters */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
         {/* Search */}
-        <div className="col-span-1 sm:col-span-2 lg:col-span-4">
+        <div className="col-span-1 sm:col-span-2 lg:col-span-2">
           <TextField
             label="Search"
             size="small"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             fullWidth
-            sx={{ maxWidth: 400 }}
             InputProps={{
               endAdornment: searchQuery?.length > 0 && (
                 <InputAdornment position="end">
@@ -244,8 +196,64 @@ export default function ProjectsList() {
           />
         </div>
 
+        {/* Priority Filter */}
+        <div className="col-span-1">
+          <FormControl fullWidth size="small">
+            <InputLabel>Priority</InputLabel>
+            <Select
+              value={priorityFilter}
+              onChange={(e) => {
+                setPriorityFilter(e.target.value);
+                setPage(0);
+              }}
+              label="Priority"
+            >
+              <MenuItem value="">All</MenuItem>
+              <MenuItem value="low">Low</MenuItem>
+              <MenuItem value="medium">Medium</MenuItem>
+              <MenuItem value="high">High</MenuItem>
+            </Select>
+          </FormControl>
+        </div>
+
+        {/* Start Date */}
+        <div className="col-span-1 sm:col-span-1 lg:col-span-1">
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DatePicker
+              label="Start Date"
+              value={startDate}
+              onChange={(date) => {
+                setStartDate(date);
+                setPage(0);
+              }}
+              maxDate={endDate}
+              slotProps={{
+                textField: { size: "small", fullWidth: true },
+              }}
+            />
+          </LocalizationProvider>
+        </div>
+
+        {/* End Date */}
+        <div className="col-span-1 sm:col-span-1 lg:col-span-1">
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DatePicker
+              label="End Date"
+              value={endDate}
+              onChange={(date) => {
+                setEndDate(date);
+                setPage(0);
+              }}
+              minDate={startDate}
+              slotProps={{
+                textField: { size: "small", fullWidth: true },
+              }}
+            />
+          </LocalizationProvider>
+        </div>
+
         {/* View Mode */}
-        <div className="col-span-1 sm:col-span-2 lg:col-span-2 flex items-center gap-1 justify-end">
+        <div className="col-span-1 flex items-center gap-1 justify-end">
           <Tooltip title="Board View">
             <IconButton
               size="small"
@@ -287,67 +295,84 @@ export default function ProjectsList() {
           </Tooltip>
         </div>
 
-        {/* User Filter + Clear button row */}
+        {/* Status Filter Buttons + Clear button row */}
         <div className="mb-0.5 col-span-1 sm:col-span-2 lg:col-span-6 flex flex-col lg:flex-row items-stretch lg:items-center gap-2">
           {/* Filter Buttons */}
           <div className="flex flex-wrap gap-2">
             <button
-              onClick={() => setStatusFilter("")}
+              onClick={() => {
+                if (statusFilter === "my_projects") {
+                  setStatusFilter("");
+                } else {
+                  setStatusFilter("my_projects");
+                }
+                setPage(0);
+              }}
+              className={`px-3 py-[6.15px] !text-xs font-medium rounded-lg border transition-all duration-500 ${statusFilter === "my_projects"
+                ? "bg-brand-500 text-white border-brand-500 hover:bg-brand-600"
+                : "border border-[#E5E7EB] text-[#969AA1] hover:bg-gray-50"
+                }`}
+            >
+              My Projects
+            </button>
+            {statusOptions.map((status) => {
+              // Handle both object format {value, label} and string format
+              const statusValue = typeof status === "string" ? status : status.value || status.id;
+              const statusLabel = typeof status === "string"
+                ? toProperCase(status)
+                : status.label || status.name || toProperCase(statusValue);
+
+              return (
+                <button
+                  key={statusValue}
+                  onClick={() => {
+                    setStatusFilter(statusValue);
+                    setPage(0);
+                  }}
+                  className={`px-3 py-[6.15px] !text-xs font-medium rounded-lg border transition-all duration-500 ${statusFilter === statusValue
+                    ? "bg-brand-500 text-white border-brand-500 hover:bg-brand-600"
+                    : "border border-[#E5E7EB] text-[#969AA1] hover:bg-gray-50"
+                    }`}
+                >
+                  {statusLabel}
+                </button>
+              );
+            })}
+            <button
+              onClick={() => {
+                setStatusFilter("");
+                setPage(0);
+              }}
               className={`px-3 py-[6.15px] !text-xs font-medium rounded-lg border transition-all duration-500 ${statusFilter === ""
-                  ? "bg-brand-500 text-white border-brand-500 hover:bg-brand-600"
-                  : "border border-[#E5E7EB] text-[#969AA1] hover:bg-gray-50"
+                ? "bg-brand-500 text-white border-brand-500 hover:bg-brand-600"
+                : "border border-[#E5E7EB] text-[#969AA1] hover:bg-gray-50"
                 }`}
             >
               All
-            </button>
-            <button
-              onClick={() => setStatusFilter("active")}
-              className={`px-3 py-[6.15px] !text-xs font-medium rounded-lg border transition-all duration-500 ${statusFilter === "active"
-                  ? "bg-brand-500 text-white border-brand-500 hover:bg-brand-600"
-                  : "border border-[#E5E7EB] text-[#969AA1] hover:bg-gray-50"
-                }`}
-            >
-              Active
-            </button>
-            <button
-              onClick={() => setStatusFilter("completed")}
-              className={`px-3 py-[6.15px] !text-xs font-medium rounded-lg border transition-all duration-500 ${statusFilter === "completed"
-                  ? "bg-brand-500 text-white border-brand-500 hover:bg-brand-600"
-                  : "border border-[#E5E7EB] text-[#969AA1] hover:bg-gray-50"
-                }`}
-            >
-              Completed
-            </button>
-            <button
-              onClick={() => setStatusFilter("archived")}
-              className={`px-3 py-[6.15px] !text-xs font-medium rounded-lg border transition-all duration-500 ${statusFilter === "archived"
-                  ? "bg-brand-500 text-white border-brand-500 hover:bg-brand-600"
-                  : "border border-[#E5E7EB] text-[#969AA1] hover:bg-gray-50"
-                }`}
-            >
-              Archived
             </button>
           </div>
 
           {/* Clear Button on the right */}
           <div className="flex lg:ml-auto lg:w-auto">
-            <button
-              onClick={() => {
-                setSearchQuery("");
-                setStatusFilter("");
-                setSortBy("name");
-                setSortOrder("asc");
-              }}
-              className={`px-3 py-[6.15px] shrink-0 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 transition-all ${searchQuery ||
-                  statusFilter ||
-                  (sortBy !== "name") ||
-                  (sortOrder !== "asc")
-                  ? "border border-red-500 bg-red-500 text-white hover:bg-red-600 focus:ring-red-500"
-                  : "border border-[#E5E7EB] text-gray-400 hover:border-gray-300 hover:text-gray-600 hover:bg-brand-50 focus:ring-gray-500"
-                }`}
-            >
-              Clear
-            </button>
+            {(searchQuery ||
+              (statusFilter && statusFilter !== "my_projects") ||
+              priorityFilter ||
+              startDate ||
+              endDate) && (
+                <button
+                  onClick={() => {
+                    setSearchQuery("");
+                    setStatusFilter("my_projects"); // Reset to default "My Projects"
+                    setPriorityFilter("");
+                    setStartDate(null);
+                    setEndDate(null);
+                    setPage(0);
+                  }}
+                  className="px-3 py-[6.15px] shrink-0 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 transition-all border border-red-500 bg-red-500 text-white hover:bg-red-600 focus:ring-red-500"
+                >
+                  Clear
+                </button>
+              )}
           </div>
         </div>
       </div>
@@ -387,6 +412,12 @@ export default function ProjectsList() {
                 key={project.id}
                 className="p-4 hover:!shadow-lg transition-all cursor-pointer border-l-4 !shadow-md"
                 style={{ borderLeftColor: projectColor }}
+                // sx={{
+                //   boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important",
+                //   "&:hover": {
+                //     boxShadow: `0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05), 0 0 0 1px ${projectColor}40, 0 0 20px ${projectColor}30 !important`,
+                //   },
+                // }}
                 onClick={() => navigate(`/projects/${project.id}`)}
               >
                 <div className="flex justify-between items-start mb-3">
@@ -428,14 +459,18 @@ export default function ProjectsList() {
                 </div>
                 {project.tags && project.tags.length > 0 && (
                   <div className="flex flex-wrap gap-1 mb-3">
-                    {project.tags.slice(0, 3).map((tag, idx) => (
-                      <Chip
-                        key={idx}
-                        label={tag}
-                        size="small"
-                        className="text-xs"
-                      />
-                    ))}
+                    {project.tags.slice(0, 3).map((tag, idx) => {
+                      const tagName = typeof tag === 'string' ? tag : (tag.tag_name || tag.name || tag);
+                      const tagId = typeof tag === 'object' ? tag.id : idx;
+                      return (
+                        <Chip
+                          key={tagId}
+                          label={tagName}
+                          size="small"
+                          className="text-xs"
+                        />
+                      );
+                    })}
                     {project.tags.length > 3 && (
                       <Chip
                         label={`+${project.tags.length - 3}`}
@@ -448,38 +483,37 @@ export default function ProjectsList() {
                 {project.description && (
                   <Typography
                     variant="body2"
-                    className="text-gray-600 mb-3 line-clamp-2"
+                    className="!text-gray-600 !mb-3 line-clamp-2"
                   >
                     {project.description}
                   </Typography>
                 )}
                 <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
                   <div className="flex items-center gap-4">
-                    <span>{stats.total} Tasks</span>
-                    <span>{stats.completed} Completed</span>
+                    <span>{stats.total} {stats.total === 1 ? "Ticket" : "Tickets"}</span>
                   </div>
                   {project.due_date && (
                     <DateWithTooltip date={project.due_date} />
                   )}
                 </div>
-                {project.assignees && project.assignees.length > 0 && (
+                {(project.team_members || project.assignees)?.length > 0 && (
                   <div className="flex items-center gap-2">
                     <Typography variant="caption" className="text-gray-500">
                       Assigned to:
                     </Typography>
                     <div className="flex -space-x-2">
-                      {project.assignees.slice(0, 3).map((assignee) => (
-                        <div
-                          key={assignee.id}
-                          className="w-6 h-6 rounded-full bg-brand-500 text-white text-xs flex items-center justify-center border-2 border-white"
-                          title={assignee.username || assignee.name}
-                        >
-                          {(assignee.username || assignee.name || "?")[0].toUpperCase()}
-                        </div>
+                      {(project.team_members || project.assignees || []).slice(0, 3).map((member) => (
+                        <Tooltip key={member.user_id || member.id} title={member.username || member.name}>
+                          <div
+                            className="w-6 h-6 rounded-full bg-orange-400 text-white text-xs flex items-center justify-center border-2 border-white"
+                          >
+                            {(member.username || member.name || "?")[0].toUpperCase()}
+                          </div>
+                        </Tooltip>
                       ))}
-                      {project.assignees.length > 3 && (
+                      {(project.team_members || project.assignees || []).length > 3 && (
                         <div className="w-6 h-6 rounded-full bg-gray-300 text-gray-600 text-xs flex items-center justify-center border-2 border-white">
-                          +{project.assignees.length - 3}
+                          +{(project.team_members || project.assignees || []).length - 3}
                         </div>
                       )}
                     </div>
@@ -490,7 +524,7 @@ export default function ProjectsList() {
           })}
         </div>
       ) : viewMode === "timeline" ? (
-        <Card className="p-4">
+        <Card className="p-4 !px-0 !shadow-none">
           <div className="space-y-4">
             {projects.map((project) => {
               const stats = getProjectStats(project);
@@ -502,7 +536,7 @@ export default function ProjectsList() {
               return (
                 <Card
                   key={project.id}
-                  className="p-4 hover:shadow-md transition-shadow cursor-pointer border-l-4"
+                  className="p-4 hover:!shadow-lg transition-shadow cursor-pointer border-l-4 !shadow-md"
                   style={{ borderLeftColor: projectColor }}
                   onClick={() => navigate(`/projects/${project.id}`)}
                 >
@@ -533,7 +567,7 @@ export default function ProjectsList() {
                   <div className="mb-2">
                     <div className="flex justify-between text-sm text-gray-600 mb-1">
                       <span>Progress: {progress}%</span>
-                      <span>{stats.completed}/{stats.total} tasks</span>
+                      <span>{stats.total} {stats.total === 1 ? "ticket" : "tickets"}</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
                       <div
@@ -609,7 +643,7 @@ export default function ProjectsList() {
                         onClick={() => navigate(`/projects/${project.id}`)}
                       >
                         <td className="px-4 py-3 border-b border-[#E5E7EB]">
-                          {idx + 1}
+                          {page * rowsPerPage + idx + 1}
                         </td>
                         <td className="px-4 py-3 border-b border-[#E5E7EB] font-medium text-gray-800 max-w-48">
                           <div className="flex items-center gap-2">
@@ -645,7 +679,7 @@ export default function ProjectsList() {
                           />
                         </td>
                         <td className="px-4 py-3 border-b border-[#E5E7EB] text-sm text-gray-600">
-                          {stats.total} total, {stats.completed} completed
+                          {stats.total} {stats.total === 1 ? "ticket" : "tickets"}
                         </td>
                         <td className="px-4 py-3 border-b border-[#E5E7EB]">
                           <div className="flex items-center gap-2">
@@ -671,11 +705,11 @@ export default function ProjectsList() {
                           )}
                         </td>
                         <td className="px-4 py-3 border-b border-[#E5E7EB] text-sm text-gray-600">
-                          {project.assignees && project.assignees.length > 0 ? (
+                          {(project.team_members || project.assignees)?.length > 0 ? (
                             <span>
                               {toProperCase(
-                                project.assignees[0]?.username ||
-                                project.assignees[0]?.name ||
+                                (project.team_members || project.assignees)[0]?.username ||
+                                (project.team_members || project.assignees)[0]?.name ||
                                 "N/A"
                               )}
                             </span>
@@ -711,6 +745,17 @@ export default function ProjectsList() {
         </div>
       )}
 
+      {/* Pagination - Only show for table view */}
+      {viewMode === "table" && projects.length > 0 && (
+        <CustomTablePagination
+          rowsPerPage={rowsPerPage}
+          setRowsPerPage={setRowsPerPage}
+          page={page}
+          setPage={setPage}
+          totalCount={totalCount}
+        />
+      )}
+
       {/* Context Menu */}
       <Menu
         anchorEl={anchorEl}
@@ -727,10 +772,26 @@ export default function ProjectsList() {
         >
           Edit
         </MenuItem>
-        <MenuItem onClick={handleDelete} className="text-red-600">
+        {/* <MenuItem onClick={handleDeleteClick} className="text-red-600">
           Delete
-        </MenuItem>
+        </MenuItem> */}
       </Menu>
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        open={deleteModalOpen}
+        onClose={() => {
+          setDeleteModalOpen(false);
+          setSelectedProject(null);
+        }}
+        onConfirm={handleDelete}
+        title="Delete Project"
+        message={`Are you sure you want to delete "${selectedProject?.name}"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        loading={deleting}
+        danger={true}
+      />
     </div>
   );
 }

@@ -422,6 +422,9 @@ export default function Tickets() {
                       #
                     </th>
                     <th className="px-4 py-3 border-b border-r border-[#E5E7EB]">
+                      Ticket ID
+                    </th>
+                    <th className="px-4 py-3 border-b border-r border-[#E5E7EB]">
                       Title
                     </th>
                     {/* <th className="px-4 py-3 border-r border-b border-[#E5E7EB] !font-medium">
@@ -458,6 +461,9 @@ export default function Tickets() {
                     <tr key={t.id} className="hover:bg-gray-50 ">
                       <td className="px-4 py-3 border-b  border-[#E5E7EB] ">
                         {page * rowsPerPage + idx + 1}
+                      </td>
+                      <td className="px-4 py-3 border-b border-[#E5E7EB] text-gray-600">
+                        #{t.id}
                       </td>
                       <td className="px-4 py-3 border-b border-[#E5E7EB] font-medium text-gray-800 max-w-48">
                         {toProperCase(t.title)}
