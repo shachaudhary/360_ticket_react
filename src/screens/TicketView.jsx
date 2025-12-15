@@ -518,13 +518,13 @@ export default function TicketView() {
             loc.id !== 25 && // Sales Team
             loc.id !== 28 && // Insurance
             loc.id !== 30 && // Anonymous
-            loc.id !== 29 && // Pediatrics
-            loc.id !== 32 && // Orthodontics
+            // loc.id !== 29 && // Pediatrics
+            // loc.id !== 32 && // Orthodontics
             name !== "sales team" &&
             name !== "insurance" &&
-            name !== "anonymous" &&
-            name !== "pediatrics" &&
-            name !== "orthodontics"
+            name !== "anonymous"
+            // name !== "pediatrics" &&
+            // name !== "orthodontics"
           );
         });
 
