@@ -110,12 +110,12 @@ export default function Dashboard() {
   const formatResolutionTime = (timeInHours) => {
     // Handle null, undefined, or 0
     if (!timeInHours || timeInHours === 0) return "N/A";
-    
+
     // Compact Format: Convert to days, hours, minutes
     const days = Math.floor(timeInHours / 24);
     const hours = Math.floor(timeInHours % 24);
     const minutes = Math.round((timeInHours % 1) * 60);
-    
+
     // Build compact string (e.g., "2d 5h 30m")
     const parts = [];
     if (days > 0) {
@@ -127,12 +127,12 @@ export default function Dashboard() {
     if (minutes > 0) {
       parts.push(`${minutes}m`);
     }
-    
+
     // If no parts (shouldn't happen, but safety check)
     if (parts.length === 0) {
       return "< 1m";
     }
-    
+
     return parts.join(" ");
   };
 
@@ -158,6 +158,12 @@ export default function Dashboard() {
 
   return (
     <div className="dashbaord-pg">
+      {loadingStats && timeView === "custom" && (
+        <div className="h-[calc(100vh-56px)] absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 rounded-md !z-50 backdrop-blur-sm">
+          <CircularProgress size={40} thickness={4} sx={{ color: "#9C6BFF" }} />
+        </div>
+      )}
+
       {loading ? (
         <div className="fixed inset-0 flex items-center justify-center bg-white z-50">
           <CircularProgress size={60} thickness={4} sx={{ color: "#9C6BFF" }} />
@@ -241,59 +247,60 @@ export default function Dashboard() {
           )} */}
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            {stats.map((s) => (
-              <div
-                key={s.label}
-                className={`rounded-md border border-gray-100 bg-white p-5 shadow-card hover:shadow-md transition-all duration-300 ${
-                  s.resolutionTime ? "flex items-center justify-between gap-4" : "flex items-center gap-4"
-                }`}
-              >
-                <div className="flex items-center gap-4">
-                  <div
-                    className="flex h-11 w-11 items-center justify-center rounded-lg"
-                    style={{
-                      backgroundColor:
-                        s.label === "Open Tickets"
-                          ? "rgba(59, 130, 246, 0.12)" // light blue bg
-                          : s.label === "In Progress"
-                            ? "rgba(250, 204, 21, 0.15)" // light yellow bg
-                            : s.label === "Completed"
-                              ? "rgba(34, 197, 94, 0.12)" // light green bg
-                              : "#f3f4f6", // fallback light gray
-                    }}
-                  >
-                    {s.icon}
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">{s.label}</div>
-                    <div className="mt-1 text-2xl font-bold">
-                      {s.label === "Open Tickets" && typeof s.total === "number"
-                        ? s.total
-                          ? `${s.value} / ${s.total}`
-                          : s.value
-                        : s.value}
+          <div className="relative">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              {stats.map((s) => (
+                <div
+                  key={s.label}
+                  className={`rounded-md border border-gray-100 bg-white p-5 shadow-card hover:shadow-md transition-all duration-300 ${s.resolutionTime ? "flex items-center justify-between gap-4" : "flex items-center gap-4"
+                    }`}
+                >
+                  <div className="flex items-center gap-4">
+                    <div
+                      className="flex h-11 w-11 items-center justify-center rounded-lg"
+                      style={{
+                        backgroundColor:
+                          s.label === "Open Tickets"
+                            ? "rgba(59, 130, 246, 0.12)" // light blue bg
+                            : s.label === "In Progress"
+                              ? "rgba(250, 204, 21, 0.15)" // light yellow bg
+                              : s.label === "Completed"
+                                ? "rgba(34, 197, 94, 0.12)" // light green bg
+                                : "#f3f4f6", // fallback light gray
+                      }}
+                    >
+                      {s.icon}
                     </div>
-                    {s.label === "Open Tickets" && typeof s.total === "number" && s.total > 0 && (
-                      <div className="mt-0.5 text-xs text-gray-500">
-                        of {s.total} total
+                    <div>
+                      <div className="text-sm text-gray-500">{s.label}</div>
+                      <div className="mt-1 text-2xl font-bold">
+                        {s.label === "Open Tickets" && typeof s.total === "number"
+                          ? s.total
+                            ? `${s.value} / ${s.total}`
+                            : s.value
+                          : s.value}
                       </div>
-                    )}
+                      {s.label === "Open Tickets" && typeof s.total === "number" && s.total > 0 && (
+                        <div className="mt-0.5 text-xs text-gray-500">
+                          of {s.total} total
+                        </div>
+                      )}
+                    </div>
                   </div>
+                  {s.resolutionTime && (
+                    <div className="text-right flex flex-col items-end">
+                      <div className="text-xs text-gray-500 font-medium flex items-center gap-1.5 justify-end mb-2">
+                        <ClockIcon className="h-4 w-4 text-gray-400" />
+                        <span>Avg Resolution Time</span>
+                      </div>
+                      <div className="px-3 py-1.5 rounded-md bg-white border border-gray-200 shadow-sm">
+                        <div className="!text-[13px] font-semibold text-gray-700">{s.resolutionTime}</div>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                {s.resolutionTime && (
-                  <div className="text-right flex flex-col items-end">
-                    <div className="text-xs text-gray-500 font-medium flex items-center gap-1.5 justify-end mb-2">
-                      <ClockIcon className="h-4 w-4 text-gray-400" />
-                      <span>Avg Resolution Time</span>
-                    </div>
-                    <div className="px-3 py-1.5 rounded-md bg-white border border-gray-200 shadow-sm">
-                      <div className="!text-[13px] font-semibold text-gray-700">{s.resolutionTime}</div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
 
           {/* Ticket Trends Line Chart */}
