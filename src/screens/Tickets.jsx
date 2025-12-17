@@ -14,8 +14,10 @@ import {
 } from "@mui/material";
 import { IconButton, Tooltip } from "@mui/material";
 import LaunchIcon from "@mui/icons-material/Launch";
+import CheckIcon from "@mui/icons-material/Check";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs from "dayjs";
 import { createAPIEndPoint } from "../config/api/api";
 import CustomTablePagination from "../components/CustomTablePagination";
 import { useNavigate } from "react-router-dom";
@@ -33,25 +35,65 @@ import { chipStyle } from "../utils/common";
 export default function Tickets() {
   const navigate = useNavigate();
   const { user } = useApp();
-  console.log("🚀 ~ Tickets ~ user:", user);
 
-  const [query, setQuery] = useState("");
-  const [debouncedQuery, setDebouncedQuery] = useState(""); // 🔹 debounced value
+  // Load filters from localStorage on mount
+  const loadFiltersFromStorage = () => {
+    try {
+      const saved = localStorage.getItem("ticketsFilters");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return {
+          query: parsed.query || "",
+          statusFilter: parsed.statusFilter || [],
+          categoryFilter: parsed.categoryFilter || "",
+          startDate: parsed.startDate ? dayjs(parsed.startDate) : null,
+          endDate: parsed.endDate ? dayjs(parsed.endDate) : null,
+          userFilter: parsed.userFilter !== undefined ? parsed.userFilter : "assign_to",
+          page: parsed.page || 0,
+          rowsPerPage: parsed.rowsPerPage || 10,
+        };
+      }
+    } catch (err) {
+      console.error("Error loading filters from storage:", err);
+    }
+    return {
+      query: "",
+      statusFilter: [],
+      categoryFilter: "",
+      startDate: null,
+      endDate: null,
+      userFilter: "assign_to",
+      page: 0,
+      rowsPerPage: 10,
+    };
+  };
+
+  const savedFilters = loadFiltersFromStorage();
+
+  const [query, setQuery] = useState(savedFilters.query);
+  const [debouncedQuery, setDebouncedQuery] = useState(savedFilters.query); // 🔹 debounced value
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const [statusFilter, setStatusFilter] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("");
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
-  const [userFilter, setUserFilter] = useState("assign_to"); // Default to "assigned"
+  const [statusFilter, setStatusFilter] = useState(savedFilters.statusFilter);
+  const [categoryFilter, setCategoryFilter] = useState(savedFilters.categoryFilter);
+  const [startDate, setStartDate] = useState(savedFilters.startDate);
+  const [endDate, setEndDate] = useState(savedFilters.endDate);
+  const [userFilter, setUserFilter] = useState(savedFilters.userFilter);
   const [categories, setCategories] = useState([]);
   
   // Check if user is admin
   const isAdmin = user?.user_role?.toLowerCase() === "admin";
 
   // 🔹 Debounce effect
+  const isInitialMount = React.useRef(true);
   useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      setDebouncedQuery(query);
+      return;
+    }
+    
     const handler = setTimeout(() => {
       setDebouncedQuery(query);
       setPage(0); // reset to first page when typing new query
@@ -80,10 +122,25 @@ export default function Tickets() {
   }, []);
 
   // State
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(savedFilters.rowsPerPage);
+  const [page, setPage] = useState(savedFilters.page);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+
+  // Save filters to localStorage whenever they change
+  useEffect(() => {
+    const filtersToSave = {
+      query,
+      statusFilter,
+      categoryFilter,
+      startDate: startDate ? startDate.toISOString() : null,
+      endDate: endDate ? endDate.toISOString() : null,
+      userFilter,
+      page,
+      rowsPerPage,
+    };
+    localStorage.setItem("ticketsFilters", JSON.stringify(filtersToSave));
+  }, [query, statusFilter, categoryFilter, startDate, endDate, userFilter, page, rowsPerPage]);
 
   // Status update state
   const [statusMenuAnchor, setStatusMenuAnchor] = useState(null);
@@ -120,13 +177,19 @@ export default function Tickets() {
       // params.append("user_id", user?.id);
 
       if (debouncedQuery) params.append("search", debouncedQuery); // 🔹 use debounced value
-      if (statusFilter) params.append("status", statusFilter.toLowerCase().replace(/\+/g, " "));
+      if (statusFilter && statusFilter.length > 0) {
+        // Join multiple statuses with commas and normalize them
+        const statusParam = statusFilter
+          .map(s => s.toLowerCase().replace(/\+/g, " ").replace(/_/g, " "))
+          .join(",");
+        params.append("status", statusParam);
+      }
       if (categoryFilter) params.append("category_id", categoryFilter);
       if (startDate)
         params.append("start_date", startDate.format("YYYY-MM-DD"));
       if (endDate) params.append("end_date", endDate.format("YYYY-MM-DD"));
       if (userFilter === "assign_to") params.append("assign_to", user?.id);
-      if (userFilter === "assign_by") params.append("assign_by", user?.id);
+      if (userFilter === "created_by") params.append("created_by", user?.id);
       if (userFilter === "followup") params.append("followup", user?.id);
       if (userFilter === "tag") params.append("tag", user?.id);
       params.append("page", page + 1);
@@ -190,7 +253,6 @@ export default function Tickets() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             fullWidth
-            disabled={loading}
             InputProps={{
               endAdornment: query?.length > 0 && (
                 <InputAdornment position="end">
@@ -198,7 +260,6 @@ export default function Tickets() {
                     size="small"
                     onClick={() => setQuery("")}
                     edge="end"
-                    disabled={loading}
                   >
                     <ClearIcon fontSize="small" />
                   </IconButton>
@@ -213,15 +274,99 @@ export default function Tickets() {
           <FormControl size="small" fullWidth disabled={loading}>
             <InputLabel>Status</InputLabel>
             <Select
+              multiple
               value={statusFilter}
               label="Status"
               onChange={(e) => setStatusFilter(e.target.value)}
               disabled={loading}
+              renderValue={(selected) => {
+                if (selected.length === 0) return "All";
+                const displayCount = Math.min(selected.length, 1);
+                const remainingCount = selected.length - displayCount;
+                return (
+                  <div className="flex flex-wrap gap-1 items-center">
+                    {selected.slice(0, displayCount).map((value) => (
+                      <Chip
+                        key={value}
+                        label={toProperCase(value.replace(/_/g, " "))}
+                        size="small"
+                        sx={{
+                          height: 22,
+                          fontSize: "0.7rem",
+                          fontWeight: 500,
+                          backgroundColor: "#F3E8FF",
+                          color: "#824EF2",
+                          border: "1px solid #E9D5FF",
+                          "& .MuiChip-label": {
+                            px: 0.875,
+                          },
+                        }}
+                      />
+                    ))}
+                    {remainingCount > 0 && (
+                      <span className="text-xs text-gray-500 font-medium ml-1">
+                        +{remainingCount} more
+                      </span>
+                    )}
+                  </div>
+                );
+              }}
+
             >
-              <MenuItem value="">All</MenuItem>
-              <MenuItem value="Pending">Pending</MenuItem>
-              <MenuItem value="In Progress">In Progress</MenuItem>
-              <MenuItem value="Completed">Completed</MenuItem>
+              <MenuItem 
+                value="pending"
+                sx={{
+                  "&.Mui-selected": {
+                    backgroundColor: "#F3E8FF",
+                    "&:hover": {
+                      backgroundColor: "#E9D5FF",
+                    },
+                  },
+                }}
+              >
+                <div className="flex items-center justify-between w-full">
+                  <span>Pending</span>
+                  {statusFilter.includes("pending") && (
+                    <CheckIcon sx={{ fontSize: 18, color: "#824EF2", ml: 1 }} />
+                  )}
+                </div>
+              </MenuItem>
+              <MenuItem 
+                value="in_progress"
+                sx={{
+                  "&.Mui-selected": {
+                    backgroundColor: "#F3E8FF",
+                    "&:hover": {
+                      backgroundColor: "#E9D5FF",
+                    },
+                  },
+                }}
+              >
+                <div className="flex items-center justify-between w-full">
+                  <span>In Progress</span>
+                  {statusFilter.includes("in_progress") && (
+                    <CheckIcon sx={{ fontSize: 18, color: "#824EF2", ml: 1 }} />
+                  )}
+                </div>
+              </MenuItem>
+              <MenuItem 
+                value="completed"
+                sx={{
+                  "&.Mui-selected": {
+                    backgroundColor: "#F3E8FF",
+                    "&:hover": {
+                      backgroundColor: "#E9D5FF",
+                    },
+                  },
+                }}
+              >
+                <div className="flex items-center justify-between w-full">
+                  <span>Completed</span>
+                  {statusFilter.includes("completed") && (
+                    <CheckIcon sx={{ fontSize: 18, color: "#824EF2", ml: 1 }} />
+                  )}
+                </div>
+              </MenuItem>
             </Select>
           </FormControl>
         </div>
@@ -290,7 +435,7 @@ export default function Tickets() {
               >
                 <MenuItem value="">All</MenuItem>
                 <MenuItem value="assign_to">Assigned To Me</MenuItem>
-                <MenuItem value="assign_by">Assigned By Me</MenuItem>
+                <MenuItem value="created_by">Assigned By Me</MenuItem>
                 <MenuItem value="followup">My Followups</MenuItem>
                 <MenuItem value="tag">Tagged Me</MenuItem>
               </Select>
@@ -332,7 +477,7 @@ export default function Tickets() {
               // Base filters (without "All")
               const baseFilters = [
                 { value: "assign_to", label: "Assigned" },
-                { value: "assign_by", label: "Created" },
+                { value: "created_by", label: "Created" },
                 { value: "followup", label: "Following" },
                 { value: "tag", label: "Tagged" },
               ];
@@ -370,7 +515,7 @@ export default function Tickets() {
             <button
               onClick={() => {
                 setQuery("");
-                setStatusFilter("");
+                setStatusFilter([]);
                 setCategoryFilter("");
                 setStartDate(null);
                 setEndDate(null);
@@ -383,7 +528,7 @@ export default function Tickets() {
                   ? "opacity-50 cursor-not-allowed"
                   : ""
               } ${query ||
-                  statusFilter ||
+                  (statusFilter && statusFilter.length > 0) ||
                   categoryFilter ||
                   startDate ||
                   endDate ||
@@ -603,10 +748,7 @@ export default function Tickets() {
                         <Tooltip title="View Ticket">
                           <IconButton
                             size="small"
-                            // onClick={() => navigate(`/tickets/${t.id}`)}
-                            onClick={() =>
-                              window.open(`/tickets/${t.id}`, "_blank")
-                            }
+                            onClick={() => navigate(`/tickets/${t.id}`)}
                           >
                             {/* <LaunchIcon
                               fontSize="small"
