@@ -11,6 +11,12 @@ import { checkTokenAndAuth } from "../utils/checkTokenAndAuth";
 import { useNavigate } from "react-router-dom";
 import CircularProgress from "@mui/material/CircularProgress";
 import {
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+} from "@mui/material";
+import {
   LineChart,
   Line,
   XAxis,
@@ -38,6 +44,8 @@ export default function Dashboard() {
   const [startDate, setStartDate] = useState(dayjs());
   const [endDate, setEndDate] = useState(dayjs());
   const [timeView, setTimeView] = useState("week");
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [categories, setCategories] = useState([]);
 
   useEffect(() => {
     const fetchAuth = async () => {
@@ -58,13 +66,28 @@ export default function Dashboard() {
       tickets: d.count,
     })) || [];
 
+  // Fetch categories once
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await createAPIEndPoint("category").fetchAll();
+        setCategories(res.data || []);
+      } catch (err) {
+        console.error("Error fetching categories:", err);
+        setCategories([]);
+      }
+    };
+    fetchCategories();
+  }, []);
+
   const handleClearFilters = () => {
     setTimeView("week");
     setStartDate(dayjs());
     setEndDate(dayjs());
+    setCategoryFilter("");
   };
 
-  const hasActiveFilters = timeView !== "week";
+  const hasActiveFilters = timeView !== "week" || categoryFilter !== "";
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -72,18 +95,27 @@ export default function Dashboard() {
         setLoadingStats(true);
 
         let apiUrl = "tickets/stats";
+        const params = [];
 
         // build query by timeView
         if (timeView === "today") {
-          apiUrl += "?timeframe=today";
+          params.push("timeframe=today");
         } else if (timeView === "week") {
-          apiUrl += "?timeframe=last_7_days";
+          params.push("timeframe=last_7_days");
         } else if (timeView === "month") {
-          apiUrl += "?timeframe=last_30_days";
+          params.push("timeframe=last_30_days");
         } else if (timeView === "custom") {
-          apiUrl += `?start_date=${startDate.format(
-            "YYYY-MM-DD"
-          )}&end_date=${endDate.format("YYYY-MM-DD")}`;
+          params.push(`start_date=${startDate.format("YYYY-MM-DD")}`);
+          params.push(`end_date=${endDate.format("YYYY-MM-DD")}`);
+        }
+
+        // Add category filter if selected
+        if (categoryFilter) {
+          params.push(`category_id=${categoryFilter}`);
+        }
+
+        if (params.length > 0) {
+          apiUrl += `?${params.join("&")}`;
         }
 
         const res = await createAPIEndPoint(apiUrl).fetchAll();
@@ -95,7 +127,7 @@ export default function Dashboard() {
       }
     };
     fetchStats();
-  }, [timeView, startDate, endDate]);
+  }, [timeView, startDate, endDate, categoryFilter]);
 
   // Pie chart data
   const statusData = Object.entries(statsData?.by_status || {})
@@ -186,7 +218,7 @@ export default function Dashboard() {
             </h2>
 
             {/* Right: Filters */}
-            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto items-stretch sm:items-center">
               {/* Quick Filters */}
               <div className="flex flex-row flex-wrap gap-3 items-center">
                 {["today", "week", "month", "custom"].map((view) => (
@@ -247,14 +279,94 @@ export default function Dashboard() {
                 </div>
               )}
 
+              {/* Category Filter */}
+              <FormControl
+                size="small"
+                sx={{
+                  minWidth: { xs: "100%", sm: 150 },
+                  maxWidth: { md: 180 },
+                  display: "flex",
+                  justifyContent: "center",
+                  alignSelf: { xs: "stretch", sm: "center" },
+                  "& .MuiInputLabel-root": {
+                    fontSize: "0.75rem",
+                  },
+                  "& .MuiInputLabel-shrink": {
+                    transform: "translate(14px, -9px) scale(0.75)",
+                  },
+                }}
+              >
+                <InputLabel
+                  sx={{
+                    fontSize: "0.5rem",
+                    top:!categoryFilter ? "-1px !important" : "0px !important",
+                    "&.Mui-focused": {
+                      color: categoryFilter ? "#824EF2" : "#6B7280",
+                    },
+                  }}
+                >
+                  Category
+                </InputLabel>
+                <Select
+                  value={categoryFilter}
+                  label="Category"
+                  onChange={(e) => setCategoryFilter(e.target.value)}
+                  sx={{
+                    borderRadius: "8px",
+                    fontSize: "0.75rem !important",
+                    fontWeight: 500,
+                    height: "29.9px",
+                    display: "flex",
+                    alignItems: "center",
+
+                    "& .MuiSelect-select": {
+                      padding: "6px 32px 6px 12px",
+                      color: "#6B7280",
+                      display: "flex",
+                      alignItems: "center",
+                      minHeight: "20px",
+                      fontSize: "0.75rem !important",
+                    },
+                    "& .MuiSvgIcon-root": {
+                      color: "#9CA3AF",
+                      fontSize: "1rem !important",
+                    },
+                  }}
+                >
+                  <MenuItem value="" sx={{ fontSize: "0.75rem" }}>
+                    All Categories
+                  </MenuItem>
+                  {categories.map((category) => (
+                    <MenuItem
+                      key={category.id}
+                      value={category.id}
+                      sx={{
+                        fontSize: "0.75rem",
+                        "&:hover": {
+                          backgroundColor: "#F3F4F6",
+                        },
+                        "&.Mui-selected": {
+                          backgroundColor: "#F3E8FF",
+                          color: "#824EF2",
+                          "&:hover": {
+                            backgroundColor: "#E9D5FF",
+                          },
+                        },
+                      }}
+                    >
+                      {category.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
               {/* Clear Button */}
               <button
                 onClick={handleClearFilters}
-                className={`px-3 py-[6.15px] text-xs font-medium rounded-lg border transition-all duration-300 shrink-0 self-start sm:self-center ${
-                  hasActiveFilters
-                    ? "border-red-500 text-red-500 hover:bg-red-50 focus:ring-2 focus:ring-red-500"
-                    : "border border-gray-200 text-gray-400 hover:border-gray-300 hover:text-gray-600 hover:bg-gray-50"
-                }`}
+                className={`px-3 py-[6.15px] text-xs font-medium rounded-lg border transition-all duration-300 shrink-0 self-start sm:self-center ${hasActiveFilters
+                  ? "border-red-500 text-red-500 hover:bg-red-50 focus:ring-2 focus:ring-red-500"
+                  : "border border-gray-200 text-gray-400 hover:border-gray-300 hover:text-gray-600 hover:bg-gray-50"
+                  }`}
               >
                 Clear
               </button>

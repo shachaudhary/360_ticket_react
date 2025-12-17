@@ -887,17 +887,17 @@ export default function TicketView() {
   }
 
   return (
-    <Box sx={{ display: "flex", height: "100%", position: "relative" }}>
+    <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, height: "100%", position: "relative", width: "100%", overflow: "hidden" }}>
       {/* 🔹 Main Ticket Details */}
-      <Box sx={{ flex: 1, overflowY: "auto", pr: 2 }}>
-        <div className="flex justify-between items-center">
+      <Box sx={{ flex: 1, overflowY: "auto", pr: { xs: 0, md: 2 }, pb: { xs: 2, md: 0 }, minWidth: 0, width: { xs: "100%", md: "auto" } }}>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
           <BackButton self="/tickets" />
 
-          <div className="flex items-center gap-2 justify-between w-full pl-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2 justify-between w-full sm:pl-3">
             {/* Assigned To or Assign Ticket Button */}
             {ticket.assignees?.length > 0 ? (
-              <div className="flex items-center gap-1 !text-[13px] text-gray-500 mr-auto">
-                <span className="font-medium text-sm">Assigned To:</span>
+              <div className="flex items-center gap-1 !text-[13px] text-gray-500 sm:mr-auto">
+                <span className="font-medium text-sm whitespace-nowrap">Assigned To:</span>
                 <Tooltip title="Change Assignee" arrow>
                   <Box
                     onClick={() => {
@@ -908,10 +908,10 @@ export default function TicketView() {
                     sx={{ borderRadius: 1.25 }}
                     className="flex justify-center items-center text-brand-500 border border-brand-500 bg-purple-50 hover:brightness-[97.5%] py-2 px-2 gap-1 cursor-pointer transition-all"
                   >
-                    <span className="leading-3 font-semibold">
+                    <span className="leading-3 font-semibold truncate max-w-[120px] sm:max-w-none">
                       {toProperCase(ticket.assignees[0]?.assign_to_username)}
                     </span>
-                    <ArrowsRightLeftIcon className="h-4 w-4 text-brand-500" />
+                    <ArrowsRightLeftIcon className="h-4 w-4 text-brand-500 flex-shrink-0" />
                   </Box>
                 </Tooltip>
               </div>
@@ -924,7 +924,7 @@ export default function TicketView() {
                   setAssignee(null);
                   setAssignModalOpen(true);
                 }}
-                sx={{ borderRadius: 1.25, mr: "auto" }}
+                sx={{ borderRadius: 1.25, mr: { xs: 0, sm: "auto" }, width: { xs: "100%", sm: "auto" } }}
                 className="!bg-brand-500 hover:!bg-brand-600 !text-white !px-3 !py-1.5 !shadow-none"
               >
                 Assign Ticket
@@ -937,7 +937,7 @@ export default function TicketView() {
               size="small"
               startIcon={<PencilSquareIcon className="h-4 w-4" />}
               onClick={() => navigate(`/tickets/${ticket.id}/edit`)}
-              sx={{ borderRadius: 1.25 }}
+              sx={{ borderRadius: 1.25, width: { xs: "100%", sm: "auto" } }}
               className="!border !border-[#E5E7EB] hover:!border-[#ddd]  !text-gray-500 hover:!bg-gray-50 focus:!ring-gray-500 !px-1 !py-1.5"
             >
               Edit
@@ -945,17 +945,19 @@ export default function TicketView() {
           </div>
         </div>
 
-        <Container maxWidth="1440px" sx={{ mt: 2, px: "0px !important" }}>
+        <Container maxWidth="1440px" sx={{ mt: 2, px: { xs: 1, sm: 2, md: "0px !important" }, width: "100%" }}>
           <Card
             sx={{
               width: "100%",
+              maxWidth: "100%",
               bgcolor: "background.paper",
               border: "1px solid #ddd",
-              borderRadius: "16px",
+              borderRadius: { xs: "12px", md: "16px" },
               boxShadow: 0,
-              p: 2,
+              p: { xs: 1.5, sm: 2 },
               height: { xs: "auto", md: "calc(100dvh - 144px)" },
               overflowY: "auto",
+              overflowX: "hidden",
 
               // Hide scrollbar
               "&::-webkit-scrollbar": {
@@ -976,7 +978,7 @@ export default function TicketView() {
             <Divider sx={{ my: 2 }} />
 
             {/* Ticket Details Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
               <Label title="Title" value={toProperCase(ticket.title)} />
               <Label
                 title="Priority"
@@ -1030,7 +1032,7 @@ export default function TicketView() {
                 />
               )}
               
-              <div className="sm:col-span-2 md:col-span-3">
+              <div className="col-span-1 sm:col-span-2 md:col-span-3">
                 <Label title="Message" value={ticket.details} />
               </div>
             </div>
@@ -1038,8 +1040,8 @@ export default function TicketView() {
             <Divider sx={{ my: 2 }} />
 
             {/* Location Section */}
-            <div className="mt-4 border border-gray-200 rounded-lg p-4 bg-gray-50">
-              <div className="flex items-center justify-between mb-3">
+            <div className="mt-4 border border-gray-200 rounded-lg p-3 sm:p-4 bg-gray-50">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 mb-3">
                 <div className="flex items-center gap-2">
                   <MapPinIcon className="h-5 w-5 text-brand-500" />
                   <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
@@ -1054,7 +1056,7 @@ export default function TicketView() {
                     setSelectedLocation(ticket?.location_id ? locations.find(l => l.id === ticket.location_id) : null);
                     setLocationModalOpen(true);
                   }}
-                  sx={{ textTransform: "none", borderRadius: 1.25 }}
+                  sx={{ textTransform: "none", borderRadius: 1.25, width: { xs: "100%", sm: "auto" } }}
                   className="!border !border-brand-500 !text-brand-500 hover:!bg-purple-50"
                 >
                   {selectedLocation ? "Change" : "Add"}
@@ -1108,8 +1110,8 @@ export default function TicketView() {
             </div>
 
             {/* Followers Section */}
-            <div className="mt-4 border border-gray-200 rounded-lg p-4 bg-gray-50">
-              <div className="flex items-center justify-between mb-3">
+            <div className="mt-4 border border-gray-200 rounded-lg p-3 sm:p-4 bg-gray-50">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 mb-3">
                 <div className="flex items-center gap-2">
                   <UserGroupIcon className="h-5 w-5 text-brand-500" />
                   <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
@@ -1125,7 +1127,7 @@ export default function TicketView() {
                     setFollowerSearchTerm("");
                     setFollowerModalOpen(true);
                   }}
-                  sx={{ textTransform: "none", borderRadius: 1.25 }}
+                  sx={{ textTransform: "none", borderRadius: 1.25, width: { xs: "100%", sm: "auto" } }}
                   className="!border !border-brand-500 !text-brand-500 hover:!bg-purple-50"
                 >
                   {followers.length > 0 ? "Manage" : "Add"}
@@ -1182,8 +1184,8 @@ export default function TicketView() {
             </div>
 
             {/* Attached Files Section */}
-            <div className="mt-4 border border-gray-200 rounded-lg p-4 bg-gray-50">
-              <div className="flex items-center justify-between mb-1">
+            <div className="mt-4 border border-gray-200 rounded-lg p-3 sm:p-4 bg-gray-50">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 mb-1">
                 <div className="flex items-center gap-2">
                   <PaperClipIcon className="h-5 w-5 text-brand-500" />
                   <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
@@ -1206,7 +1208,7 @@ export default function TicketView() {
                   size="small"
                   startIcon={<ArrowUpTrayIcon className="h-4 w-4" />}
                   onClick={() => document.getElementById("fileUploadTicket")?.click()}
-                  sx={{ textTransform: "none", borderRadius: 1.25 }}
+                  sx={{ textTransform: "none", borderRadius: 1.25, width: { xs: "100%", sm: "auto" } }}
                   className="!border !border-brand-500 !text-brand-500 hover:!bg-purple-50"
                 >
                   Upload
@@ -1215,7 +1217,7 @@ export default function TicketView() {
 
               {/* Existing Files Display */}
               {files.filter((f) => f.isExisting).length > 0 ? (
-                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 mb-4">
                   {files
                     .filter((f) => f.isExisting)
                     .map((file, idx) => {
@@ -1657,10 +1659,14 @@ export default function TicketView() {
 
       {/* Comments Sidebar (desktop) */}
       <Box
-        className="hidden md:flex flex-col w-[305px] bg-white p-2.5 pr-0 border-l border-gray-200 -mt-4 -mb-4"
+        className="hidden md:flex flex-col bg-white p-2.5 pr-0 border-l border-gray-200 -mt-4 -mb-4"
         sx={{
+          width: { md: "305px", lg: "350px" },
+          minWidth: { md: "305px" },
+          maxWidth: { md: "305px", lg: "350px" },
           height: "calc(100dvh - 58px)", // full viewport height
           overflowY: "hidden", // enable vertical scroll only in sidebar
+          flexShrink: 0,
           // Hide scrollbar
           "&::-webkit-scrollbar": {
             width: 0, // for Chrome, Safari

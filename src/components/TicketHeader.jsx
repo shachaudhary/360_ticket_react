@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Stack, Typography, Button, CircularProgress } from "@mui/material";
+import { Stack, Typography, Button, CircularProgress, Box } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import { createAPIEndPoint } from "../config/api/api";
@@ -107,17 +107,20 @@ export default function TicketHeader({ ticket, onUpdate, fetchAgain }) {
     <Stack
       direction={{ xs: "column", sm: "row" }} // ✅ column on mobile, row on sm+
       justifyContent="space-between"
-      alignItems={{ xs: "flex-start", sm: "center" }}
+      alignItems={{ xs: "stretch", sm: "center" }}
       spacing={{ xs: 2, sm: 0 }}
       mb={2}
+      sx={{ width: "100%" }}
     >
       {/* Left side: Ticket heading + Follow button */}
-      <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap">
-        {/* <Typography variant="h6" fontWeight="bold" color="#0F1A1C">
-          Ticket #{ticket.id}
-        </Typography> */}
-
-        <h2 className="text-lg md:text-xl font-medium text-sidebar">
+      <Stack 
+        direction={{ xs: "column", sm: "row" }} 
+        spacing={{ xs: 1.5, sm: 2 }} 
+        alignItems={{ xs: "flex-start", sm: "center" }} 
+        flexWrap="wrap"
+        sx={{ width: { xs: "100%", sm: "auto" } }}
+      >
+        <h2 className="text-lg md:text-xl font-medium text-sidebar whitespace-nowrap">
           Ticket <span className="font-bwold">#{ticket.id}</span>
         </h2>
 
@@ -133,6 +136,7 @@ export default function TicketHeader({ ticket, onUpdate, fetchAgain }) {
             fontWeight: 500,
             px: 1.5,
             minHeight: 35,
+            width: { xs: "100%", sm: "auto" },
             ...(following
               ? {
                   borderColor: "#0984e3",
@@ -152,13 +156,16 @@ export default function TicketHeader({ ticket, onUpdate, fetchAgain }) {
 
       {/* Right side: Status + Actions */}
       <Stack
-        direction="row"
+        direction={{ xs: "column", sm: "row" }}
         spacing={1}
-        alignItems="center"
+        alignItems={{ xs: "stretch", sm: "center" }}
         flexWrap="wrap"
-        justifyContent={{ xs: "flex-start", sm: "flex-end" }}
+        justifyContent={{ xs: "stretch", sm: "flex-end" }}
+        sx={{ width: { xs: "100%", sm: "auto" } }}
       >
-        <StatusBadge status={ticket.status} isBigger={true} />
+        <Box sx={{ width: { xs: "100%", sm: "auto" }, display: "flex", justifyContent: { xs: "flex-start", sm: "center" } }}>
+          <StatusBadge status={ticket.status} isBigger={true} />
+        </Box>
 
         {nextAction && (
           <Button
@@ -174,6 +181,7 @@ export default function TicketHeader({ ticket, onUpdate, fetchAgain }) {
               fontWeight: 500,
               boxShadow: "none",
               minHeight: 35,
+              width: { xs: "100%", sm: "auto" },
               ...nextAction.styles,
             }}
             startIcon={!submitting && nextAction.icon}

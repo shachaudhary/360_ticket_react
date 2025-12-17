@@ -190,6 +190,7 @@ export default function Tickets() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             fullWidth
+            disabled={loading}
             InputProps={{
               endAdornment: query?.length > 0 && (
                 <InputAdornment position="end">
@@ -197,6 +198,7 @@ export default function Tickets() {
                     size="small"
                     onClick={() => setQuery("")}
                     edge="end"
+                    disabled={loading}
                   >
                     <ClearIcon fontSize="small" />
                   </IconButton>
@@ -208,12 +210,13 @@ export default function Tickets() {
 
         {/* Status */}
         <div className="col-span-1">
-          <FormControl size="small" fullWidth>
+          <FormControl size="small" fullWidth disabled={loading}>
             <InputLabel>Status</InputLabel>
             <Select
               value={statusFilter}
               label="Status"
               onChange={(e) => setStatusFilter(e.target.value)}
+              disabled={loading}
             >
               <MenuItem value="">All</MenuItem>
               <MenuItem value="Pending">Pending</MenuItem>
@@ -225,12 +228,13 @@ export default function Tickets() {
 
         {/* Category */}
         <div className="col-span-1">
-          <FormControl size="small" fullWidth>
+          <FormControl size="small" fullWidth disabled={loading}>
             <InputLabel>Category</InputLabel>
             <Select
               value={categoryFilter}
               label="Category"
               onChange={(e) => setCategoryFilter(e.target.value)}
+              disabled={loading}
             >
               <MenuItem value="">All</MenuItem>
               {categories.map((c) => (
@@ -250,8 +254,9 @@ export default function Tickets() {
               value={startDate}
               onChange={(date) => setStartDate(date)}
               maxDate={endDate}
+              disabled={loading}
               slotProps={{
-                textField: { size: "small", fullWidth: true },
+                textField: { size: "small", fullWidth: true, disabled: loading },
               }}
             />
           </LocalizationProvider>
@@ -265,8 +270,9 @@ export default function Tickets() {
               value={endDate}
               onChange={(date) => setEndDate(date)}
               minDate={startDate}
+              disabled={loading}
               slotProps={{
-                textField: { size: "small", fullWidth: true },
+                textField: { size: "small", fullWidth: true, disabled: loading },
               }}
             />
           </LocalizationProvider>
@@ -343,7 +349,12 @@ export default function Tickets() {
                   onClick={() =>
                     setUserFilter(userFilter === filter.value ? "assign_to" : filter.value)
                   }
-                  className={`px-3 py-[6.15px] !text-xs font-medium rounded-lg border transition-all duration-500 ${userFilter === filter.value
+                  disabled={loading}
+                  className={`px-3 py-[6.15px] !text-xs font-medium rounded-lg border transition-all duration-500 ${
+                    loading
+                      ? "opacity-50 cursor-not-allowed"
+                      : ""
+                  } ${userFilter === filter.value
                       ? "bg-brand-500 text-white border-brand-500 hover:bg-brand-600"
                       : "border border-[#E5E7EB] text-[#969AA1] hover:bg-gray-50"
                     }`}
@@ -366,7 +377,12 @@ export default function Tickets() {
                 setUserFilter("assign_to"); // Reset to default "assigned"
                 setPage(0);
               }}
-              className={`px-3 py-[6.15px] shrink-0 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 transition-all ${query ||
+              disabled={loading}
+              className={`px-3 py-[6.15px] shrink-0 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 transition-all ${
+                loading
+                  ? "opacity-50 cursor-not-allowed"
+                  : ""
+              } ${query ||
                   statusFilter ||
                   categoryFilter ||
                   startDate ||
