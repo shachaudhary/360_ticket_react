@@ -33,7 +33,7 @@ import toast from "react-hot-toast";
 import { chipStyle } from "../utils/common";
 
 
-const MAX_RECENT_TICKETS = 7;
+const MAX_RECENT_TICKETS = 6;
 
 const getRecentTickets = () => {
   try {
