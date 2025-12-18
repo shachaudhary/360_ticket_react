@@ -276,6 +276,42 @@ const CommentsList = ({ comments }) => {
                   {isExpanded ? "Show less" : "Show more"}
                 </span>
                 )}
+                {/* File Attachments */}
+                {c.files && c.files.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {c.files.map((file, fileIdx) => {
+                      const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(file.url || file.name);
+                      const fileName = file.name || file.url?.split("/").pop() || "file";
+                      const shortName = fileName.length > 20
+                        ? fileName.substring(0, 15) + "..." + fileName.slice(-5)
+                        : fileName;
+
+                      return (
+                        <a
+                          key={fileIdx}
+                          href={file.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="flex items-center gap-1.5 rounded-md border border-gray-200 bg-white px-2 py-1.5 text-xs text-gray-600 hover:bg-gray-50 hover:shadow-sm transition-all"
+                        >
+                          {isImage ? (
+                            <img
+                              src={file.url}
+                              alt={fileName}
+                              className="h-8 w-8 rounded object-cover border border-gray-300"
+                            />
+                          ) : (
+                            <div className="flex h-8 w-8 items-center justify-center rounded bg-gray-100 text-gray-500 text-xs">
+                              📄
+                            </div>
+                          )}
+                          <span className="truncate max-w-[120px]">{shortName}</span>
+                        </a>
+                      );
+                    })}
+                  </div>
+                )}
               </motion.div>
             );
           })}
@@ -1008,9 +1044,21 @@ export default function TicketView() {
                 value={convertToCST(ticket.created_at)}
               />
               <Label
-                title="Created By"
+                title="Creator"
                 value={toProperCase(ticket?.created_by?.username)}
               />
+              {ticket?.created_by?.phone && (
+                <Label
+                  title="Creator Phone"
+                  value={ticket.created_by.phone}
+                />
+              )}
+              {ticket?.created_by?.email && (
+                <Label
+                  title="Creator Email"
+                  value={ticket.created_by.email}
+                />
+              )}
               
               {/* Contact Form Info */}
               {ticket.contact_form_info?.name && (
@@ -1039,8 +1087,8 @@ export default function TicketView() {
 
             <Divider sx={{ my: 2 }} />
 
-            {/* Location Section */}
-            <div className="mt-4 border border-gray-200 rounded-lg p-3 sm:p-4 bg-gray-50">
+            {/* Location Section (Mobile) */}
+            <div className="mt-4 border border-gray-200 rounded-lg p-3 sm:p-4 bg-gray-50 md:hidden">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 mb-3">
                 <div className="flex items-center gap-2">
                   <MapPinIcon className="h-5 w-5 text-brand-500" />
@@ -1065,9 +1113,6 @@ export default function TicketView() {
               {selectedLocation ? (
                 <div className="bg-white rounded-lg p-3 border border-gray-200">
                   <div className="flex items-start gap-3">
-                    {/* <div className="flex-shrink-0 mt-0.5">
-                      <MapPin className="h-4 w-4 text-gray-500" />
-                    </div> */}
                     <div className="flex-1 min-w-0">
                       <Typography variant="body2" className="!font-semibold !text-gray-800 !mb-1">
                         {selectedLocation.display_name || selectedLocation.location_name}
@@ -1109,8 +1154,8 @@ export default function TicketView() {
               )}
             </div>
 
-            {/* Followers Section */}
-            <div className="mt-4 border border-gray-200 rounded-lg p-3 sm:p-4 bg-gray-50">
+            {/* Followers Section (Mobile) */}
+            <div className="mt-4 border border-gray-200 rounded-lg p-3 sm:p-4 bg-gray-50 md:hidden">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 mb-3">
                 <div className="flex items-center gap-2">
                   <UserGroupIcon className="h-5 w-5 text-brand-500" />
@@ -1136,44 +1181,43 @@ export default function TicketView() {
               {followers.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
                   {followers.map((follower) => (
-                    <Box
+                    <Tooltip
                       key={follower.user_id || follower.id}
-                      className="!relative !bg-white !border !border-gray-200 !rounded-lg !px-3 !py-2 !pr-8 !min-w-[140px]"
-                      sx={{
-                        "&:hover": {
-                          boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                        },
-                      }}
+                      title={follower.email || ""}
+                      arrow
+                      placement="top"
                     >
-                      <Typography
-                        variant="body2"
-                        className="!font-medium !text-gray-800 !mb-0.5"
-                      >
-                        {toProperCase(follower.username || follower.name || "N/A")}
-                      </Typography>
-                      {follower.email && (
-                        <Typography
-                          variant="caption"
-                          className="!text-gray-500 !text-xs !block"
-                        >
-                          {follower.email}
-                        </Typography>
-                      )}
-                      <IconButton
-                        size="small"
-                        onClick={() => handleRemoveFollower(follower.user_id)}
-                        className="!absolute !top-1 !right-1 !p-0.5"
+                      <Box
+                        className="!relative !bg-white !border !border-gray-200 !rounded-lg !px-3 !py-2 !pr-8 !min-w-[140px]"
                         sx={{
-                          color: "#ef4444",
+                          cursor: "default",
                           "&:hover": {
-                            color: "#dc2626",
-                            backgroundColor: "rgba(239, 68, 68, 0.1)",
+                            boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
                           },
                         }}
                       >
-                        <XMarkIcon className="!w-3 !h-3" />
-                      </IconButton>
-                    </Box>
+                        <Typography
+                          variant="body2"
+                          className="!font-medium !text-gray-800"
+                        >
+                          {toProperCase(follower.username || follower.name || "N/A")}
+                        </Typography>
+                        <IconButton
+                          size="small"
+                          onClick={() => handleRemoveFollower(follower.user_id)}
+                          className="!absolute !top-1 !right-1 !p-0.5"
+                          sx={{
+                            color: "#ef4444",
+                            "&:hover": {
+                              color: "#dc2626",
+                              backgroundColor: "rgba(239, 68, 68, 0.1)",
+                            },
+                          }}
+                        >
+                          <XMarkIcon className="!w-3 !h-3" />
+                        </IconButton>
+                      </Box>
+                    </Tooltip>
                   ))}
                 </div>
               ) : (
@@ -1479,6 +1523,33 @@ export default function TicketView() {
                   />
                 </div>
               </div>
+
+              <Divider />
+
+              {/* 🔹 Comments Section */}
+              <div className="mt-0">
+                <Typography
+                  variant="subtitle1"
+                  color="primary"
+                  sx={{ mb: 1, fontWeight: 600 }}
+                >
+                  Comments
+                </Typography>
+                <Box className="mb-4">
+                  <CommentBox ticketId={ticket.id} onAdd={fetchTicket} />
+                </Box>
+                <Divider sx={{ my: 2 }} />
+                <Typography
+                  variant="subtitle2"
+                  fontWeight={600}
+                  sx={{ mb: 1 }}
+                >
+                  Previous Comments
+                </Typography>
+                <div className="max-h-96 overflow-y-auto">
+                  <CommentsList comments={ticket.comments} />
+                </div>
+              </div>
             </div>
 
             {/* 🔹 Logs Section */}
@@ -1639,58 +1710,167 @@ export default function TicketView() {
               </div>
             </div> */}
 
-            {/* Comments (mobile) */}
-            <Box className="mt-6 rounded-xl border border-gray-200 p-4 md:hidden">
-              <CommentBox ticketId={ticket.id} onAdd={fetchTicket} />
-              <Divider sx={{ my: 2 }} />
-              <Typography
-                variant="body2"
-                fontWeight={600}
-                sx={{ mb: 1 }}
-                className="!text-sidebar"
-              >
-                Previous Comments
-              </Typography>
-              <CommentsList comments={ticket.comments} />
-            </Box>
           </Card>
         </Container>
       </Box>
 
-      {/* Comments Sidebar (desktop) */}
+      {/* Right Sidebar - Location & Followers (Desktop) */}
       <Box
         className="hidden md:flex flex-col bg-white p-2.5 pr-0 border-l border-gray-200 -mt-4 -mb-4"
         sx={{
           width: { md: "305px", lg: "350px" },
           minWidth: { md: "305px" },
           maxWidth: { md: "305px", lg: "350px" },
-          height: "calc(100dvh - 58px)", // full viewport height
-          overflowY: "hidden", // enable vertical scroll only in sidebar
+          height: "calc(100dvh - 58px)",
+          overflowY: "auto",
           flexShrink: 0,
           // Hide scrollbar
           "&::-webkit-scrollbar": {
-            width: 0, // for Chrome, Safari
+            width: 0,
           },
-          scrollbarWidth: "none", // for Firefox
-          msOverflowStyle: "none", // for IE & Edge
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
         }}
       >
-        <CommentBox ticketId={ticket.id} onAdd={fetchTicket} />
-        <Divider sx={{ my: 2 }} />
-        <Typography
-          variant="subtitle1"
-          fontWeight={600}
-          sx={{ mb: 1, mt: -0.5 }}
-        >
-          Previous Comments
-        </Typography>
-        <Box
-          sx={{
-            overflowY: "auto",
-          }}
-        >
-          <CommentsList comments={ticket.comments} />
-        </Box>
+        {/* Location Section */}
+        <div className="border border-gray-200 rounded-lg p-3 sm:p-4 bg-gray-50 mb-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 mb-3">
+            <div className="flex items-center gap-2">
+              <MapPinIcon className="h-5 w-5 text-brand-500" />
+              <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                Location
+              </Typography>
+            </div>
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<PencilSquareIcon className="h-4 w-4" />}
+              onClick={() => {
+                setSelectedLocation(ticket?.location_id ? locations.find(l => l.id === ticket.location_id) : null);
+                setLocationModalOpen(true);
+              }}
+              sx={{ textTransform: "none", borderRadius: 1.25 }}
+              className="!border !border-brand-500 !text-brand-500 hover:!bg-purple-50"
+            >
+              {selectedLocation ? "Change" : "Add"}
+            </Button>
+          </div>
+          {selectedLocation ? (
+            <div className="bg-white rounded-lg p-3 border border-gray-200">
+              <div className="flex items-start gap-3">
+                <div className="flex-1 min-w-0">
+                  <Typography variant="body2" className="!font-semibold !text-gray-800 !mb-1">
+                    {selectedLocation.display_name || selectedLocation.location_name}
+                  </Typography>
+                  {selectedLocation.address && selectedLocation.address !== "N/A" && (
+                    <Typography variant="caption" className="!text-gray-600 !block !mb-0.5">
+                      <span className="!inline-flex !items-center !gap-1">
+                        <MapPin className="!h-3 !w-3" />
+                        {toProperCase(selectedLocation.address)}
+                        {selectedLocation.city && selectedLocation.city !== "N/A" && `, ${toProperCase(selectedLocation.city)}`}
+                        {selectedLocation.state && selectedLocation.state !== "N/A" && `, ${toProperCase(selectedLocation.state)}`}
+                        {selectedLocation.postal_code && selectedLocation.postal_code !== "0" && ` ${selectedLocation.postal_code}`}
+                      </span>
+                    </Typography>
+                  )}
+                  {selectedLocation.phone && (
+                    <Typography variant="caption" className="!text-gray-600 !block !mb-0.5">
+                      <span className="!inline-flex !items-center !gap-1">
+                        <Phone className="!h-3 !w-3" />
+                        {selectedLocation.phone}
+                      </span>
+                    </Typography>
+                  )}
+                  {selectedLocation.email && (
+                    <Typography variant="caption" className="!text-gray-600 !block">
+                      <span className="!inline-flex !items-center !gap-1">
+                        <Mail className="!h-3 !w-3" />
+                        {selectedLocation.email}
+                      </span>
+                    </Typography>
+                  )}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <Typography variant="body2" className="!text-gray-500 !italic">
+              No location assigned
+            </Typography>
+          )}
+        </div>
+
+        {/* Followers Section */}
+        <div className="border border-gray-200 rounded-lg p-3 sm:p-4 bg-gray-50">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 mb-3">
+            <div className="flex items-center gap-2">
+              <UserGroupIcon className="h-5 w-5 text-brand-500" />
+              <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                Followers ({followers.length})
+              </Typography>
+            </div>
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<UserPlusIcon className="h-4 w-4" />}
+              onClick={() => {
+                setSelectedFollowers([]);
+                setFollowerSearchTerm("");
+                setFollowerModalOpen(true);
+              }}
+              sx={{ textTransform: "none", borderRadius: 1.25 }}
+              className="!border !border-brand-500 !text-brand-500 hover:!bg-purple-50"
+            >
+              {followers.length > 0 ? "Manage" : "Add"}
+            </Button>
+          </div>
+          {followers.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {followers.map((follower) => (
+                <Tooltip
+                  key={follower.user_id || follower.id}
+                  title={follower.email || ""}
+                  arrow
+                  placement="top"
+                >
+                  <Box
+                    className="!relative !bg-white !border !border-gray-200 !rounded-lg !px-3 !py-2 !pr-8 !min-w-[140px]"
+                    sx={{
+                      cursor: "default",
+                      "&:hover": {
+                        boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                      },
+                    }}
+                  >
+                    <Typography
+                      variant="body2"
+                      className="!font-medium !text-gray-800"
+                    >
+                      {toProperCase(follower.username || follower.name || "N/A")}
+                    </Typography>
+                    <IconButton
+                      size="small"
+                      onClick={() => handleRemoveFollower(follower.user_id)}
+                      className="!absolute !top-1 !right-1 !p-0.5"
+                      sx={{
+                        color: "#ef4444",
+                        "&:hover": {
+                          color: "#dc2626",
+                          backgroundColor: "rgba(239, 68, 68, 0.1)",
+                        },
+                      }}
+                    >
+                      <XMarkIcon className="!w-3 !h-3" />
+                    </IconButton>
+                  </Box>
+                </Tooltip>
+              ))}
+            </div>
+          ) : (
+            <Typography variant="body2" className="!text-gray-500 !italic">
+              No followers yet
+            </Typography>
+          )}
+        </div>
       </Box>
 
       <AssignModal

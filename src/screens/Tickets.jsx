@@ -801,31 +801,22 @@ export default function Tickets() {
                         <DateWithTooltip date={t?.due_date} />
                       </td> */}
                       <td className="px-4 py-3 border-b border-[#E5E7EB]">
-                        {t.status?.toLowerCase() === "completed" ? (
-                          <div className="inline-block">
+
+                        <Tooltip title="Click to change status" arrow>
+                          <div
+                            onClick={(e) => {
+                              setStatusMenuAnchor(e.currentTarget);
+                              setSelectedTicketForStatus(t);
+                            }}
+                            className="cursor-pointer inline-block hover:opacity-80 transition-opacity"
+                          >
                             <StatusBadge
                               isInside
                               status={t.status}
-                              showDropdown={false}
+                              showDropdown={true}
                             />
                           </div>
-                        ) : (
-                          <Tooltip title="Click to change status" arrow>
-                            <div
-                              onClick={(e) => {
-                                setStatusMenuAnchor(e.currentTarget);
-                                setSelectedTicketForStatus(t);
-                              }}
-                              className="cursor-pointer inline-block hover:opacity-80 transition-opacity"
-                            >
-                              <StatusBadge
-                                isInside
-                                status={t.status}
-                                showDropdown={true}
-                              />
-                            </div>
-                          </Tooltip>
-                        )}
+                        </Tooltip>
                       </td>
                       <td className="px-4 py-3 text-gray-700 border-b border-[#E5E7EB]">
                         {/* {toProperCase(t.created_by?.username) || "—"} */}

@@ -219,6 +219,7 @@ export default function StatusBadge({
   isBigger = false,
   customRadius = "12px",
   showDropdown = false,
+  component = "span",
 }) {
   const normalizedStatus = status?.toLowerCase?.().trim();
   const bgColor = statusColors[normalizedStatus] || statusColors.default;
@@ -226,6 +227,7 @@ export default function StatusBadge({
 
   return (
     <Box
+      component={component}
       sx={{
         display: "inline-flex",
         alignItems: "center",
@@ -248,7 +250,7 @@ export default function StatusBadge({
       {/* ✅ Show priority icon */}
       {getPriorityIcon(normalizedStatus, textColor)}
       <Typography
-        variant="caption"
+        variant="caption" 
         fontWeight="600"
         fontSize={isBigger ? 13 : isInside ? 11 : 12}
         lineHeight={1.05}
