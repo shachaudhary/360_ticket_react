@@ -33,7 +33,7 @@ import toast from "react-hot-toast";
 import { chipStyle } from "../utils/common";
 
 
-const MAX_RECENT_TICKETS = 6;
+const MAX_RECENT_TICKETS = 5;
 
 const getRecentTickets = () => {
   try {
@@ -318,11 +318,11 @@ export default function Tickets() {
           ))}
 
           {/* More indicator */}
-          {recentTickets.length > 6 && (
+          {/* {recentTickets.length > 6 && (
             <span className="text-[11px] text-gray-400 shrink-0">
               +{recentTickets.length - 6} more
             </span>
-          )}
+          )} */}
 
           {/* Clear */}
           <Tooltip title="Clear recent tickets">
