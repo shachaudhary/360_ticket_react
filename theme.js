@@ -101,6 +101,48 @@ const theme = createTheme({
         },
       },
     },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          height: "36px !important",
+          "& .MuiOutlinedInput-notchedOutline": {
+            borderColor: "#E5E7EB",
+          },
+          "&:hover .MuiOutlinedInput-notchedOutline": {
+            borderColor: "#D1D5DB",
+          },
+          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+            borderColor: brand,
+            borderWidth: 2,
+          },
+        },
+        input: {
+          padding: "8px 14px !important",
+        },
+      },
+    },
+
+    MuiPickersOutlinedInput: {
+      styleOverrides: {
+        root: {
+          height: "36px !important",
+          "& .MuiPickersOutlinedInput-notchedOutline": {
+            borderColor: "#E5E7EB",
+          },
+
+          "&:hover .MuiPickersOutlinedInput-notchedOutline": {
+            borderColor: "#D1D5DB",
+          },
+
+          "&.Mui-focused .MuiPickersOutlinedInput-notchedOutline": {
+            borderColor: brand,
+            borderWidth: 2,
+          },
+        },
+      },
+    },
+
+
     MuiInputLabel: {
       styleOverrides: {
         root: {

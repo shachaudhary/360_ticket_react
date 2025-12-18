@@ -225,7 +225,7 @@ export default function Dashboard() {
                   <button
                     key={view}
                     onClick={() => setTimeView(view)}
-                    className={`px-3 py-[6.15px] text-xs font-medium rounded-lg border transition-all duration-300 shrink-0
+                    className={`px-3 py-[6.2px] text-xs font-medium rounded-lg border transition-all duration-300 shrink-0
           ${timeView === view
                         ? "bg-brand-500 text-white border-brand-500 hover:bg-brand-600"
                         : "border border-gray-200 text-gray-500 hover:bg-gray-50"
@@ -252,7 +252,7 @@ export default function Dashboard() {
                           fullWidth: true,
                           sx: {
                             minWidth: { xs: "100%", sm: 200 },
-                            maxWidth: { md: 150 },
+                            maxWidth: { md: 100 },
                           },
                         },
                       }}
@@ -299,7 +299,7 @@ export default function Dashboard() {
                 <InputLabel
                   sx={{
                     fontSize: "0.5rem",
-                    top:!categoryFilter ? "-1px !important" : "0px !important",
+                    // top:!categoryFilter ? "-1px !important" : "0px !important",
                     "&.Mui-focused": {
                       color: categoryFilter ? "#824EF2" : "#6B7280",
                     },
@@ -315,7 +315,7 @@ export default function Dashboard() {
                     borderRadius: "8px",
                     fontSize: "0.75rem !important",
                     fontWeight: 500,
-                    height: "29.9px",
+                    height: "32px !important",
                     display: "flex",
                     alignItems: "center",
 
@@ -325,7 +325,7 @@ export default function Dashboard() {
                       display: "flex",
                       alignItems: "center",
                       minHeight: "20px",
-                      fontSize: "0.75rem !important",
+                      // fontSize: "0.75rem !important",
                     },
                     "& .MuiSvgIcon-root": {
                       color: "#9CA3AF",

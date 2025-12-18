@@ -30,6 +30,10 @@
 } */
 
 
+label.MuiFormLabel-root {
+  top: -2px !important;
+}
+
 .MuiBackdrop-root {
   /* backdrop-filter: blur(3px); */
   background-color: rgba(0, 0, 0, 0.15) !important;
@@ -37,9 +41,12 @@
 
 
 .form-type-modal .MuiChip-root {
-  background-color: #f9fafb !important;      /* light gray background */
-  color: #374151 !important;                 /* neutral dark text */
-  border: 1px solid #e5e7eb !important;      /* subtle border */
+  background-color: #f9fafb !important;
+  /* light gray background */
+  color: #374151 !important;
+  /* neutral dark text */
+  border: 1px solid #e5e7eb !important;
+  /* subtle border */
   font-weight: 500;
   font-size: 13px !important;
   transition: all 0.2s ease-in-out;
@@ -53,7 +60,8 @@
 }
 
 .form-type-modal .MuiChip-deleteIcon:hover {
-  color: #ff6a6a !important;                 /* red on hover */
+  color: #ff6a6a !important;
+  /* red on hover */
 }
 
 /* For filled variant specifically */

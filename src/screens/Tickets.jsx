@@ -32,9 +32,42 @@ import { EyeIcon } from "@heroicons/react/24/outline";
 import toast from "react-hot-toast";
 import { chipStyle } from "../utils/common";
 
+
+const MAX_RECENT_TICKETS = 7;
+
+const getRecentTickets = () => {
+  try {
+    return JSON.parse(localStorage.getItem("recentTickets")) || [];
+  } catch {
+    return [];
+  }
+};
+
+const addRecentTicket = (ticket) => {
+  const existing = getRecentTickets();
+
+  const filtered = existing.filter((t) => t.id !== ticket.id);
+  const updated = [
+    {
+      id: ticket.id,
+      title: ticket.title,
+    },
+    ...filtered,
+  ].slice(0, MAX_RECENT_TICKETS);
+
+  localStorage.setItem("recentTickets", JSON.stringify(updated));
+};
+
+
 export default function Tickets() {
   const navigate = useNavigate();
   const { user } = useApp();
+  const [recentTickets, setRecentTickets] = useState([]);
+
+  useEffect(() => {
+    const recent = getRecentTickets();
+    setRecentTickets(recent);
+  }, []);
 
   // Load filters from localStorage on mount
   const loadFiltersFromStorage = () => {
@@ -81,7 +114,7 @@ export default function Tickets() {
   const [endDate, setEndDate] = useState(savedFilters.endDate);
   const [userFilter, setUserFilter] = useState(savedFilters.userFilter);
   const [categories, setCategories] = useState([]);
-  
+
   // Check if user is admin
   const isAdmin = user?.user_role?.toLowerCase() === "admin";
 
@@ -93,7 +126,7 @@ export default function Tickets() {
       setDebouncedQuery(query);
       return;
     }
-    
+
     const handler = setTimeout(() => {
       setDebouncedQuery(query);
       setPage(0); // reset to first page when typing new query
@@ -228,6 +261,99 @@ export default function Tickets() {
 
   return (
     <div className="space-y-3">
+
+      {recentTickets.length > 0 && (
+        <div className="!pb-1 flex items-center gap-2 mt-2 overflow-x-auto !scrollbar-hide   
+    scrollbar-thin
+    scrollbar-thumb-gray-300
+    scrollbar-track-transparent 
+    [&::-webkit-scrollbar]:h-[4px]
+    [&::-webkit-scrollbar-track]:bg-transparent
+    [&::-webkit-scrollbar-thumb]:bg-gray-300
+    [&::-webkit-scrollbar-thumb]:rounded-full">
+          {/* Label */}
+          <span className="text-[11px] font-medium text-gray-500 uppercase tracking-wide shrink-0">
+            Recent
+          </span>
+
+          {/* Divider */}
+          <span className="h-4 w-px bg-gray-200 shrink-0" />
+
+          {/* Tickets */}
+          {recentTickets.slice(0, 6).map((t) => (
+            <Tooltip
+              key={t.id}
+              title={`${toProperCase(t.title)} (#${t.id})`}
+              arrow
+              placement="top"
+            >
+              <Chip
+                size="small"
+                onClick={() => navigate(`/tickets/${t.id}`)}
+                label={
+                  <span className="max-w-[140px] truncate inline-block">
+                    #{t.id} — {toProperCase(t.title)}
+                  </span>
+                }
+                sx={{
+                  height: 26,
+                  fontSize: "11.5px",
+                  fontWeight: 500,
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                  backgroundColor: "#FAFAFA",
+                  border: "1px solid #E5E7EB",
+
+                  "&:hover": {
+                    backgroundColor: "#F3F4F6",
+                  },
+
+                  "& .MuiChip-label": {
+                    px: 1.25,
+                    color: "#6B7280",
+                  },
+                }}
+              />
+            </Tooltip>
+          ))}
+
+          {/* More indicator */}
+          {recentTickets.length > 6 && (
+            <span className="text-[11px] text-gray-400 shrink-0">
+              +{recentTickets.length - 6} more
+            </span>
+          )}
+
+          {/* Clear */}
+          <Tooltip title="Clear recent tickets">
+            <button
+              onClick={() => {
+                localStorage.removeItem("recentTickets");
+                setRecentTickets([]);
+              }}
+              className="
+      ml-1 px-2 h-[26px] shrink-0
+      rounded-lg
+      text-[11px] font-medium
+      border border-[#E5E7EB]
+      text-[#969AA1]
+      bg-white
+      hover:bg-gray-50
+      hover:text-[#6B7280]
+      transition-all
+      focus:outline-none
+      focus:ring-2 focus:ring-gray-200
+    "
+            >
+              Clear
+            </button>
+          </Tooltip>
+
+        </div>
+      )}
+
+
+
       {/* Header */}
       <div className="flex items-center justify-between">
         {/* <h2 className="text-xl font-semibold text-brand-600">Tickets</h2> */}
@@ -242,6 +368,8 @@ export default function Tickets() {
           New Ticket
         </button>
       </div>
+
+
 
       {/* Filters */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
@@ -313,7 +441,7 @@ export default function Tickets() {
               }}
 
             >
-              <MenuItem 
+              <MenuItem
                 value="pending"
                 sx={{
                   "&.Mui-selected": {
@@ -331,7 +459,7 @@ export default function Tickets() {
                   )}
                 </div>
               </MenuItem>
-              <MenuItem 
+              <MenuItem
                 value="in_progress"
                 sx={{
                   "&.Mui-selected": {
@@ -349,7 +477,7 @@ export default function Tickets() {
                   )}
                 </div>
               </MenuItem>
-              <MenuItem 
+              <MenuItem
                 value="completed"
                 sx={{
                   "&.Mui-selected": {
@@ -481,13 +609,13 @@ export default function Tickets() {
                 { value: "followup", label: "Following" },
                 { value: "tag", label: "Tagged" },
               ];
-              
+
               // Add "All" at the end only for admins
               const allFilter = { value: "", label: "All" };
-              const filters = isAdmin 
-                ? [...baseFilters, allFilter] 
+              const filters = isAdmin
+                ? [...baseFilters, allFilter]
                 : baseFilters;
-              
+
               return filters.map((filter) => (
                 <button
                   key={filter.value}
@@ -495,11 +623,10 @@ export default function Tickets() {
                     setUserFilter(userFilter === filter.value ? "assign_to" : filter.value)
                   }
                   disabled={loading}
-                  className={`px-3 py-[6.15px] !text-xs font-medium rounded-lg border transition-all duration-500 ${
-                    loading
-                      ? "opacity-50 cursor-not-allowed"
-                      : ""
-                  } ${userFilter === filter.value
+                  className={`px-3 py-[6.15px] !text-xs font-medium rounded-lg border transition-all duration-500 ${loading
+                    ? "opacity-50 cursor-not-allowed"
+                    : ""
+                    } ${userFilter === filter.value
                       ? "bg-brand-500 text-white border-brand-500 hover:bg-brand-600"
                       : "border border-[#E5E7EB] text-[#969AA1] hover:bg-gray-50"
                     }`}
@@ -523,11 +650,10 @@ export default function Tickets() {
                 setPage(0);
               }}
               disabled={loading}
-              className={`px-3 py-[6.15px] shrink-0 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 transition-all ${
-                loading
-                  ? "opacity-50 cursor-not-allowed"
-                  : ""
-              } ${query ||
+              className={`px-3 py-[6.15px] shrink-0 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 transition-all ${loading
+                ? "opacity-50 cursor-not-allowed"
+                : ""
+                } ${query ||
                   (statusFilter && statusFilter.length > 0) ||
                   categoryFilter ||
                   startDate ||
@@ -748,7 +874,11 @@ export default function Tickets() {
                         <Tooltip title="View Ticket">
                           <IconButton
                             size="small"
-                            onClick={() => navigate(`/tickets/${t.id}`)}
+                            onClick={() => {
+                              addRecentTicket(t);
+                              setRecentTickets(getRecentTickets());
+                              navigate(`/tickets/${t.id}`);
+                            }}
                           >
                             {/* <LaunchIcon
                               fontSize="small"
