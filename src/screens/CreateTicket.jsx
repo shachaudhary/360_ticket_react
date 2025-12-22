@@ -45,10 +45,16 @@ export default function TicketForm({ isEdit = false, projectId }) {
 
   // Location state
   const [locations, setLocations] = useState([]);
-  const [selectedLocation, setSelectedLocation] = useState(null);
   const [locationModalOpen, setLocationModalOpen] = useState(false);
   const [locationSearchTerm, setLocationSearchTerm] = useState("");
   const [loadingLocations, setLoadingLocations] = useState(false);
+
+  // temp selection (modal ke andar)
+  const [tempLocation, setTempLocation] = useState(null);
+
+  // confirmed selection (form + details box)
+  const [confirmedLocation, setConfirmedLocation] = useState(null);
+
 
   useEffect(() => {
     if (isEdit && id) {
@@ -425,23 +431,24 @@ export default function TicketForm({ isEdit = false, projectId }) {
                   },
                 }}
               >
-                {selectedLocation ? "Change" : "Add"} Location
+                {formik.values.location_id ? "Change Location" : "Select Location"}
               </Button>
             </div>
 
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
               <div className="flex-1">
-                {selectedLocation ? (
+                {confirmedLocation ? (
                   <div className="bg-purple-50 rounded-lg p-3 border border-purple-200">
                     <Typography variant="body2" className="!font-semibold !text-gray-800 !mb-1">
-                      {selectedLocation.location_name || selectedLocation.display_name}
+                      {confirmedLocation.display_name || confirmedLocation.location_name}
                     </Typography>
-                    {selectedLocation.address && selectedLocation.address !== "N/A" && (
+
+                    {confirmedLocation.address && confirmedLocation.address !== "N/A" && (
                       <Typography variant="caption" className="!text-gray-600 !block">
                         <MapPin className="!w-3 !h-3 !inline !mr-1" />
-                        {toProperCase(selectedLocation.address)}
-                        {selectedLocation.city && selectedLocation.city !== "N/A" && `, ${toProperCase(selectedLocation.city)}`}
-                        {selectedLocation.state && selectedLocation.state !== "N/A" && `, ${toProperCase(selectedLocation.state)}`}
+                        {toProperCase(confirmedLocation.address)}
+                        {confirmedLocation.city && `, ${toProperCase(confirmedLocation.city)}`}
+                        {confirmedLocation.state && `, ${toProperCase(confirmedLocation.state)}`}
                       </Typography>
                     )}
                   </div>
@@ -483,8 +490,8 @@ export default function TicketForm({ isEdit = false, projectId }) {
                 }
               }}
               className={`min-h-40 relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-8 text-center transition-all ${dragActive
-                  ? "border-brand-500 bg-purple-50 scale-[1.01] shadow-md"
-                  : "border-gray-300 bg-gray-50 hover:border-gray-400 hover:bg-gray-100"
+                ? "border-brand-500 bg-purple-50 scale-[1.01] shadow-md"
+                : "border-gray-300 bg-gray-50 hover:border-gray-400 hover:bg-gray-100"
                 }`}
             >
               <input
@@ -506,9 +513,9 @@ export default function TicketForm({ isEdit = false, projectId }) {
               >
                 <ArrowUpTrayIcon
                   className={`h-8 w-8 mb-2 transition-colors ${dragActive ||
-                      (formik.values.files && formik.values.files.length > 0)
-                      ? "text-brand-500"
-                      : "text-gray-400"
+                    (formik.values.files && formik.values.files.length > 0)
+                    ? "text-brand-500"
+                    : "text-gray-400"
                     }`}
                 />
                 <span className="block">Drag & drop files here</span>
@@ -662,15 +669,17 @@ export default function TicketForm({ isEdit = false, projectId }) {
       >
         <DialogTitle className="!text-lg !font-semibold !flex !items-center !gap-2">
           <MapPinIcon className="!h-5 !w-5 !text-brand-500" />
-          {selectedLocation ? "Change Location" : "Add Location"}
+          Select Location
         </DialogTitle>
         <DialogContent dividers>
           <Autocomplete
             size="medium"
             fullWidth
             options={locations}
-            value={selectedLocation}
-            onChange={(e, newValue) => setSelectedLocation(newValue)}
+            value={tempLocation}
+            onChange={(e, newValue) => {
+              setTempLocation(newValue); // ❗ only temp
+            }}
             onInputChange={(e, newInputValue) => setLocationSearchTerm(newInputValue)}
             loading={loadingLocations}
             filterOptions={(options, params) => {
@@ -694,7 +703,7 @@ export default function TicketForm({ isEdit = false, projectId }) {
             }
             isOptionEqualToValue={(option, value) => option.id === value?.id}
             renderOption={(props, option) => {
-              const isSelected = selectedLocation && selectedLocation.id === option.id;
+              const isSelected = tempLocation && tempLocation.id === option.id;
 
               return (
                 <li
@@ -707,7 +716,7 @@ export default function TicketForm({ isEdit = false, projectId }) {
                 >
                   <div className="!flex !flex-col">
                     <span className="!font-semibold !text-gray-800 !text-sm">
-                      {option.location_name || option.display_name}
+                      {option.display_name || option.location_name}
                     </span>
                     {option.email && (
                       <span className="!text-xs !text-gray-500 !mt-1">
@@ -741,27 +750,33 @@ export default function TicketForm({ isEdit = false, projectId }) {
             )}
             noOptionsText={loadingLocations ? "Loading locations..." : "No locations found"}
           />
-          {selectedLocation && (
+          {tempLocation && (
             <div className="!mt-4 !p-3 !bg-purple-50 !rounded-lg !border !border-purple-200">
               <Typography variant="caption" className="!text-gray-600 !block !mb-2 !font-medium">
                 Selected Location:
               </Typography>
+
               <Typography variant="body2" className="!font-semibold !text-gray-800 !mb-1">
-                {selectedLocation.display_name || selectedLocation.location_name}
+                {tempLocation.display_name || tempLocation.location_name}
               </Typography>
-              {selectedLocation.address && selectedLocation.address !== "N/A" && (
+
+              {tempLocation.address && tempLocation.address !== "N/A" && (
                 <Typography variant="caption" className="!text-gray-600 !block">
-                  {toProperCase(selectedLocation.address)}
-                  {selectedLocation.city && selectedLocation.city !== "N/A" && `, ${toProperCase(selectedLocation.city)}`}
-                  {selectedLocation.state && selectedLocation.state !== "N/A" && `, ${toProperCase(selectedLocation.state)}`}
+                  {toProperCase(tempLocation.address)}
+                  {tempLocation.city && `, ${toProperCase(tempLocation.city)}`}
+                  {tempLocation.state && `, ${toProperCase(tempLocation.state)}`}
                 </Typography>
               )}
             </div>
           )}
+
         </DialogContent>
         <DialogActions sx={{ px: 2, py: 1.5 }}>
           <Button
-            onClick={() => setLocationModalOpen(false)}
+            onClick={() => {
+              setTempLocation(null);
+              setLocationModalOpen(false);
+            }}
             variant="outlined"
             sx={{
               textTransform: "none",
@@ -774,7 +789,11 @@ export default function TicketForm({ isEdit = false, projectId }) {
           </Button>
           <Button
             onClick={() => {
-              formik.setFieldValue("location_id", selectedLocation?.id || null);
+              // commit location
+              setConfirmedLocation(tempLocation);
+              formik.setFieldValue("location_id", tempLocation.id);
+
+              // close modal
               setLocationModalOpen(false);
             }}
             variant="contained"
@@ -785,8 +804,9 @@ export default function TicketForm({ isEdit = false, projectId }) {
               color: "white",
               minWidth: 90,
             }}
+            disabled={!tempLocation}
           >
-            {selectedLocation ? "Select" : "Clear"}
+            Select Location
           </Button>
         </DialogActions>
       </Dialog>

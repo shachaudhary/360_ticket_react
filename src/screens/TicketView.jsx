@@ -1716,7 +1716,7 @@ export default function TicketView() {
 
       {/* Right Sidebar - Location & Followers (Desktop) */}
       <Box
-        className="hidden md:flex flex-col bg-white p-2.5 pr-0 border-l border-gray-200 -mt-4 -mb-4"
+        className="hidden md:flex flex-col bg-white p-2.5 pr-0 border-l border-gray-200 -mt-2 -mb-2"
         sx={{
           width: { md: "305px", lg: "350px" },
           minWidth: { md: "305px" },
@@ -1900,7 +1900,7 @@ export default function TicketView() {
         </DialogTitle>
         <DialogContent dividers>
           <Autocomplete
-            size="small"
+            size="medium"
             fullWidth
             options={locations}
             value={selectedLocation}
