@@ -291,7 +291,7 @@ export default function Tickets() {
                 size="small"
                 onClick={() => navigate(`/tickets/${t.id}`)}
                 label={
-                  <span className="max-w-[140px] truncate inline-block">
+                  <span className="max-w-[140px] truncate inline-block -mb-1">
                     #{t.id} — {toProperCase(t.title)}
                   </span>
                 }
