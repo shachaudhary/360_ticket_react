@@ -11,18 +11,26 @@ import {
   Typography,
   Card,
   Divider,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Autocomplete,
 } from "@mui/material";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { ArrowUpTrayIcon } from "@heroicons/react/24/outline";
+import { ArrowUpTrayIcon, MapPinIcon } from "@heroicons/react/24/outline";
+import { MapPin, Phone, Mail } from "lucide-react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import dayjs from "dayjs";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import BackButton from "../components/BackButton";
 import { createAPIEndPoint } from "../config/api/api";
+import { createAPIEndPointAuth } from "../config/api/apiAuth";
 import { useApp } from "../state/AppContext";
 import toast from "react-hot-toast";
+import { toProperCase } from "../utils/formatting";
 
 // const priorities = ["Low", "Medium", "High"];
 const priorities = ["Low", "High", "Urgent"];
@@ -34,6 +42,13 @@ export default function TicketForm({ isEdit = false, projectId }) {
   const [loadingTicket, setLoadingTicket] = useState(isEdit);
   const [dragActive, setDragActive] = useState(false);
   const [categories, setCategories] = useState([]);
+
+  // Location state
+  const [locations, setLocations] = useState([]);
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [locationModalOpen, setLocationModalOpen] = useState(false);
+  const [locationSearchTerm, setLocationSearchTerm] = useState("");
+  const [loadingLocations, setLoadingLocations] = useState(false);
 
   useEffect(() => {
     if (isEdit && id) {
@@ -87,6 +102,47 @@ export default function TicketForm({ isEdit = false, projectId }) {
     fetchCategories();
   }, []);
 
+  // Fetch locations from API
+  useEffect(() => {
+    const fetchLocations = async () => {
+      if (!user?.clinic_id) return;
+
+      setLoadingLocations(true);
+      try {
+        const res = await createAPIEndPointAuth(
+          `clinic_locations/get_all/${user.clinic_id}`
+        ).fetchAll();
+
+        const data = res.data?.locations || [];
+        const filtered = data.filter((loc) => {
+          const name = (loc.location_name || "").trim().toLowerCase();
+          return (
+            loc.id !== 25 && // Sales Team
+            loc.id !== 28 && // Insurance
+            loc.id !== 30 && // Anonymous
+            name !== "sales team" &&
+            name !== "insurance" &&
+            name !== "anonymous"
+          );
+        });
+
+        const sorted = filtered.sort((a, b) => {
+          const nameA = (a.display_name?.trim() || a.location_name?.trim() || "").toLowerCase();
+          const nameB = (b.display_name?.trim() || b.location_name?.trim() || "").toLowerCase();
+          return nameA.localeCompare(nameB);
+        });
+
+        setLocations(sorted);
+      } catch (err) {
+        console.error("Error fetching locations:", err);
+      } finally {
+        setLoadingLocations(false);
+      }
+    };
+
+    fetchLocations();
+  }, [user?.clinic_id]);
+
   const handleCancel = () => {
     if (isEdit && id) {
       navigate(`/tickets/${id}`);
@@ -103,6 +159,7 @@ export default function TicketForm({ isEdit = false, projectId }) {
       due_date: null,
       priority: "Low",
       files: [],
+      location_id: null,
     },
     validationSchema: Yup.object({
       title: Yup.string().required("Ticket title is required").min(3),
@@ -112,6 +169,7 @@ export default function TicketForm({ isEdit = false, projectId }) {
       due_date: Yup.date().nullable().required("Please select a due date"),
       // .min(new Date(), "Due date cannot be in the past"),
       files: Yup.array().nullable(),
+      location_id: Yup.number().nullable(),
     }),
     onSubmit: async (values, { setSubmitting }) => {
       try {
@@ -135,8 +193,10 @@ export default function TicketForm({ isEdit = false, projectId }) {
         });
 
         formData.append("user_id", user?.id);
-        formData.append("clinic_id", 1);
-        formData.append("location_id", 30);
+        formData.append("clinic_id", user?.clinic_id || 1);
+        if (values.location_id) {
+          formData.append("location_id", values.location_id);
+        }
         if (projectId) {
           formData.append("project_id", projectId);
         }
@@ -218,7 +278,7 @@ export default function TicketForm({ isEdit = false, projectId }) {
                 Ticket Information
               </Typography>
             </div>
-            
+
             <TextField
               label="Issue"
               name="title"
@@ -272,7 +332,7 @@ export default function TicketForm({ isEdit = false, projectId }) {
                 Ticket Details
               </Typography>
             </div>
-            
+
             <div className="!grid !grid-cols-1 md:!grid-cols-3 !gap-4">
               <FormControl fullWidth size="small">
                 <InputLabel>Category</InputLabel>
@@ -342,6 +402,61 @@ export default function TicketForm({ isEdit = false, projectId }) {
 
           <Divider />
 
+          {/* Location Section */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-1 h-6 rounded-full" style={{ backgroundColor: "#824EF2" }}></div>
+              <Typography variant="subtitle1" className="!text-gray-800 !font-semibold !text-base">
+                Location (Optional)
+              </Typography>
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<MapPinIcon className="h-4 w-4" />}
+                onClick={() => setLocationModalOpen(true)}
+                sx={{
+                  textTransform: "none",
+                  borderRadius: 1.25,
+                  borderColor: "#824EF2",
+                  color: "#824EF2",
+                  "&:hover": {
+                    borderColor: "#824EF2",
+                    backgroundColor: "rgba(130, 78, 242, 0.04)",
+                  },
+                }}
+              >
+                {selectedLocation ? "Change" : "Add"} Location
+              </Button>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div className="flex-1">
+                {selectedLocation ? (
+                  <div className="bg-purple-50 rounded-lg p-3 border border-purple-200">
+                    <Typography variant="body2" className="!font-semibold !text-gray-800 !mb-1">
+                      {selectedLocation.location_name || selectedLocation.display_name}
+                    </Typography>
+                    {selectedLocation.address && selectedLocation.address !== "N/A" && (
+                      <Typography variant="caption" className="!text-gray-600 !block">
+                        <MapPin className="!w-3 !h-3 !inline !mr-1" />
+                        {toProperCase(selectedLocation.address)}
+                        {selectedLocation.city && selectedLocation.city !== "N/A" && `, ${toProperCase(selectedLocation.city)}`}
+                        {selectedLocation.state && selectedLocation.state !== "N/A" && `, ${toProperCase(selectedLocation.state)}`}
+                      </Typography>
+                    )}
+                  </div>
+                ) : (
+                  <Typography variant="body2" className="!text-gray-500 !italic">
+                    No location selected
+                  </Typography>
+                )}
+              </div>
+
+            </div>
+          </div>
+
+          <Divider />
+
           {/* File Upload Section */}
           <div className="space-y-3">
             <div className="flex items-center gap-2 mb-3">
@@ -367,11 +482,10 @@ export default function TicketForm({ isEdit = false, projectId }) {
                   ]);
                 }
               }}
-              className={`min-h-40 relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-8 text-center transition-all ${
-                dragActive
+              className={`min-h-40 relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-8 text-center transition-all ${dragActive
                   ? "border-brand-500 bg-purple-50 scale-[1.01] shadow-md"
                   : "border-gray-300 bg-gray-50 hover:border-gray-400 hover:bg-gray-100"
-              }`}
+                }`}
             >
               <input
                 type="file"
@@ -391,12 +505,11 @@ export default function TicketForm({ isEdit = false, projectId }) {
                 className="cursor-pointer flex flex-col items-center text-sm font-medium text-gray-600"
               >
                 <ArrowUpTrayIcon
-                  className={`h-8 w-8 mb-2 transition-colors ${
-                    dragActive ||
-                    (formik.values.files && formik.values.files.length > 0)
+                  className={`h-8 w-8 mb-2 transition-colors ${dragActive ||
+                      (formik.values.files && formik.values.files.length > 0)
                       ? "text-brand-500"
                       : "text-gray-400"
-                  }`}
+                    }`}
                 />
                 <span className="block">Drag & drop files here</span>
                 <span className="text-gray-400">or click to upload</span>
@@ -406,64 +519,64 @@ export default function TicketForm({ isEdit = false, projectId }) {
             {/* Preview Uploaded Files */}
             {formik.values.files && formik.values.files.length > 0 && (
               <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
-            {formik.values.files.map((file, index) => {
-              const isImage =
-                file.type?.startsWith("image/") ||
-                file.previewUrl?.match(/\.(jpg|jpeg|png|gif|webp)$/i);
+                {formik.values.files.map((file, index) => {
+                  const isImage =
+                    file.type?.startsWith("image/") ||
+                    file.previewUrl?.match(/\.(jpg|jpeg|png|gif|webp)$/i);
 
-              return (
-                <div
-                  key={index}
-                  className="relative flex flex-col items-center border rounded-lg p-2"
-                >
-                  {/* Show preview if image */}
-                  {isImage ? (
-                    <img
-                      src={file.previewUrl || URL.createObjectURL(file)}
-                      alt={file.name}
-                      className="h-28 w-full object-cover rounded"
-                    />
-                  ) : (
-                    <div className="h-28 w-full flex items-center justify-center bg-gray-100 text-xs text-gray-600 rounded">
-                      {file.name.endsWith(".pdf") ? "📄 PDF File" : file.name}
+                  return (
+                    <div
+                      key={index}
+                      className="relative flex flex-col items-center border rounded-lg p-2"
+                    >
+                      {/* Show preview if image */}
+                      {isImage ? (
+                        <img
+                          src={file.previewUrl || URL.createObjectURL(file)}
+                          alt={file.name}
+                          className="h-28 w-full object-cover rounded"
+                        />
+                      ) : (
+                        <div className="h-28 w-full flex items-center justify-center bg-gray-100 text-xs text-gray-600 rounded">
+                          {file.name.endsWith(".pdf") ? "📄 PDF File" : file.name}
+                        </div>
+                      )}
+
+                      {/* Filename */}
+                      <Typography
+                        variant="caption"
+                        className="!mt-1 truncate w-full text-center capitalize"
+                      >
+                        {file.name}
+                      </Typography>
+
+                      {/* Remove button */}
+                      <Button
+                        size="small"
+                        color="error"
+                        variant="outlined"
+                        onClick={() => {
+                          const updated = [...formik.values.files];
+                          updated.splice(index, 1);
+                          formik.setFieldValue("files", updated);
+                        }}
+                        sx={{
+                          position: "absolute",
+                          top: -8,
+                          right: -8,
+                          minWidth: 0,
+                          width: 24,
+                          height: 24,
+                          borderRadius: "50%",
+                          p: 0,
+                          fontSize: 12,
+                        }}
+                      >
+                        ✕
+                      </Button>
                     </div>
-                  )}
-
-                  {/* Filename */}
-                  <Typography
-                    variant="caption"
-                    className="!mt-1 truncate w-full text-center capitalize"
-                  >
-                    {file.name}
-                  </Typography>
-
-                  {/* Remove button */}
-                  <Button
-                    size="small"
-                    color="error"
-                    variant="outlined"
-                    onClick={() => {
-                      const updated = [...formik.values.files];
-                      updated.splice(index, 1);
-                      formik.setFieldValue("files", updated);
-                    }}
-                    sx={{
-                      position: "absolute",
-                      top: -8,
-                      right: -8,
-                      minWidth: 0,
-                      width: 24,
-                      height: 24,
-                      borderRadius: "50%",
-                      p: 0,
-                      fontSize: 12,
-                    }}
-                  >
-                    ✕
-                  </Button>
-                </div>
-              );
-            })}
+                  );
+                })}
               </div>
             )}
           </div>
@@ -478,8 +591,8 @@ export default function TicketForm({ isEdit = false, projectId }) {
                 textTransform: "none",
                 borderColor: "#E5E7EB",
                 color: "#6B7270",
-                "&:hover": { 
-                  borderColor: "#E5E7EB", 
+                "&:hover": {
+                  borderColor: "#E5E7EB",
                   backgroundColor: "#Fafafa",
                 },
                 "&:disabled": {
@@ -518,14 +631,14 @@ export default function TicketForm({ isEdit = false, projectId }) {
             >
               {formik.isSubmitting ? (
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <CircularProgress 
-                    size={18} 
-                    sx={{ 
+                  <CircularProgress
+                    size={18}
+                    sx={{
                       color: "#6B7280",
                       "& .MuiCircularProgress-circle": {
                         strokeLinecap: "round",
                       },
-                    }} 
+                    }}
                   />
                   <span>{isEdit ? "Updating..." : "Creating..."}</span>
                 </Box>
@@ -538,6 +651,145 @@ export default function TicketForm({ isEdit = false, projectId }) {
           </div>
         </Box>
       </Card>
+
+      {/* Location Modal */}
+      <Dialog
+        open={locationModalOpen}
+        onClose={() => setLocationModalOpen(false)}
+        fullWidth
+        maxWidth="sm"
+        PaperProps={{ sx: { borderRadius: 2 } }}
+      >
+        <DialogTitle className="!text-lg !font-semibold !flex !items-center !gap-2">
+          <MapPinIcon className="!h-5 !w-5 !text-brand-500" />
+          {selectedLocation ? "Change Location" : "Add Location"}
+        </DialogTitle>
+        <DialogContent dividers>
+          <Autocomplete
+            size="medium"
+            fullWidth
+            options={locations}
+            value={selectedLocation}
+            onChange={(e, newValue) => setSelectedLocation(newValue)}
+            onInputChange={(e, newInputValue) => setLocationSearchTerm(newInputValue)}
+            loading={loadingLocations}
+            filterOptions={(options, params) => {
+              const filtered = options.filter((option) => {
+                const searchLower = params.inputValue.toLowerCase();
+                const name = (option.display_name || option.location_name || "").toLowerCase();
+                const address = (option.address || "").toLowerCase();
+                const city = (option.city || "").toLowerCase();
+                const state = (option.state || "").toLowerCase();
+                return (
+                  name.includes(searchLower) ||
+                  address.includes(searchLower) ||
+                  city.includes(searchLower) ||
+                  state.includes(searchLower)
+                );
+              });
+              return filtered;
+            }}
+            getOptionLabel={(option) =>
+              option ? (option.display_name || option.location_name || "") : ""
+            }
+            isOptionEqualToValue={(option, value) => option.id === value?.id}
+            renderOption={(props, option) => {
+              const isSelected = selectedLocation && selectedLocation.id === option.id;
+
+              return (
+                <li
+                  {...props}
+                  key={option.id}
+                  className={`!py-2.5 !px-3 !cursor-pointer !transition-all !duration-200 ${isSelected
+                    ? "!bg-gray-100"
+                    : "hover:!bg-gray-100"
+                    }`}
+                >
+                  <div className="!flex !flex-col">
+                    <span className="!font-semibold !text-gray-800 !text-sm">
+                      {option.location_name || option.display_name}
+                    </span>
+                    {option.email && (
+                      <span className="!text-xs !text-gray-500 !mt-1">
+                        <Mail className="!w-3.5 !h-3.5 !inline !mr-1" /> {option.email}
+                      </span>
+                    )}
+                  </div>
+                </li>
+              );
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Search Location"
+                placeholder="Type to search locations..."
+                autoComplete="off"
+                inputProps={{
+                  ...params.inputProps,
+                  autoComplete: "off",
+                }}
+                InputProps={{
+                  ...params.InputProps,
+                  endAdornment: (
+                    <>
+                      {loadingLocations && <CircularProgress size={20} />}
+                      {params.InputProps.endAdornment}
+                    </>
+                  ),
+                }}
+              />
+            )}
+            noOptionsText={loadingLocations ? "Loading locations..." : "No locations found"}
+          />
+          {selectedLocation && (
+            <div className="!mt-4 !p-3 !bg-purple-50 !rounded-lg !border !border-purple-200">
+              <Typography variant="caption" className="!text-gray-600 !block !mb-2 !font-medium">
+                Selected Location:
+              </Typography>
+              <Typography variant="body2" className="!font-semibold !text-gray-800 !mb-1">
+                {selectedLocation.display_name || selectedLocation.location_name}
+              </Typography>
+              {selectedLocation.address && selectedLocation.address !== "N/A" && (
+                <Typography variant="caption" className="!text-gray-600 !block">
+                  {toProperCase(selectedLocation.address)}
+                  {selectedLocation.city && selectedLocation.city !== "N/A" && `, ${toProperCase(selectedLocation.city)}`}
+                  {selectedLocation.state && selectedLocation.state !== "N/A" && `, ${toProperCase(selectedLocation.state)}`}
+                </Typography>
+              )}
+            </div>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ px: 2, py: 1.5 }}>
+          <Button
+            onClick={() => setLocationModalOpen(false)}
+            variant="outlined"
+            sx={{
+              textTransform: "none",
+              borderColor: "#E5E7EB",
+              color: "#6B7270",
+              "&:hover": { borderColor: "#E5E7EB", backgroundColor: "#Fafafa" },
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={() => {
+              formik.setFieldValue("location_id", selectedLocation?.id || null);
+              setLocationModalOpen(false);
+            }}
+            variant="contained"
+            color="primary"
+            sx={{
+              boxShadow: "none",
+              textTransform: "none",
+              color: "white",
+              minWidth: 90,
+            }}
+          >
+            {selectedLocation ? "Select" : "Clear"}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
