@@ -104,7 +104,7 @@ const theme = createTheme({
     MuiOutlinedInput: {
       styleOverrides: {
         root: {
-          height: "36px !important",
+          // height: "36px !important",
           "& .MuiOutlinedInput-notchedOutline": {
             borderColor: "#E5E7EB",
           },
@@ -125,7 +125,7 @@ const theme = createTheme({
     MuiPickersOutlinedInput: {
       styleOverrides: {
         root: {
-          height: "36px !important",
+          // height: "36px !important",
           "& .MuiPickersOutlinedInput-notchedOutline": {
             borderColor: "#E5E7EB",
           },

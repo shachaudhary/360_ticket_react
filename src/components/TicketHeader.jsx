@@ -150,7 +150,7 @@ export default function TicketHeader({ ticket, onUpdate, fetchAgain }) {
         alignItems={{ xs: "flex-start", sm: "center" }}
       >
         <h2 className="text-lg md:text-xl font-medium text-sidebar">
-          Ticket <span className="font-bold">#{ticket.id}</span>
+          Ticket <span className="font-semibold">#{ticket.id}</span>
         </h2>
 
         <Button
@@ -161,6 +161,7 @@ export default function TicketHeader({ ticket, onUpdate, fetchAgain }) {
           sx={{
             textTransform: "none",
             borderRadius: "14px",
+            boxShadow: "none",
             minHeight: 35,
             ...(following
               ? {
