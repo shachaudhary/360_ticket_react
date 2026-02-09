@@ -32,7 +32,7 @@ const ORTHO_LOCATIONS = [
     email: "belmont@dental360grp.com",
     hours: "Dr. Herrera - Tuesday (1st-4th Week)",
   },
-  {
+  { 
     id: 23,
     display_name: "Dental 360 - Berwyn",
     location_name: "Dental 360 Berwyn",
