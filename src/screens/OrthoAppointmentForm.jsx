@@ -36,7 +36,7 @@ const ORTHO_LOCATIONS = [
     id: 23,
     display_name: "Dental 360 - Berwyn",
     location_name: "Dental 360 Berwyn",
-    address: "7039 Roosevelt Rd, Berwyn, IL 60402",
+    address: "6301 W. Berwyn Rd, Berwyn, IL 60402",
     city: "berwyn",
     state: "illinois",
     postal_code: "60402",
