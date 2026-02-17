@@ -424,7 +424,7 @@ export default function Tickets() {
                           size="small"
                           sx={{
                             height: 22,
-                            width: "58px",
+                            width: "52px",
                             fontSize: "0.7rem",
                             fontWeight: 500,
                             backgroundColor: "#F3E8FF",
