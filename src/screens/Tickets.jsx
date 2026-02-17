@@ -58,6 +58,7 @@ const addRecentTicket = (ticket) => {
   localStorage.setItem("recentTickets", JSON.stringify(updated));
 };
 
+const ALL_STATUSES = ["pending", "in_progress", "completed"];
 
 export default function Tickets() {
   const navigate = useNavigate();
@@ -401,35 +402,38 @@ export default function Tickets() {
         <div className="col-span-1">
           <FormControl size="small" fullWidth disabled={loading}>
             <InputLabel>Status</InputLabel>
+
             <Select
               multiple
               value={statusFilter}
               label="Status"
               onChange={(e) => setStatusFilter(e.target.value)}
-              disabled={loading}
               renderValue={(selected) => {
                 if (selected.length === 0) return "All";
+
                 const displayCount = Math.min(selected.length, 1);
                 const remainingCount = selected.length - displayCount;
+
                 return (
                   <div className="flex flex-wrap gap-1 items-center">
                     {selected.slice(0, displayCount).map((value) => (
-                      <Chip
-                        key={value}
-                        label={toProperCase(value.replace(/_/g, " "))}
-                        size="small"
-                        sx={{
-                          height: 22,
-                          fontSize: "0.7rem",
-                          fontWeight: 500,
-                          backgroundColor: "#F3E8FF",
-                          color: "#824EF2",
-                          border: "1px solid #E9D5FF",
-                          "& .MuiChip-label": {
-                            px: 0.875,
-                          },
-                        }}
-                      />
+                      <Tooltip title={toProperCase(value.replace(/_/g, " "))} arrow>
+                        <Chip
+                          key={value}
+                          label={toProperCase(value.replace(/_/g, " "))}
+                          size="small"
+                          sx={{
+                            height: 22,
+                            width: "58px",
+                            fontSize: "0.7rem",
+                            fontWeight: 500,
+                            backgroundColor: "#F3E8FF",
+                            color: "#824EF2",
+                            border: "1px solid #E9D5FF",
+                            "& .MuiChip-label": { px: 0.875 },
+                          }}
+                        />
+                      </Tooltip>
                     ))}
                     {remainingCount > 0 && (
                       <span className="text-xs text-gray-500 font-medium ml-1">
@@ -439,64 +443,44 @@ export default function Tickets() {
                   </div>
                 );
               }}
-
+              endAdornment={
+                statusFilter.length > 0 && (
+                  <InputAdornment position="end" sx={{ marginRight: "12px" }}>
+                    <IconButton
+                      size="small"
+                      onClick={(e) => {
+                        e.stopPropagation();   // VERY IMPORTANT
+                        setStatusFilter([]);   // remove filter
+                      }}
+                    >
+                      <ClearIcon fontSize="small"/>
+                    </IconButton>
+                  </InputAdornment>
+                )
+              }
             >
-              <MenuItem
-                value="pending"
-                sx={{
-                  "&.Mui-selected": {
-                    backgroundColor: "#F3E8FF",
-                    "&:hover": {
-                      backgroundColor: "#E9D5FF",
+              {ALL_STATUSES.map((status) => (
+                <MenuItem
+                  key={status}
+                  value={status}
+                  sx={{
+                    "&.Mui-selected": {
+                      backgroundColor: "#F3E8FF",
+                      "&:hover": { backgroundColor: "#E9D5FF" },
                     },
-                  },
-                }}
-              >
-                <div className="flex items-center justify-between w-full">
-                  <span>Pending</span>
-                  {statusFilter.includes("pending") && (
-                    <CheckIcon sx={{ fontSize: 18, color: "#824EF2", ml: 1 }} />
-                  )}
-                </div>
-              </MenuItem>
-              <MenuItem
-                value="in_progress"
-                sx={{
-                  "&.Mui-selected": {
-                    backgroundColor: "#F3E8FF",
-                    "&:hover": {
-                      backgroundColor: "#E9D5FF",
-                    },
-                  },
-                }}
-              >
-                <div className="flex items-center justify-between w-full">
-                  <span>In Progress</span>
-                  {statusFilter.includes("in_progress") && (
-                    <CheckIcon sx={{ fontSize: 18, color: "#824EF2", ml: 1 }} />
-                  )}
-                </div>
-              </MenuItem>
-              <MenuItem
-                value="completed"
-                sx={{
-                  "&.Mui-selected": {
-                    backgroundColor: "#F3E8FF",
-                    "&:hover": {
-                      backgroundColor: "#E9D5FF",
-                    },
-                  },
-                }}
-              >
-                <div className="flex items-center justify-between w-full">
-                  <span>Completed</span>
-                  {statusFilter.includes("completed") && (
-                    <CheckIcon sx={{ fontSize: 18, color: "#824EF2", ml: 1 }} />
-                  )}
-                </div>
-              </MenuItem>
+                  }}
+                >
+                  <div className="flex items-center justify-between w-full">
+                    <span>{toProperCase(status.replace(/_/g, " "))}</span>
+                    {statusFilter.includes(status) && (
+                      <CheckIcon sx={{ fontSize: 18, color: "#824EF2", ml: 1 }} />
+                    )}
+                  </div>
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
+
         </div>
 
         {/* Category */}
