@@ -77,7 +77,9 @@ export default function TicketForm({ isEdit = false, projectId }) {
             due_date: t.due_date ? dayjs(t.due_date) : null,
             priority: t.priority || "Low",
             files: existingFiles,
+            location_id: t.location_id || null,
           });
+
         } catch (err) {
           toast.error("Failed to load ticket");
         } finally {
@@ -181,6 +183,8 @@ export default function TicketForm({ isEdit = false, projectId }) {
       try {
         const formData = new FormData();
         Object.keys(values).forEach((key) => {
+          if (key === "location_id") return;
+          
           if (key === "files" && values.files?.length > 0) {
             values.files.forEach((f) => {
               if (!f.isExisting) {
@@ -200,9 +204,12 @@ export default function TicketForm({ isEdit = false, projectId }) {
 
         formData.append("user_id", user?.id);
         formData.append("clinic_id", user?.clinic_id || 1);
-        if (values.location_id) {
-          formData.append("location_id", values.location_id);
-        }
+        // Always send location_id (default 30 if not selected)
+        formData.append(
+          "location_id",
+          values.location_id || 30
+        );
+
         if (projectId) {
           formData.append("project_id", projectId);
         }
