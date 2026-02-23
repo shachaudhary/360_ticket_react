@@ -27,7 +27,7 @@ import DateWithTooltip from "../components/DateWithTooltip";
 import ClearIcon from "@mui/icons-material/Clear";
 import { convertToCST } from "../utils";
 import { PlusIcon } from "@heroicons/react/24/solid";
-import { toProperCase, cleanText } from "../utils/formatting";
+import { toProperCase, cleanText, toProperCase1 } from "../utils/formatting";
 import { EyeIcon } from "@heroicons/react/24/outline";
 import toast from "react-hot-toast";
 import { chipStyle } from "../utils/common";
@@ -739,7 +739,7 @@ export default function Tickets() {
                       <td className="px-4 py-3 border-b border-[#E5E7EB] font-medium text-gray-800 max-w-48">
                         <Tooltip title={toProperCase(cleanText(t.title))} arrow placement="top">
                           <div className="line-clamp-none break-words">
-                            {toProperCase(cleanText(t.title))}
+                            {toProperCase1(cleanText(t.title))}
                           </div>
                         </Tooltip>
                       </td>
