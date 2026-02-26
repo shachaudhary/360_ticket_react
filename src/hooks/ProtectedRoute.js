@@ -6,9 +6,22 @@ import { toast } from "react-hot-toast";
 function ProtectedRoute({ children }) {
     const location = useLocation();
     const [shouldRedirect, setShouldRedirect] = useState(false);
-    const [accessToken, setAccessToken] = useState(localStorage.getItem("access_token"));
+    // const [accessToken, setAccessToken] = useState(localStorage.getItem("access_token"));
     const [isOffline, setIsOffline] = useState(false);
     const toastShown = useRef(false);
+    const [accessToken, setAccessToken] = useState(() => {
+        // 1. Check the URL for a token immediately during the first render
+        const urlParams = new URLSearchParams(location.search);
+        const tokenFromUrl = urlParams.get("token");
+
+        if (tokenFromUrl) {
+            // 2. If a new token is in the URL, save it and use it right away
+            localStorage.setItem("access_token", tokenFromUrl);
+            return tokenFromUrl;
+        }
+        // 3. Otherwise, fall back to the old token in local storage
+        return localStorage.getItem("access_token");
+    });
 
     // 🔹 Logout Helper
     const logoutUser = (message) => {
@@ -95,19 +108,44 @@ function ProtectedRoute({ children }) {
     }, [isOffline]);
 
     // 🔹 Handle token from URL (OAuth redirect)
+    // useEffect(() => {
+    //     const urlParams = new URLSearchParams(location.search);
+    //     const tokenFromUrl = urlParams.get("token");
+
+    //     if (tokenFromUrl) {
+    //         localStorage.setItem("access_token", tokenFromUrl);
+    //         setAccessToken(tokenFromUrl);
+    //     } else if (!accessToken && !toastShown.current) {
+    //         toast.error("Unauthorized access. Please log in.");
+    //         toastShown.current = true;
+    //         setShouldRedirect(true);
+    //     }
+    // }, [location.search, accessToken]);
+
+    // 🔹 Handle token from URL & clean it from the address bar
     useEffect(() => {
         const urlParams = new URLSearchParams(location.search);
         const tokenFromUrl = urlParams.get("token");
 
-        if (tokenFromUrl) {
+        if (tokenFromUrl && tokenFromUrl !== accessToken) {
             localStorage.setItem("access_token", tokenFromUrl);
             setAccessToken(tokenFromUrl);
-        } else if (!accessToken && !toastShown.current) {
+        }
+
+        // Security improvement: Remove the token from the URL bar so users don't copy/share it
+        if (tokenFromUrl) {
+            urlParams.delete("token");
+            const search = urlParams.toString();
+            const newUrl = `${location.pathname}${search ? "?" + search : ""}${location.hash}`;
+            window.history.replaceState({}, document.title, newUrl);
+        }
+
+        if (!accessToken && !tokenFromUrl && !toastShown.current) {
             toast.error("Unauthorized access. Please log in.");
             toastShown.current = true;
             setShouldRedirect(true);
         }
-    }, [location.search, accessToken]);
+    }, [location.search, location.pathname, location.hash, accessToken]);
 
     // 🔹 Redirect if needed
     useEffect(() => {
