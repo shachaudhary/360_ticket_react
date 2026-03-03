@@ -41,6 +41,60 @@ import { convertToCST } from "../utils";
 import { toProperCase } from "../utils/formatting";
 import toast from "react-hot-toast";
 
+
+const TextWithLinks = ({ text }) => {
+  if (!text) return null;
+
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+
+  return text.split(urlRegex).map((part, index) => {
+    if (part.match(urlRegex)) {
+      return (
+        <a
+          key={index}
+          href={part}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            color: "#146ef5",
+            textDecoration: "underline",
+            wordBreak: "break-all",
+          }}
+          onClick={(e) => e.stopPropagation()} // 🔥 VERY IMPORTANT for cards
+        >
+          {part}
+        </a>
+      );
+    }
+    return part;
+  });
+};
+
+const renderWithLinks = (text) => {
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+
+  return text.split(urlRegex).map((part, index) => {
+    if (part.match(urlRegex)) {
+      return (
+        <a
+          key={index}
+          href={part}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            color: "#146ef5",
+            textDecoration: "underline",
+            wordBreak: "break-all",
+          }}
+        >
+          {part}
+        </a>
+      );
+    }
+    return part;
+  });
+};
+
 export default function ProjectView() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -404,7 +458,7 @@ export default function ProjectView() {
             </div>
             {displayProject.description && (
               <Typography variant="body2" className="!text-gray-600 !leading-relaxed !text-base">
-                {displayProject.description}
+                {renderWithLinks(displayProject.description)}
               </Typography>
             )}
           </div>
@@ -597,8 +651,8 @@ export default function ProjectView() {
                     onDragLeave={handleDragLeave}
                     onDrop={(e) => handleDrop(e, status)}
                     className={`!p-4 !border-2 !rounded-lg !shadow-sm !transition-all ${isDraggedOver
-                        ? `${statusColors[status]} ${statusBorderColors[status]} !border-4 !bg-opacity-90 !shadow-md`
-                        : `${statusColors[status] || "!bg-gray-50 !border-gray-200"}`
+                      ? `${statusColors[status]} ${statusBorderColors[status]} !border-4 !bg-opacity-90 !shadow-md`
+                      : `${statusColors[status] || "!bg-gray-50 !border-gray-200"}`
                       }`}
                   >
                     <div className="!flex !items-center !justify-between !mb-4 !pb-3 !border-b !border-gray-200">
@@ -624,8 +678,8 @@ export default function ProjectView() {
                       ))}
                       {statusTickets.length === 0 && (
                         <div className={`!flex !items-center !justify-center !py-12 !rounded-lg !border-2 !border-dashed !transition-all ${isDraggedOver
-                            ? `${statusBorderColors[status]} !bg-opacity-20 ${statusColors[status]}`
-                            : "!border-gray-200 !bg-transparent"
+                          ? `${statusBorderColors[status]} !bg-opacity-20 ${statusColors[status]}`
+                          : "!border-gray-200 !bg-transparent"
                           }`}>
                           <Typography variant="caption" className={`!text-xs ${isDraggedOver ? "!font-medium" : "!text-gray-400"
                             }`}>

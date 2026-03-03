@@ -88,7 +88,7 @@ export default function ProjectForm({ isEdit = false }) {
 
       // Handle tags - extract tag names if they're objects, otherwise use as strings
       const projectTags = project.tags || [];
-      const tagNames = projectTags.map((tag) => 
+      const tagNames = projectTags.map((tag) =>
         typeof tag === 'string' ? tag : (tag.tag_name || tag.name || tag)
       );
 
@@ -224,7 +224,7 @@ export default function ProjectForm({ isEdit = false }) {
                 Project Information
               </Typography>
             </div>
-            
+
             <TextField
               label="Project Name"
               name="name"
@@ -263,6 +263,7 @@ export default function ProjectForm({ isEdit = false }) {
               placeholder="Add a detailed description of your project..."
               sx={{
                 "& .MuiOutlinedInput-root": {
+                  p: 0,
                   "&:hover fieldset": {
                     borderColor: "#824EF2",
                   },
@@ -312,7 +313,7 @@ export default function ProjectForm({ isEdit = false }) {
                 Project Details
               </Typography>
             </div>
-            
+
             <div className="!grid !grid-cols-1 md:!grid-cols-3 !gap-4">
               <FormControl fullWidth size="small">
                 <InputLabel>Status</InputLabel>
@@ -413,8 +414,8 @@ export default function ProjectForm({ isEdit = false }) {
               getOptionLabel={(option) =>
                 option.first_name && option.last_name
                   ? `${toProperCase(option.first_name)} ${toProperCase(
-                      option.last_name
-                    )}`
+                    option.last_name
+                  )}`
                   : toProperCase(option.username || "")
               }
               isOptionEqualToValue={(option, value) =>
@@ -444,8 +445,8 @@ export default function ProjectForm({ isEdit = false }) {
                     label={
                       option.first_name && option.last_name
                         ? `${toProperCase(option.first_name)} ${toProperCase(
-                            option.last_name
-                          )}`
+                          option.last_name
+                        )}`
                         : toProperCase(option.username || "")
                     }
                     className="!bg-purple-50 !border !border-purple-200 !text-gray-700"
@@ -543,8 +544,8 @@ export default function ProjectForm({ isEdit = false }) {
                 textTransform: "none",
                 borderColor: "#E5E7EB",
                 color: "#6B7270",
-                "&:hover": { 
-                  borderColor: "#E5E7EB", 
+                "&:hover": {
+                  borderColor: "#E5E7EB",
                   backgroundColor: "#Fafafa",
                 },
                 "&:disabled": {
@@ -583,14 +584,14 @@ export default function ProjectForm({ isEdit = false }) {
             >
               {formik.isSubmitting ? (
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <CircularProgress 
-                    size={18} 
-                    sx={{ 
+                  <CircularProgress
+                    size={18}
+                    sx={{
                       color: "#6B7280",
                       "& .MuiCircularProgress-circle": {
                         strokeLinecap: "round",
                       },
-                    }} 
+                    }}
                   />
                   <span>{isEdit ? "Updating..." : "Creating..."}</span>
                 </Box>

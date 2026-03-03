@@ -37,6 +37,7 @@ import DateWithTooltip from "../components/DateWithTooltip";
 import CustomTablePagination from "../components/CustomTablePagination";
 import ConfirmationModal from "../components/ConfirmationModal";
 import dayjs from "dayjs";
+import { chipStyle } from "../utils/common";
 
 export default function ProjectsList() {
   const navigate = useNavigate();
@@ -503,7 +504,7 @@ export default function ProjectsList() {
                     </Typography>
                     <div className="flex -space-x-2">
                       {(project.team_members || project.assignees || []).slice(0, 3).map((member) => (
-                        <Tooltip key={member.user_id || member.id} title={member.username || member.name}>
+                        <Tooltip key={member.user_id || member.id} title={toProperCase(member.username || member.name)}>
                           <div
                             className="w-6 h-6 rounded-full bg-orange-400 text-white text-xs flex items-center justify-center border-2 border-white"
                           >
@@ -655,14 +656,14 @@ export default function ProjectsList() {
                               <Typography className="font-medium text-gray-800">
                                 {toProperCase(project.name)}
                               </Typography>
-                              {project.description && (
+                              {/* {project.description && (
                                 <Typography
                                   variant="caption"
-                                  className="text-gray-500 line-clamp-1"
+                                  className="text-gray-500 line-clamp-2 max-w-48"
                                 >
                                   {project.description}
                                 </Typography>
-                              )}
+                              )} */}
                             </div>
                           </div>
                         </td>
@@ -716,6 +717,16 @@ export default function ProjectsList() {
                           ) : (
                             "-"
                           )}
+                          {/* <Chip
+                            label={toProperCase(
+                              (project.team_members || project.assignees)[0]?.username ||
+                              (project.team_members || project.assignees)[0]?.name ||
+                              "N/A"
+                            )}
+                            size="small"
+                            className="text-xs"
+                            sx={chipStyle}
+                          /> */}
                         </td>
                         <td className="px-4 py-3 border-b border-[#E5E7EB] text-sm text-gray-600">
                           {project.created_at ? (

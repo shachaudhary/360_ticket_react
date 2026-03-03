@@ -105,6 +105,11 @@ const AppMenu = () => {
             overflow: "visible",
             boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.15)",
             border: "1px solid #DDE1E5",
+            minHeight: "200px",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
           },
           "& .MuiPaper-root::before": {
             content: '""',
@@ -130,8 +135,8 @@ const AppMenu = () => {
                 onClick={() => redirectToDashboard(app.dashboard_url)}
                 className="cursor-pointer flex flex-col items-center justify-center"
               >
-                <div className="w-[34px] h-[34px] flex items-center justify-center rounded-full bg-brand-500 hover:bg-brand-600 transition-a shadow-sm">
-                  <span className="text-white font-semibold text-sm uppercase !font-sans">
+                <div className="w-[40px] h-[40px] flex items-center justify-center rounded-full bg-brand-500 hover:bg-brand-600 transition-a shadow-sm">
+                  <span className="text-white font-semibold text-base uppercase !font-sans">
                     {app?.name?.charAt(0) || "?"}
                   </span>
                 </div>
