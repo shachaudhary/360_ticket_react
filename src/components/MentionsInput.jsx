@@ -14,6 +14,37 @@ export default function MentionsInput({
   const [query, setQuery] = useState("");
   const inputRef = useRef(null);
 
+  const [caretPosition, setCaretPosition] = useState({ top: 0, left: 0 });
+
+
+  const getCaretCoordinates = (textarea, position) => {
+    const div = document.createElement("div");
+    const style = window.getComputedStyle(textarea);
+
+    for (const prop of style) {
+      div.style[prop] = style[prop];
+    }
+
+    div.style.position = "absolute";
+    div.style.visibility = "hidden";
+    div.style.whiteSpace = "pre-wrap";
+    div.style.wordWrap = "break-word";
+
+    div.textContent = textarea.value.substring(0, position);
+
+    const span = document.createElement("span");
+    span.textContent = textarea.value.substring(position) || ".";
+    div.appendChild(span);
+
+    document.body.appendChild(div);
+
+    const { offsetTop, offsetLeft } = span;
+
+    document.body.removeChild(div);
+
+    return { top: offsetTop, left: offsetLeft };
+  };
+
   const searchTeamMembers = async (query) => {
     setLoading(true);
     try {
@@ -30,18 +61,26 @@ export default function MentionsInput({
 
   const handleChange = (e) => {
     const text = e.target.value;
-    onChange(text); // lift state up
+    onChange(text);
 
-    // 🔹 Auto-remove mentions that are no longer in the text
+    const cursorPosition = e.target.selectionStart;
+
+    const coords = getCaretCoordinates(e.target, cursorPosition);
+    setCaretPosition(coords);
+
+    // Remove old mentions if deleted
     setMentions((prev) =>
       prev.filter((m) => text.includes(`@${m.first_name} ${m.last_name}`))
     );
 
-    const lastWord = text.split(" ").pop();
+    const textUntilCursor = text.substring(0, cursorPosition);
+    const lastWord = textUntilCursor.split(/\s/).pop();
+
     if (lastWord.startsWith("@")) {
       const searchQuery = lastWord.slice(1);
       setQuery(searchQuery);
-      if (searchQuery.length > 1) {
+
+      if (searchQuery.length >= 1) {
         searchTeamMembers(searchQuery);
         setShowSuggestions(true);
       } else {
@@ -116,33 +155,39 @@ export default function MentionsInput({
 
       {showSuggestions && (
         <div
-          className="absolute left-0 -translate-y-1 top-full mt-1 w-full rounded-md border shadow-lg border-[#D1D5DB] bg-white max-h-48 overflow-y-auto "
+          // className="absolute rounded-md border shadow-cl border-[#D1D5DB] bg-white max-h-48 overflow-hidden"
+          className="absolute rounded-md border border-gray-200 bg-white max-h-64 overflow-hidden"
           style={{
+            top: caretPosition.top + 26,
+            // left: caretPosition.left - 20,
+            left: "12px",
             zIndex: 999,
-            // boxShadow:
-            //   " 0px 5px 5px -3px rgba(0, 0, 0, 0.2), 0px 8px 10px 1px rgba(0, 0, 0, 0.14), 0px 3px 14px 2px rgba(0, 0, 0, 0.12)",
+            minWidth: 200,
+            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
           }}
         >
-          {loading ? (
-            <div className="p-2 text-sm text-gray-500">Searching...</div>
-          ) : teamResults.length > 0 ? (
-            teamResults.map((member) => (
-              <div
-                key={member.user_id}
-                onClick={() => addMention(member)}
-                className="cursor-pointer px-3 py-2 hover:bg-gray-50 flex flex-col"
-              >
-                <span className="text-sm font-medium text-gray-600 ">
-                  {`${toProperCase(member.first_name)} ${toProperCase(
-                    member.last_name
-                  )}`}
-                </span>
-                <span className="text-xs text-gray-500">{member.email}</span>
-              </div>
-            ))
-          ) : (
-            <div className="p-2 text-sm text-gray-500">No results</div>
-          )}
+          <div className="max-h-52 overflow-y-auto">
+            {loading ? (
+              <div className="p-2 text-sm text-gray-500">Searching...</div>
+            ) : teamResults.length > 0 ? (
+              teamResults.map((member) => (
+                <div
+                  key={member.user_id}
+                  onClick={() => addMention(member)}
+                  className="cursor-pointer px-3 py-2 hover:bg-gray-50 flex flex-col"
+                >
+                  <span className="text-sm font-medium text-gray-600 ">
+                    {`${toProperCase(member.first_name)} ${toProperCase(
+                      member.last_name
+                    )}`}
+                  </span>
+                  <span className="text-xs text-gray-500">{member.email}</span>
+                </div>
+              ))
+            ) : (
+              <div className="p-2 text-sm text-gray-500">No results</div>
+            )}
+          </div>
         </div>
       )}
     </div>

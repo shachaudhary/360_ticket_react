@@ -453,7 +453,7 @@ export default function Tickets() {
                         setStatusFilter([]);   // remove filter
                       }}
                     >
-                      <ClearIcon fontSize="small"/>
+                      <ClearIcon fontSize="small" />
                     </IconButton>
                   </InputAdornment>
                 )
@@ -685,7 +685,7 @@ export default function Tickets() {
         <div className="overflow-x-auto">
           {/* Table */}
           <div className="overflow-hidden rounded-lg border border-[#E5E7EB]">
-            <div className="overflow-auto h-[calc(100dvh-342.75px)]">
+            <div className={`overflow-auto h-[calc(100dvh-${recentTickets.length > 0 ? "342.75px" : "302.75px"})]`}    >
               <table className="min-w-full divide-y divide-gray-100">
                 <thead className="bg-white sticky top-0 z-10 whitespace-nowrap">
                   <tr className="text-left !text-xs text-gray-500 ">

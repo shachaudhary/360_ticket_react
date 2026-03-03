@@ -26,6 +26,7 @@ import AppMenu from "../components/AppMenu.jsx";
 import { Box } from "@mui/material";
 import { logoutUser } from "../utils/index.js";
 import favicon from "../assets/favicon.png";
+import logo360 from "../assets/support360.svg";
 
 function NavItem({ to, icon: Icon, label, matchChildren = false }) {
   const location = useLocation();
@@ -115,7 +116,8 @@ export default function Layout() {
           <div className="flex h-[30px] w-[30px] items-center justify-center rounded-lg bg-brand-500 font-semibold">
             <TicketIcon style={{ width: 19 }} />
           </div>
-          <div className="font-normal text-lg uppercase">Support 360</div>
+          <div className=" text-lg uppercase font-medium">Support 360</div>
+          {/* <img src={logo360} alt="Support 360" className="flex h-12 w-auto rounded-lg" /> */}
         </div>
       </div>
       {/* )} */}

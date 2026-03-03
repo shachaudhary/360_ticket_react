@@ -112,19 +112,19 @@ export default function CommentBox({ ticketId, onAdd }) {
         }
       }
     >
-      {/* <Typography
-        variant="subtitle1"
+      <Typography
+        variant="subtitle2"
         fontWeight={600}
         gutterBottom
         // color="primary"
         color="#0F1A1C"
         sx={{ mb: 1 }}
-        className="!text-lg !font-semibold"
+        className="!text-[16px] !font-semibold"
       >
-        Add a Comment
-      </Typography> */}
+        Write a Comment
+      </Typography>
 
-      <div className="border bg-white rounded-md">
+      <div className="border bg-white rounded-md focus-within:ring-1 focus-within:ring-brand-500 focus-within:border-brand-500 transition duration-300">
         <MentionsInput
           value={comment}
           onChange={setComment}
@@ -230,9 +230,9 @@ export default function CommentBox({ ticketId, onAdd }) {
             sx={{
               border: "1px solid #E5E7EB",
               color: "#6B7270",
-              "&:hover": { 
-                borderColor: "#D1D5DB", 
-                bgcolor: "#F9FAFB" 
+              "&:hover": {
+                borderColor: "#D1D5DB",
+                bgcolor: "#F9FAFB"
               },
               borderRadius: 0.75,
               width: 32,
