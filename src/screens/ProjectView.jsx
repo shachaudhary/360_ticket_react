@@ -28,6 +28,7 @@ import {
   ViewColumnsIcon,
   ChartBarIcon,
   ClockIcon,
+  ArrowTopRightOnSquareIcon,
 } from "@heroicons/react/24/outline";
 import { useParams, useNavigate } from "react-router-dom";
 import { createAPIEndPoint } from "../config/api/api";
@@ -41,34 +42,6 @@ import { convertToCST } from "../utils";
 import { toProperCase } from "../utils/formatting";
 import toast from "react-hot-toast";
 
-
-const TextWithLinks = ({ text }) => {
-  if (!text) return null;
-
-  const urlRegex = /(https?:\/\/[^\s]+)/g;
-
-  return text.split(urlRegex).map((part, index) => {
-    if (part.match(urlRegex)) {
-      return (
-        <a
-          key={index}
-          href={part}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            color: "#146ef5",
-            textDecoration: "underline",
-            wordBreak: "break-all",
-          }}
-          onClick={(e) => e.stopPropagation()} // 🔥 VERY IMPORTANT for cards
-        >
-          {part}
-        </a>
-      );
-    }
-    return part;
-  });
-};
 
 const renderWithLinks = (text) => {
   const urlRegex = /(https?:\/\/[^\s]+)/g;
@@ -91,6 +64,71 @@ const renderWithLinks = (text) => {
         </a>
       );
     }
+    return part;
+  });
+};
+
+const TextWithLinks = ({ text }) => {
+  if (!text) return null;
+
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+
+  const getShortUrl = (url) => {
+    try {
+      const parsed = new URL(url);
+      return parsed.hostname; // show only domain
+    } catch {
+      return url.slice(0, 40) + "...";
+    }
+  };
+
+  return text.split(urlRegex).map((part, index) => {
+    if (part.match(urlRegex)) {
+      const shortText = getShortUrl(part);
+
+      return (
+        <Tooltip
+          key={index}
+          title={part}
+          arrow
+          placement="top"
+        >
+          <Box
+            component="a"
+            href={part}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            sx={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 0.5,
+              px: 1,
+              py: 0.3,
+              mx: 0.5,
+              borderRadius: 1,
+              fontSize: "0.85rem",
+              fontWeight: 500,
+              backgroundColor: "rgba(95, 39, 205, 0.08)",
+              color: "#5F27CD",
+              textDecoration: "none",
+              transition: "all 0.2s ease",
+              // maxWidth: 180,
+              overflow: "hidden",
+              whiteSpace: "nowrap",
+              textOverflow: "ellipsis",
+              "&:hover": {
+                backgroundColor: "rgba(95, 39, 205, 0.15)",
+              },
+            }}
+          >
+            {shortText}
+            <ArrowTopRightOnSquareIcon className="!h-4 !w-4" />
+          </Box>
+        </Tooltip>
+      );
+    }
+
     return part;
   });
 };
@@ -458,7 +496,7 @@ export default function ProjectView() {
             </div>
             {displayProject.description && (
               <Typography variant="body2" className="!text-gray-600 !leading-relaxed !text-base">
-                {renderWithLinks(displayProject.description)}
+                <TextWithLinks text={displayProject.description} />
               </Typography>
             )}
           </div>
