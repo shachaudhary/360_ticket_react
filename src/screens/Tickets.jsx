@@ -742,6 +742,27 @@ export default function Tickets() {
                             {toProperCase1(cleanText(t.title))}
                           </div>
                         </Tooltip>
+
+                        {/* Project Chip */}
+                        {/* {t.project && t.project.name && (
+                          <Chip
+                            label={t.project.name}
+                            size="small"
+                            sx={{
+                              height: 18,
+                              fontSize: "10px",
+                              fontWeight: 500,
+                              borderRadius: "6px",
+                              backgroundColor: `${t.project.color}15`, // soft tint
+                              color: t.project.color || "#6B7280",
+                              border: `1px solid ${t.project.color}40`,
+                              width: "fit-content",
+                              "& .MuiChip-label": {
+                                px: 0.8,
+                              },
+                            }}
+                          />
+                        )} */}
                       </td>
                       {/* <td className="px-4 py-3 border-b border-[#E5E7EB]">
                         {t.details}

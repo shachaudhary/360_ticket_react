@@ -1051,6 +1051,11 @@ export default function TicketView() {
                 value={<StatusBadge status={ticket.priority} isInside />}
               />
               <Label
+                title="Category"
+                // value={<Chip label={toProperCase(ticket.category?.name)} variant="filled" sx={{ fontSize: 11.75, fontWeight: 500, borderRadius: "6px", color: "#6B7280", border: "1px solid #E5E7EB", background: "white", height: 27.5, "& .MuiChip-label": { px: "7px !important" } }} />}
+                value={toProperCase(ticket.category?.name)}
+              />
+              <Label
                 title="Due Date"
                 value={<DateWithTooltip date={ticket?.due_date} />}
               />
