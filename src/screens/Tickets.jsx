@@ -193,7 +193,7 @@ export default function Tickets() {
       toast.success(`Status updated to ${toProperCase(newStatus)}`);
       setStatusMenuAnchor(null);
       setSelectedTicketForStatus(null);
-      fetchTickets(); // Refresh the list
+      fetchTickets(true); // Refresh the list
     } catch (err) {
       console.error("Failed to update status", err);
       toast.error("Failed to update status");
@@ -203,9 +203,11 @@ export default function Tickets() {
   };
 
   // 🔹 fetchTickets with API filters
-  const fetchTickets = async () => {
+  const fetchTickets = async (refresh = false) => {
     try {
-      setLoading(true);
+      if (!refresh) {
+        setLoading(true);
+      }
 
       const params = new URLSearchParams();
       // params.append("user_id", user?.id);
