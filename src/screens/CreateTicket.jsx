@@ -125,12 +125,16 @@ export default function TicketForm({ isEdit = false, projectId }) {
         const filtered = data.filter((loc) => {
           const name = (loc.location_name || "").trim().toLowerCase();
           return (
-            loc.id !== 25 && // Sales Team
-            loc.id !== 28 && // Insurance
-            loc.id !== 30 && // Anonymous
+            loc.id !== 25 &&
+            loc.id !== 28 &&
+            loc.id !== 30 && // added anonymous 30
+            loc.id !== 44 && // added jazmin spanish 44 
+            // loc.id !== 43 && // added it support 43
             name !== "sales team" &&
             name !== "insurance" &&
-            name !== "anonymous"
+            name !== "anonymous" &&
+            name !== "jazmin spanish"
+            // name !== "it support"
           );
         });
 
@@ -184,7 +188,7 @@ export default function TicketForm({ isEdit = false, projectId }) {
         const formData = new FormData();
         Object.keys(values).forEach((key) => {
           if (key === "location_id") return;
-          
+
           if (key === "files" && values.files?.length > 0) {
             values.files.forEach((f) => {
               if (!f.isExisting) {
@@ -327,6 +331,7 @@ export default function TicketForm({ isEdit = false, projectId }) {
               required
               sx={{
                 "& .MuiOutlinedInput-root": {
+                  p: 0,
                   "&:hover fieldset": {
                     borderColor: "#824EF2",
                   },
