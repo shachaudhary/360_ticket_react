@@ -54,12 +54,16 @@ export default function ContactForm() {
         const filtered = data.filter((loc) => {
           const name = (loc.location_name || "").trim().toLowerCase();
           return (
-            loc.id !== 25 && // Sales Team
-            loc.id !== 28 && // Insurance
-            loc.id !== 30 && // Anonymous
+            loc.id !== 25 &&
+            loc.id !== 28 &&
+            loc.id !== 30 && // added anonymous 30
+            loc.id !== 44 && // added jazmin spanish 44 
+            loc.id !== 43 && // added it support 43
             name !== "sales team" &&
             name !== "insurance" &&
-            name !== "anonymous"
+            name !== "anonymous" &&
+            name !== "jazmin spanish" &&
+            name !== "it support"
           );
         });
 
@@ -503,16 +507,15 @@ export default function ContactForm() {
                     ].filter(Boolean);
                     const fullAddress = addressParts.join(", ");
                     const isSelected = selectedLocation && selectedLocation.id === option.id;
-                    
+
                     return (
-                      <li 
-                        {...props} 
-                        key={option.id} 
-                        className={`py-2.5 px-3 cursor-pointer transition-all duration-200 ${
-                          isSelected 
-                            ? "bg-gray-100" 
+                      <li
+                        {...props}
+                        key={option.id}
+                        className={`py-2.5 px-3 cursor-pointer transition-all duration-200 ${isSelected
+                            ? "bg-gray-100"
                             : "hover:bg-gray-100"
-                        }`}
+                          }`}
                       >
                         <div className="flex flex-col">
                           <span className="font-semibold text-gray-800 text-sm">
@@ -523,7 +526,7 @@ export default function ContactForm() {
                               {fullAddress}
                             </span>
                           )}
-                    
+
                         </div>
                       </li>
                     );
