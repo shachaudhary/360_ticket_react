@@ -88,11 +88,15 @@ const NewHireForm = () => {
             loc.id !== 30 &&
             loc.id !== 25 &&
             loc.id !== 28 &&
+            loc.id !== 44 &&
+            loc.id !== 43 &&
             name !== "sales team" &&
             name !== "insurance" &&
             name !== "anonymous" &&
             name !== "pediatrics" &&
-            name !== "orthodontics"
+            name !== "orthodontics" &&
+            name !== "jazmin spanish" &&
+            name !== "it support"
           );
         });
 
@@ -646,8 +650,8 @@ const NewHireForm = () => {
             {submitStatus && (
               <div
                 className={`mb-6 p-4 rounded-md ${submitStatus.type === "success"
-                    ? "bg-purple-50 border border-green-200 text-green-800"
-                    : "bg-red-50 border border-red-200 text-red-800"
+                  ? "bg-purple-50 border border-green-200 text-green-800"
+                  : "bg-red-50 border border-red-200 text-red-800"
                   }`}
               >
                 {submitStatus.message}
@@ -849,8 +853,8 @@ const NewHireForm = () => {
                       <label
                         key={title}
                         className={`flex items-center p-3 border rounded-lg cursor-pointer transition-all duration-200 ${formData.jobTitle === title
-                            ? "ring-2 ring-brand-500 border-brand-500 bg-purple-50"
-                            : "border-gray-300 hover:border-brand-300"
+                          ? "ring-2 ring-brand-500 border-brand-500 bg-purple-50"
+                          : "border-gray-300 hover:border-brand-300"
                           }`}
                       >
                         <input
@@ -888,8 +892,8 @@ const NewHireForm = () => {
                         onChange={handleInputChange}
                         placeholder="e.g., Treatment Coordinator (Floater)"
                         className={`mt-2 block w-full border-b ${errors.jobTitleOther
-                            ? "border-red-500"
-                            : "border-gray-300"
+                          ? "border-red-500"
+                          : "border-gray-300"
                           } bg-transparent py-2.5 px-1 text-gray-900 placeholder-gray-400 focus:border-brand-500 focus:outline-none focus:ring-0 sm:text-sm`}
                       />
                       {errors.jobTitleOther && (
@@ -912,8 +916,8 @@ const NewHireForm = () => {
                       <label
                         key={type}
                         className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all duration-200 ${formData.hireType === type
-                            ? "ring-2 ring-brand-500 border-brand-500 bg-purple-50"
-                            : "border-gray-300 hover:border-brand-300"
+                          ? "ring-2 ring-brand-500 border-brand-500 bg-purple-50"
+                          : "border-gray-300 hover:border-brand-300"
                           }`}
                       >
                         <input
@@ -944,8 +948,8 @@ const NewHireForm = () => {
                       <label
                         key={dept}
                         className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all duration-200 ${formData.department === dept
-                            ? "ring-2 ring-brand-500 border-brand-500 bg-purple-50"
-                            : "border-gray-300 hover:border-brand-300"
+                          ? "ring-2 ring-brand-500 border-brand-500 bg-purple-50"
+                          : "border-gray-300 hover:border-brand-300"
                           }`}
                       >
                         <input
@@ -983,8 +987,8 @@ const NewHireForm = () => {
                         <label
                           key={loc.id}
                           className={`flex items-center p-2 border rounded-lg cursor-pointer transition-all duration-200 ${formData.location === loc.location_name
-                              ? "ring-2 ring-brand-500 border-brand-500 bg-purple-50"
-                              : "border-gray-300 bg-white hover:border-brand-300"
+                            ? "ring-2 ring-brand-500 border-brand-500 bg-purple-50"
+                            : "border-gray-300 bg-white hover:border-brand-300"
                             }`}
                         >
                           <input
@@ -1074,8 +1078,8 @@ const NewHireForm = () => {
                       <label
                         key={type}
                         className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all duration-200 ${formData.payType === type
-                            ? "ring-2 ring-brand-500 border-brand-500 bg-purple-50"
-                            : "border-gray-300 hover:border-brand-300"
+                          ? "ring-2 ring-brand-500 border-brand-500 bg-purple-50"
+                          : "border-gray-300 hover:border-brand-300"
                           }`}
                       >
                         <input
@@ -1210,8 +1214,8 @@ const NewHireForm = () => {
                   onClick={handleSubmit}
                   disabled={isSubmitting}
                   className={`w-full sm:w-auto rounded-md px-8 py-3.5 text-base font-semibold text-white shadow-sm transition-colors duration-300 ${isSubmitting
-                      ? "bg-brand-400 cursor-not-allowed"
-                      : "bg-brand-500 hover:bg-brand-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
+                    ? "bg-brand-400 cursor-not-allowed"
+                    : "bg-brand-500 hover:bg-brand-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
                     }`}
                 >
                   {isSubmitting

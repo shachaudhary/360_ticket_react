@@ -1112,7 +1112,7 @@ export default function TicketView() {
               )}
 
               <div className="col-span-1 sm:col-span-2 md:col-span-4 mb-1">
-                <Label title="Message" value={ticket.details} />
+                <Label title="Message" value={<div dangerouslySetInnerHTML={{ __html: ticket?.details }} />} />
               </div>
             </div>
 

@@ -18,6 +18,7 @@ import {
   ClipboardDocumentListIcon,
   TagIcon,
   FolderIcon,
+  ComputerDesktopIcon,
 } from "@heroicons/react/24/outline";
 
 import { useApp } from "../state/AppContext.jsx";
@@ -138,6 +139,12 @@ export default function Layout() {
               to="/forms"
               icon={ClipboardDocumentListIcon}
               label="All Forms"
+              matchChildren
+            />
+            <NavItem
+              to="/hardware"
+              icon={ComputerDesktopIcon}
+              label="Hardware"
               matchChildren
             />
           </>

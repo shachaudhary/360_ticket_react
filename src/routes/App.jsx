@@ -32,6 +32,9 @@ import ProjectsList from "../screens/ProjectsList.jsx";
 import ProjectForm from "../screens/ProjectForm.jsx";
 import ProjectView from "../screens/ProjectView.jsx";
 import ProjectTicketForm from "../screens/ProjectTicketForm.jsx";
+import HardwareList from "../screens/HardwareList.jsx";
+import HardwareForm from "../screens/HardwareForm.jsx";
+import HardwareView from "../screens/HardwareView.jsx";
 
 // ✅ Add your favicon paths (public/ folder ke relative)
 const DEFAULT_FAVICON = "/favicon.ico";
@@ -60,6 +63,8 @@ export default function App() {
     "/projects": "Projects",
     "/projects/new": "Create Project",
     "/projects/:projectId/tickets/new": "Create Ticket for Project",
+    "/hardware": "Hardware",
+    "/hardware/new": "Add Hardware",
   };
 
   useEffect(() => {
@@ -80,6 +85,12 @@ export default function App() {
         pageTitle = "Edit Project";
       } else if (currentPath !== "/projects") {
         pageTitle = "Project Details";
+      }
+    }
+    if (!pageTitle && currentPath.startsWith("/hardware/")) {
+      if (currentPath.includes("/edit")) pageTitle = "Edit Hardware";
+      else if (!currentPath.endsWith("/new") && /^\/hardware\/[^/]+$/.test(currentPath)) {
+        pageTitle = "Device details";
       }
     }
 
@@ -135,6 +146,38 @@ export default function App() {
             element={
               <PageTransition>
                 <FormTypesList />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="/hardware"
+            element={
+              <PageTransition>
+                <HardwareList />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="/hardware/new"
+            element={
+              <PageTransition>
+                <HardwareForm />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="/hardware/:id/edit"
+            element={
+              <PageTransition>
+                <HardwareForm isEdit />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="/hardware/:id"
+            element={
+              <PageTransition>
+                <HardwareView />
               </PageTransition>
             }
           />
