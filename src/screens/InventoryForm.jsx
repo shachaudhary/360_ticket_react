@@ -30,7 +30,26 @@ import toast from "react-hot-toast";
 import { toProperCase } from "../utils/formatting";
 
 const DEVICE_TYPES = ["Laptop", "Desktop", "Mobile", "Tablet", "Monitor", "Other"];
+const DEVICE_TYPE_PRESETS = ["Laptop", "Desktop", "Mobile", "Tablet", "Monitor"];
 const STATUS_OPTIONS = ["Active", "Inactive", "Decommissioned"];
+
+/** API may return a preset label or a custom string — map to select + optional custom. */
+function splitDeviceTypeFromApi(raw) {
+  if (raw == null || String(raw).trim() === "") return { select: "", custom: "" };
+  const s = String(raw).trim();
+  const found = DEVICE_TYPE_PRESETS.find((t) => t.toLowerCase() === s.toLowerCase());
+  if (found) return { select: found, custom: "" };
+  if (s.toLowerCase() === "other") return { select: "Other", custom: "" };
+  return { select: "Other", custom: s };
+}
+
+/** Value sent to API as `device_type`. */
+function effectiveDeviceType(formData) {
+  if (formData.device_type === "Other") {
+    return (formData.device_type_other ?? "").trim();
+  }
+  return (formData.device_type ?? "").trim();
+}
 
 function normalizeSelectValue(value, options) {
   if (value === undefined || value === null || value === "") return "";
@@ -121,7 +140,7 @@ function SectionTitle({ children }) {
   );
 }
 
-export default function HardwareForm({ isEdit = false }) {
+export default function InventoryForm({ isEdit = false }) {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useApp();
@@ -146,11 +165,13 @@ export default function HardwareForm({ isEdit = false }) {
     computer_name: "",
     room_number: "",
     device_type: "",
+    device_type_other: "",
     device_name: "",
     device_model: "",
     ip_address: "",
     mac_address: "",
     anydesk_installed: false,
+    anydesk_id: "",
     anydesk_password: "",
     device_login_username: "",
     device_login_password: "",
@@ -212,16 +233,16 @@ export default function HardwareForm({ isEdit = false }) {
         const d = pickNestedDevicePayload(res.data);
         if (cancelled) return;
         if (!d) {
-          toast.error("Device not found");
-          navigate("/hardware");
+          toast.error("Inventory item not found");
+          navigate("/inventory");
           return;
         }
         setDeviceRecord(d);
       } catch (err) {
         if (!cancelled) {
           console.error(err);
-          toast.error("Failed to load device");
-          navigate("/hardware");
+          toast.error("Failed to load inventory item");
+          navigate("/inventory");
         }
       } finally {
         if (!cancelled) setLoadingDevice(false);
@@ -236,6 +257,7 @@ export default function HardwareForm({ isEdit = false }) {
     if (!isEdit || !deviceRecord) return;
     const d = deviceRecord;
     const locObj = resolveLocationForForm(d, locations);
+    const dtSplit = splitDeviceTypeFromApi(d.device_type);
     setFormData({
       serial_number: d.serial_number != null ? String(d.serial_number) : "",
       location_id: locObj,
@@ -245,12 +267,14 @@ export default function HardwareForm({ isEdit = false }) {
         d.room_number != null && String(d.room_number).trim() !== ""
           ? String(d.room_number)
           : "",
-      device_type: normalizeSelectValue(d.device_type, DEVICE_TYPES),
+      device_type: dtSplit.select || normalizeSelectValue(d.device_type, DEVICE_TYPES),
+      device_type_other: dtSplit.custom,
       device_name: d.device_name ?? "",
       device_model: d.device_model ?? "",
       ip_address: d.ip_address ?? "",
       mac_address: d.mac_address ?? "",
       anydesk_installed: Boolean(d.anydesk_installed),
+      anydesk_id: d.anydesk_id != null ? String(d.anydesk_id) : "",
       anydesk_password: d.anydesk_password ?? "",
       device_login_username: d.device_login_username ?? "",
       device_login_password: d.device_login_password ?? "",
@@ -282,11 +306,18 @@ export default function HardwareForm({ isEdit = false }) {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+    const nextVal = type === "checkbox" ? checked : value;
+    setFormData((prev) => {
+      const patch = { [name]: nextVal };
+      if (name === "device_type" && nextVal !== "Other") {
+        patch.device_type_other = "";
+      }
+      return { ...prev, ...patch };
+    });
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
+    if (name === "device_type" && errors.device_type_other) {
+      setErrors((prev) => ({ ...prev, device_type_other: "" }));
+    }
   };
 
   const trimOrNull = (v) => {
@@ -311,6 +342,9 @@ export default function HardwareForm({ isEdit = false }) {
         next.mac_address = "Use format AA:BB:CC:DD:EE:FF";
       }
     }
+    if (formData.device_type === "Other" && !(formData.device_type_other || "").trim()) {
+      next.device_type_other = "Enter a custom type";
+    }
     setErrors(next);
     return Object.keys(next).length === 0;
   };
@@ -327,11 +361,11 @@ export default function HardwareForm({ isEdit = false }) {
     const optional = [
       ["computer_name", formData.computer_name],
       ["room_number", formData.room_number],
-      ["device_type", formData.device_type],
       ["device_name", formData.device_name],
       ["device_model", formData.device_model],
       ["ip_address", formData.ip_address],
       ["mac_address", formData.mac_address],
+      ["anydesk_id", formData.anydesk_id],
       ["anydesk_password", formData.anydesk_password],
       ["device_login_username", formData.device_login_username],
       ["device_login_password", formData.device_login_password],
@@ -340,6 +374,8 @@ export default function HardwareForm({ isEdit = false }) {
       const t = trimOrNull(v);
       if (t !== null) payload[k] = t;
     });
+    const dtPayload = trimOrNull(effectiveDeviceType(formData));
+    if (dtPayload !== null) payload.device_type = dtPayload;
     if (formData.anydesk_installed && trimOrNull(formData.anydesk_password)) {
       payload.anydesk_password = formData.anydesk_password.trim();
     }
@@ -356,11 +392,11 @@ export default function HardwareForm({ isEdit = false }) {
     const optional = [
       ["computer_name", formData.computer_name],
       ["room_number", formData.room_number],
-      ["device_type", formData.device_type],
       ["device_name", formData.device_name],
       ["device_model", formData.device_model],
       ["ip_address", formData.ip_address],
       ["mac_address", formData.mac_address],
+      ["anydesk_id", formData.anydesk_id],
       ["anydesk_password", formData.anydesk_password],
       ["device_login_username", formData.device_login_username],
       ["device_login_password", formData.device_login_password],
@@ -368,6 +404,7 @@ export default function HardwareForm({ isEdit = false }) {
     optional.forEach(([k, v]) => {
       payload[k] = trimOrNull(v);
     });
+    payload.device_type = trimOrNull(effectiveDeviceType(formData));
     return payload;
   };
 
@@ -381,12 +418,12 @@ export default function HardwareForm({ isEdit = false }) {
     try {
       if (isEdit) {
         await createAPIEndPoint("devices/").update(id, buildUpdatePayload());
-        toast.success("Device updated");
-        navigate(`/hardware/${id}`);
+        toast.success("Inventory updated");
+        navigate(`/inventory/${id}`);
       } else {
         await createAPIEndPoint("devices").createWithJSONFormat(buildCreatePayload());
-        toast.success("Device created");
-        navigate("/hardware");
+        toast.success("Inventory item created");
+        navigate("/inventory");
       }
     } catch (err) {
       const msg =
@@ -401,7 +438,7 @@ export default function HardwareForm({ isEdit = false }) {
   };
 
   const handleCancel = () =>
-    navigate(isEdit && id ? `/hardware/${id}` : "/hardware");
+    navigate(isEdit && id ? `/inventory/${id}` : "/inventory");
 
   const openLocationModal = () => {
     if (isEdit) return;
@@ -428,9 +465,9 @@ export default function HardwareForm({ isEdit = false }) {
   return (
     <Box>
       <div className="!flex !items-center !justify-start !gap-2 !mb-4">
-        <BackButton self={isEdit && id ? `/hardware/${id}` : "/hardware"} />
+        <BackButton self={isEdit && id ? `/inventory/${id}` : "/inventory"} />
         <h2 className="text-lg md:text-2xl font-semibold text-sidebar mb-1">
-          {isEdit ? "Edit device" : "Register device"}
+          {isEdit ? "Edit inventory" : "Register inventory"}
         </h2>
       </div>
 
@@ -546,7 +583,7 @@ export default function HardwareForm({ isEdit = false }) {
           <Divider />
 
           <div className="space-y-4">
-            <SectionTitle>Device identity</SectionTitle>
+            <SectionTitle>Item identity</SectionTitle>
             <TextField
               label="Serial number"
               name="serial_number"
@@ -558,17 +595,22 @@ export default function HardwareForm({ isEdit = false }) {
               onChange={handleChange}
               error={Boolean(errors.serial_number)}
               helperText={errors.serial_number}
-              placeholder="Hardware serial (unique)"
+              placeholder="Serial number (unique)"
               sx={fieldHoverSx}
             />
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <FormControl fullWidth size="small">
-                <InputLabel>Device type</InputLabel>
+
+            <div className="flex flex-col gap-3 sm:gap-4">
+              <FormControl fullWidth size="small" sx={fieldHoverSx}>
+                <label htmlFor="device-type" className="text-sm mb-1 !text-gray-400 !font-semibold">Device type</label>
+                {/* <InputLabel id="device-type-label">Device type</InputLabel> */}
                 <Select
+                  // labelId="device-type-label"
                   name="device_type"
                   value={formData.device_type}
-                  label="Device type"
+                  // label="Device type"
                   onChange={handleChange}
+                  displayEmpty
+
                 >
                   <MenuItem value="">
                     <em>None</em>
@@ -580,24 +622,82 @@ export default function HardwareForm({ isEdit = false }) {
                   ))}
                 </Select>
               </FormControl>
-              <TextField
-                label="Device name"
-                name="device_name"
-                fullWidth
-                size="small"
-                value={formData.device_name}
-                onChange={handleChange}
-                sx={fieldHoverSx}
-              />
-              <TextField
-                label="Device model"
-                name="device_model"
-                fullWidth
-                size="small"
-                value={formData.device_model}
-                onChange={handleChange}
-                sx={fieldHoverSx}
-              />
+
+              {formData.device_type === "Other" && (
+                <Box
+                  sx={{
+                    borderRadius: 2,
+                    border: "1px solid",
+                    borderColor: "rgba(130, 78, 242, 0.35)",
+                    background:
+                      "linear-gradient(145deg, rgba(130, 78, 242, 0.06) 0%, rgba(130, 78, 242, 0.02) 100%)",
+                    p: { xs: 2, sm: 2.5 },
+                    transition: "box-shadow 0.2s ease",
+                    boxShadow: "0 1px 3px rgba(15, 26, 28, 0.06)",
+                  }}
+                >
+                  <Typography
+                    variant="overline"
+                    sx={{
+                      display: "block",
+                      color: "#824EF2",
+                      fontWeight: 700,
+                      letterSpacing: "0.08em",
+                      fontSize: { xs: "0.65rem", sm: "0.7rem" },
+                      mb: 0.5,
+                    }}
+                  >
+                    Custom type
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ mb: 1.5, fontSize: { xs: "0.8125rem", sm: "0.875rem" }, lineHeight: 1.45 }}
+                  >
+                    Enter the hardware category when it is not listed above.
+                  </Typography>
+                  <TextField
+                    name="device_type_other"
+                    label="Specify device type"
+                    fullWidth
+                    size="small"
+                    required
+                    value={formData.device_type_other}
+                    onChange={handleChange}
+                    error={Boolean(errors.device_type_other)}
+                    helperText={errors.device_type_other}
+                    placeholder="e.g. Server, POS, KVM, printer"
+                    inputProps={{ "aria-label": "Custom device type" }}
+                    sx={{
+                      ...fieldHoverSx,
+                      "& .MuiOutlinedInput-root": {
+                        backgroundColor: "rgba(255,255,255,0.85)",
+                      },
+                    }}
+                  />
+                </Box>
+              )}
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <TextField
+                  label="Device name"
+                  name="device_name"
+                  fullWidth
+                  size="small"
+                  value={formData.device_name}
+                  onChange={handleChange}
+                  sx={fieldHoverSx}
+                />
+                <TextField
+                  label="Device model"
+                  name="device_model"
+                  fullWidth
+                  size="small"
+                  value={formData.device_model}
+                  onChange={handleChange}
+                  sx={fieldHoverSx}
+                />
+              </div>
             </div>
           </div>
 
@@ -616,17 +716,30 @@ export default function HardwareForm({ isEdit = false }) {
               }
               label="AnyDesk installed (Y)"
             />
-            <TextField
-              label="AnyDesk password"
-              name="anydesk_password"
-              type="password"
-              fullWidth
-              size="small"
-              value={formData.anydesk_password}
-              onChange={handleChange}
-              autoComplete="new-password"
-              sx={fieldHoverSx}
-            />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+              <TextField
+                label="AnyDesk ID"
+                name="anydesk_id"
+                fullWidth
+                size="small"
+                value={formData.anydesk_id}
+                onChange={handleChange}
+                inputProps={{ maxLength: 255 }}
+                placeholder="Address / ID"
+                sx={fieldHoverSx}
+              />
+              <TextField
+                label="AnyDesk password"
+                name="anydesk_password"
+                type="password"
+                fullWidth
+                size="small"
+                value={formData.anydesk_password}
+                onChange={handleChange}
+                autoComplete="new-password"
+                sx={fieldHoverSx}
+              />
+            </div>
           </div>
 
           <Divider />
@@ -659,7 +772,7 @@ export default function HardwareForm({ isEdit = false }) {
 
           <Divider />
 
-          <div className="space-y-4">
+          {/* <div className="space-y-4">
             <SectionTitle>Additional (not on tagging sheet)</SectionTitle>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormControl fullWidth size="small">
@@ -701,7 +814,7 @@ export default function HardwareForm({ isEdit = false }) {
                 )}
               />
             </div>
-          </div>
+          </div> */}
 
           <div className="!flex !justify-end !gap-3 !pt-4 !border-t !border-gray-200 !mt-6">
             <Button
@@ -738,9 +851,9 @@ export default function HardwareForm({ isEdit = false }) {
                   <span>Saving…</span>
                 </Box>
               ) : isEdit ? (
-                "Update"
+                "Update inventory"
               ) : (
-                "Create device"
+                "Create inventory"
               )}
             </Button>
           </div>

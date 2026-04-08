@@ -16,7 +16,7 @@ import { convertToCST } from "../utils";
 import { toProperCase } from "../utils/formatting";
 import { useApp } from "../state/AppContext";
 import toast from "react-hot-toast";
-// import HardwareDeviceStatusChip from "../components/HardwareDeviceStatusChip";
+// import InventoryStatusChip from "../components/InventoryStatusChip";
 
 function pickDevicePayload(raw) {
   if (!raw || typeof raw !== "object") return null;
@@ -73,7 +73,7 @@ const Label = ({ title, value }) => (
   </div>
 );
 
-export default function HardwareView() {
+export default function InventoryView() {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -89,7 +89,7 @@ export default function HardwareView() {
       setDevice(d || null);
     } catch (err) {
       console.error(err);
-      toast.error("Failed to load device");
+      toast.error("Failed to load inventory item");
       setDevice(null);
     } finally {
       setLoading(false);
@@ -116,9 +116,9 @@ export default function HardwareView() {
     return (
       <Box className="flex flex-col items-center justify-center gap-3 py-16">
         <Typography color="text.secondary" fontWeight={600}>
-          Device not found
+          Inventory item not found
         </Typography>
-        <BackButton self="/hardware" textBtn />
+        <BackButton self="/inventory" textBtn />
       </Box>
     );
   }
@@ -130,16 +130,16 @@ export default function HardwareView() {
     <Box>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
         <div className="flex flex-wrap items-center gap-2">
-          <BackButton self="/hardware" />
+          <BackButton self="/inventory" />
           <h2 className="text-lg md:text-xl font-semibold text-sidebar">
-            Device details
+            Inventory details
           </h2>
         </div>
         <Button
           variant="outlined"
           size="small"
           startIcon={<PencilSquareIcon className="h-4 w-4" />}
-          onClick={() => navigate(`/hardware/${id}/edit`)}
+          onClick={() => navigate(`/inventory/${id}/edit`)}
           sx={{
             textTransform: "none",
             borderRadius: 1.25,
@@ -172,7 +172,7 @@ export default function HardwareView() {
                 Status
               </Typography>
               <Box sx={{ mt: 0.75 }}>
-                <HardwareDeviceStatusChip status={device.status} />
+                <InventoryStatusChip status={device.status} />
               </Box>
             </div>
             */}
@@ -205,6 +205,14 @@ export default function HardwareView() {
           </Typography>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <Label title="Installed (Y/N)" value={yn(device.anydesk_installed)} />
+            <Label
+              title="AnyDesk ID"
+              value={
+                device.anydesk_id != null && String(device.anydesk_id).trim() !== ""
+                  ? String(device.anydesk_id)
+                  : "—"
+              }
+            />
             <Label title="AnyDesk password" value={device.anydesk_password || "—"} />
           </div>
 
@@ -224,10 +232,10 @@ export default function HardwareView() {
             Record
           </Typography>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Label
+            {/* <Label
               title="Assigned user ID"
               value={device.user_id != null ? String(device.user_id) : "—"}
-            />
+            /> */}
             <Label
               title="Updated"
               value={device.updated_at ? convertToCST(device.updated_at) : "—"}

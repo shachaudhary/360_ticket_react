@@ -18,9 +18,9 @@ import ConfirmationModal from "../components/ConfirmationModal";
 import { Navigate, useNavigate, useLocation } from "react-router-dom";
 import { useApp } from "../state/AppContext";
 import toast from "react-hot-toast";
-// import HardwareDeviceStatusChip from "../components/HardwareDeviceStatusChip";
+// import InventoryStatusChip from "../components/InventoryStatusChip";
 
-export default function HardwareList() {
+export default function InventoryList() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useApp();
@@ -86,7 +86,7 @@ export default function HardwareList() {
       setDevices(Array.isArray(list) ? list : []);
     } catch (err) {
       console.error(err);
-      toast.error("Failed to load devices");
+      toast.error("Failed to load inventory");
       setDevices([]);
     } finally {
       setLoading(false);
@@ -114,13 +114,13 @@ export default function HardwareList() {
     try {
       setDeleting(true);
       await createAPIEndPoint("devices/").delete(deviceToDelete.id);
-      toast.success("Device deleted");
+      toast.success("Inventory item deleted");
       fetchDevices();
       setDeleteModalOpen(false);
       setDeviceToDelete(null);
     } catch (err) {
       console.error(err);
-      toast.error(err?.response?.data?.error || "Failed to delete device");
+      toast.error(err?.response?.data?.error || "Failed to delete inventory item");
     } finally {
       setDeleting(false);
     }
@@ -140,7 +140,7 @@ export default function HardwareList() {
     <div className="space-y-3">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-lg md:text-xl font-semibold text-sidebar">
-          Hardware
+          IT Inventory
         </h2>
         <div className="flex flex-col sm:flex-row gap-2 sm:items-center sm:ml-auto w-full sm:w-auto">
           <TextField
@@ -161,11 +161,11 @@ export default function HardwareList() {
           />
           <button
             type="button"
-            onClick={() => navigate("/hardware/new")}
+            onClick={() => navigate("/inventory/new")}
             className="flex items-center justify-center gap-1 rounded-lg bg-brand-500 px-3 py-2 text-sm font-semibold text-white hover:bg-brand-600 transition-all whitespace-nowrap"
           >
             <PlusIcon className="h-4 w-4 text-white stroke-[2.5]" />
-            Add device
+            Add inventory
           </button>
         </div>
       </div>
@@ -180,14 +180,14 @@ export default function HardwareList() {
         <div className="overflow-hidden rounded-lg border border-[#E5E7EB]">
           <div className="h-[calc(100dvh-152px)] flex flex-col items-center justify-center bg-white">
             <p className="text-gray-500 font-normal text-md">
-              No devices found
+              No inventory items found
             </p>
             <button
               type="button"
-              onClick={() => navigate("/hardware/new")}
+              onClick={() => navigate("/inventory/new")}
               className="mt-3 text-sm font-medium text-brand-600 hover:underline"
             >
-              Register a device
+              Register an item
             </button>
           </div>
         </div>
@@ -230,11 +230,11 @@ export default function HardwareList() {
                       key={d.id}
                       role="button"
                       tabIndex={0}
-                      onClick={() => navigate(`/hardware/${d.id}`)}
+                      onClick={() => navigate(`/inventory/${d.id}`)}
                       onKeyDown={(e) => {
                         if (e.key === "Enter" || e.key === " ") {
                           e.preventDefault();
-                          navigate(`/hardware/${d.id}`);
+                          navigate(`/inventory/${d.id}`);
                         }
                       }}
                       className="hover:bg-gray-50 cursor-pointer"
@@ -271,7 +271,7 @@ export default function HardwareList() {
                         className="px-4 py-3 border-b border-[#E5E7EB]"
                         onClick={(e) => e.stopPropagation()}
                       >
-                        <HardwareDeviceStatusChip status={d.status} />
+                        <InventoryStatusChip status={d.status} />
                       </td> */}
                       <td className="px-4 py-3 text-center border-b border-[#E5E7EB] whitespace-nowrap">
                         <Tooltip title="View">
@@ -279,7 +279,7 @@ export default function HardwareList() {
                             size="small"
                             onClick={(e) => {
                               e.stopPropagation();
-                              navigate(`/hardware/${d.id}`);
+                              navigate(`/inventory/${d.id}`);
                             }}
                           >
                             <EyeIcon className="h-5 w-5 text-gray-500 hover:text-brand-500" />
@@ -290,7 +290,7 @@ export default function HardwareList() {
                             size="small"
                             onClick={(e) => {
                               e.stopPropagation();
-                              navigate(`/hardware/${d.id}/edit`);
+                              navigate(`/inventory/${d.id}/edit`);
                             }}
                           >
                             <PencilSquareIcon className="h-5 w-5 text-gray-500 hover:text-brand-500" />
@@ -327,8 +327,8 @@ export default function HardwareList() {
         open={deleteModalOpen}
         onClose={closeDeleteModal}
         onConfirm={confirmDeleteDevice}
-        title="Delete device"
-        message={`Are you sure you want to delete device ${
+        title="Delete inventory item"
+        message={`Are you sure you want to delete inventory item ${
           deviceToDelete?.serial?.trim()
             ? `"${deviceToDelete.serial}"`
             : `#${deviceToDelete?.id ?? ""}`

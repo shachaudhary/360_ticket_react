@@ -145,7 +145,7 @@ export default function Tickets() {
       } catch (err) {
         console.error("Error fetching categories:", err);
         setCategories([
-          { id: 1, name: "Hardware" },
+          { id: 1, name: "IT Inventory" },
           { id: 2, name: "Software" },
           { id: 3, name: "Network" },
           { id: 4, name: "Other" },

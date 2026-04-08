@@ -142,9 +142,9 @@ export default function Layout() {
               matchChildren
             />
             <NavItem
-              to="/hardware"
+              to="/inventory"
               icon={ComputerDesktopIcon}
-              label="Hardware"
+              label="IT Inventory"
               matchChildren
             />
           </>

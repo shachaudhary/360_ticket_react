@@ -32,9 +32,9 @@ import ProjectsList from "../screens/ProjectsList.jsx";
 import ProjectForm from "../screens/ProjectForm.jsx";
 import ProjectView from "../screens/ProjectView.jsx";
 import ProjectTicketForm from "../screens/ProjectTicketForm.jsx";
-import HardwareList from "../screens/HardwareList.jsx";
-import HardwareForm from "../screens/HardwareForm.jsx";
-import HardwareView from "../screens/HardwareView.jsx";
+import InventoryList from "../screens/InventoryList.jsx";
+import InventoryForm from "../screens/InventoryForm.jsx";
+import InventoryView from "../screens/InventoryView.jsx";
 
 // ✅ Add your favicon paths (public/ folder ke relative)
 const DEFAULT_FAVICON = "/favicon.ico";
@@ -63,8 +63,8 @@ export default function App() {
     "/projects": "Projects",
     "/projects/new": "Create Project",
     "/projects/:projectId/tickets/new": "Create Ticket for Project",
-    "/hardware": "Hardware",
-    "/hardware/new": "Add Hardware",
+    "/inventory": "IT Inventory",
+    "/inventory/new": "Add inventory",
   };
 
   useEffect(() => {
@@ -87,10 +87,10 @@ export default function App() {
         pageTitle = "Project Details";
       }
     }
-    if (!pageTitle && currentPath.startsWith("/hardware/")) {
-      if (currentPath.includes("/edit")) pageTitle = "Edit Hardware";
-      else if (!currentPath.endsWith("/new") && /^\/hardware\/[^/]+$/.test(currentPath)) {
-        pageTitle = "Device details";
+    if (!pageTitle && currentPath.startsWith("/inventory/")) {
+      if (currentPath.includes("/edit")) pageTitle = "Edit inventory";
+      else if (!currentPath.endsWith("/new") && /^\/inventory\/[^/]+$/.test(currentPath)) {
+        pageTitle = "Inventory details";
       }
     }
 
@@ -150,35 +150,44 @@ export default function App() {
             }
           />
           <Route
-            path="/hardware"
+            path="/inventory"
             element={
               <PageTransition>
-                <HardwareList />
+                <InventoryList />
               </PageTransition>
             }
           />
           <Route
-            path="/hardware/new"
+            path="/inventory/new"
             element={
               <PageTransition>
-                <HardwareForm />
+                <InventoryForm />
               </PageTransition>
             }
           />
           <Route
-            path="/hardware/:id/edit"
+            path="/inventory/:id/edit"
             element={
               <PageTransition>
-                <HardwareForm isEdit />
+                <InventoryForm isEdit />
               </PageTransition>
             }
           />
           <Route
-            path="/hardware/:id"
+            path="/inventory/:id"
             element={
               <PageTransition>
-                <HardwareView />
+                <InventoryView />
               </PageTransition>
+            }
+          />
+          <Route
+            path="/hardware/*"
+            element={
+              <Navigate
+                to={`${location.pathname.replace(/^\/hardware/, "/inventory")}${location.search}`}
+                replace
+              />
             }
           />
           <Route path="/contacts" element={<ContactList />} />
