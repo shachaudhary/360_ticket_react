@@ -1,0 +1,26 @@
+## Backend API URL
+
+VITE_APP_BASE_URL_AUTH=https://api.dental360grp.com/api
+VITE_APP_BASE_URL=https://api.connect.dental360grp.com/api
+# VITE_APP_BASE_URL=https://020a-172-236-122-250.ngrok-free.app/api
+# VITE_APP_BASE_URL=https://fa60-172-236-122-250.ngrok-free.app/api
+# VITE_APP_BASE_URL=http://127.0.0.1:5000/api
+VITE_APP_SOCKET_URL=https://api.connect.dental360grp.com
+
+
+# VITE_APP_BASE_URL=https://24f83dc3686c.ngrok-free.app/api
+# VITE_APP_BASE_URL_AUTH=http://34.235.175.50:5000/api
+
+# VITE_APP_BASE_URL=https://e254-172-236-122-250.ngrok-free.app/api
+# VITE_APP_BASE_URL=https://cb6a-172-236-122-250.ngrok-free.app/api
+
+# VITE_APP_BASE_URL=http://192.168.0.119:5002/api
+# VITE_APP_SOCKET_URL=http://192.168.0.9:5002
+
+ 
+# VITE_APP_BASE_URL=http://192.168.0.115:5002/api
+# VITE_APP_SOCKET_URL=http://192.168.0.115:5002
+
+
+
+VITE_APP_X_API_Key=d83dabcea80d37864dfd2f5c99c075fe475cccb31998bda99f8978e3e5897ac7

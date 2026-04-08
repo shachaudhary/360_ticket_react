@@ -79,6 +79,7 @@ export const createAPIEndPoint = (endpoint) => {
         updatedRecord,
         token !== null && {
           headers: {
+            "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
             'X-API-Key': X_API_Key,
             "ngrok-skip-browser-warning": "true",
