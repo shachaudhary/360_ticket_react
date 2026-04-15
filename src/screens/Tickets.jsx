@@ -11,6 +11,7 @@ import {
   Chip,
   Menu,
   Typography,
+  Autocomplete,
 } from "@mui/material";
 import { IconButton, Tooltip } from "@mui/material";
 import LaunchIcon from "@mui/icons-material/Launch";
@@ -19,6 +20,7 @@ import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import { createAPIEndPoint } from "../config/api/api";
+import { createAPIEndPointAuth } from "../config/api/apiAuth";
 import CustomTablePagination from "../components/CustomTablePagination";
 import { useNavigate } from "react-router-dom";
 import { useApp } from "../state/AppContext";
@@ -31,7 +33,6 @@ import { toProperCase, cleanText, toProperCase1 } from "../utils/formatting";
 import { EyeIcon } from "@heroicons/react/24/outline";
 import toast from "react-hot-toast";
 import { chipStyle } from "../utils/common";
-
 
 const MAX_RECENT_TICKETS = 5;
 
@@ -80,9 +81,11 @@ export default function Tickets() {
           query: parsed.query || "",
           statusFilter: parsed.statusFilter || [],
           categoryFilter: parsed.categoryFilter || "",
+          locationFilter: parsed.locationFilter || "",
           startDate: parsed.startDate ? dayjs(parsed.startDate) : null,
           endDate: parsed.endDate ? dayjs(parsed.endDate) : null,
-          userFilter: parsed.userFilter !== undefined ? parsed.userFilter : "assign_to",
+          userFilter:
+            parsed.userFilter !== undefined ? parsed.userFilter : "assign_to",
           page: parsed.page || 0,
           rowsPerPage: parsed.rowsPerPage || 10,
         };
@@ -94,6 +97,7 @@ export default function Tickets() {
       query: "",
       statusFilter: [],
       categoryFilter: "",
+      locationFilter: "",
       startDate: null,
       endDate: null,
       userFilter: "assign_to",
@@ -110,11 +114,17 @@ export default function Tickets() {
   const [loading, setLoading] = useState(true);
 
   const [statusFilter, setStatusFilter] = useState(savedFilters.statusFilter);
-  const [categoryFilter, setCategoryFilter] = useState(savedFilters.categoryFilter);
+  const [categoryFilter, setCategoryFilter] = useState(
+    savedFilters.categoryFilter,
+  );
+  const [locationFilter, setLocationFilter] = useState(
+    savedFilters.locationFilter,
+  );
   const [startDate, setStartDate] = useState(savedFilters.startDate);
   const [endDate, setEndDate] = useState(savedFilters.endDate);
   const [userFilter, setUserFilter] = useState(savedFilters.userFilter);
   const [categories, setCategories] = useState([]);
+  const [locations, setLocations] = useState([]);
 
   // Check if user is admin
   const isAdmin = user?.user_role?.toLowerCase() === "admin";
@@ -155,6 +165,49 @@ export default function Tickets() {
     fetchCategories();
   }, []);
 
+  // Fetch locations once
+  useEffect(() => {
+    const fetchLocations = async () => {
+      if (!user?.clinic_id) return;
+      try {
+        const res = await createAPIEndPointAuth(
+          `clinic_locations/get_all/${user.clinic_id}`,
+        ).fetchAll();
+        const data = res.data?.locations || [];
+        const filtered = data.filter((loc) => {
+          const name = (loc.location_name || "").trim().toLowerCase();
+          return (
+            loc.id !== 25 &&
+            loc.id !== 28 &&
+            // loc.id !== 30 &&
+            loc.id !== 44 &&
+            name !== "sales team" &&
+            name !== "insurance" &&
+            // name !== "anonymous" &&
+            name !== "jazmin spanish"
+          );
+        });
+        const sorted = filtered.sort((a, b) => {
+          const nameA = (
+            a.display_name?.trim() ||
+            a.location_name?.trim() ||
+            ""
+          ).toLowerCase();
+          const nameB = (
+            b.display_name?.trim() ||
+            b.location_name?.trim() ||
+            ""
+          ).toLowerCase();
+          return nameA.localeCompare(nameB);
+        });
+        setLocations(sorted);
+      } catch (err) {
+        console.error("Error fetching locations:", err);
+      }
+    };
+    fetchLocations();
+  }, [user?.clinic_id]);
+
   // State
   const [rowsPerPage, setRowsPerPage] = useState(savedFilters.rowsPerPage);
   const [page, setPage] = useState(savedFilters.page);
@@ -167,6 +220,7 @@ export default function Tickets() {
       query,
       statusFilter,
       categoryFilter,
+      locationFilter,
       startDate: startDate ? startDate.toISOString() : null,
       endDate: endDate ? endDate.toISOString() : null,
       userFilter,
@@ -174,7 +228,17 @@ export default function Tickets() {
       rowsPerPage,
     };
     localStorage.setItem("ticketsFilters", JSON.stringify(filtersToSave));
-  }, [query, statusFilter, categoryFilter, startDate, endDate, userFilter, page, rowsPerPage]);
+  }, [
+    query,
+    statusFilter,
+    categoryFilter,
+    locationFilter,
+    startDate,
+    endDate,
+    userFilter,
+    page,
+    rowsPerPage,
+  ]);
 
   // Status update state
   const [statusMenuAnchor, setStatusMenuAnchor] = useState(null);
@@ -216,11 +280,12 @@ export default function Tickets() {
       if (statusFilter && statusFilter.length > 0) {
         // Join multiple statuses with commas and normalize them
         const statusParam = statusFilter
-          .map(s => s.toLowerCase().replace(/\+/g, " ").replace(/_/g, " "))
+          .map((s) => s.toLowerCase().replace(/\+/g, " ").replace(/_/g, " "))
           .join(",");
         params.append("status", statusParam);
       }
       if (categoryFilter) params.append("category_id", categoryFilter);
+      if (locationFilter) params.append("location_id", locationFilter);
       if (startDate)
         params.append("start_date", startDate.format("YYYY-MM-DD"));
       if (endDate) params.append("end_date", endDate.format("YYYY-MM-DD"));
@@ -232,7 +297,7 @@ export default function Tickets() {
       params.append("per_page", rowsPerPage);
 
       const res = await createAPIEndPoint(
-        `tickets?${params.toString()}`
+        `tickets?${params.toString()}`,
       ).fetchAll();
 
       setTickets(res.data.tickets || []);
@@ -255,6 +320,7 @@ export default function Tickets() {
     debouncedQuery,
     statusFilter,
     categoryFilter,
+    locationFilter,
     startDate,
     endDate,
     userFilter,
@@ -266,16 +332,17 @@ export default function Tickets() {
 
   return (
     <div className="space-y-3">
-
       {recentTickets.length > 0 && (
-        <div className="!pb-1 flex items-center gap-2 mt-2 overflow-x-auto !scrollbar-hide   
+        <div
+          className="!pb-1 flex items-center gap-2 mt-2 overflow-x-auto !scrollbar-hide   
     scrollbar-thin
     scrollbar-thumb-gray-300
     scrollbar-track-transparent 
     [&::-webkit-scrollbar]:h-[4px]
     [&::-webkit-scrollbar-track]:bg-transparent
     [&::-webkit-scrollbar-thumb]:bg-gray-300
-    [&::-webkit-scrollbar-thumb]:rounded-full">
+    [&::-webkit-scrollbar-thumb]:rounded-full"
+        >
           {/* Label */}
           <span className="text-[11px] font-medium text-gray-500 uppercase tracking-wide shrink-0">
             Recent
@@ -353,11 +420,8 @@ export default function Tickets() {
               Clear
             </button>
           </Tooltip>
-
         </div>
       )}
-
-
 
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -374,10 +438,8 @@ export default function Tickets() {
         </button>
       </div>
 
-
-
       {/* Filters */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3">
         {/* Search */}
         <div className="col-span-1 sm:col-span-2 lg:col-span-2">
           <TextField
@@ -421,7 +483,10 @@ export default function Tickets() {
                 return (
                   <div className="flex flex-wrap gap-1 items-center">
                     {selected.slice(0, displayCount).map((value) => (
-                      <Tooltip title={toProperCase(value.replace(/_/g, " "))} arrow>
+                      <Tooltip
+                        title={toProperCase(value.replace(/_/g, " "))}
+                        arrow
+                      >
                         <Chip
                           key={value}
                           label={toProperCase(value.replace(/_/g, " "))}
@@ -453,8 +518,8 @@ export default function Tickets() {
                     <IconButton
                       size="small"
                       onClick={(e) => {
-                        e.stopPropagation();   // VERY IMPORTANT
-                        setStatusFilter([]);   // remove filter
+                        e.stopPropagation(); // VERY IMPORTANT
+                        setStatusFilter([]); // remove filter
                       }}
                     >
                       <ClearIcon fontSize="small" />
@@ -477,14 +542,15 @@ export default function Tickets() {
                   <div className="flex items-center justify-between w-full">
                     <span>{toProperCase(status.replace(/_/g, " "))}</span>
                     {statusFilter.includes(status) && (
-                      <CheckIcon sx={{ fontSize: 18, color: "#824EF2", ml: 1 }} />
+                      <CheckIcon
+                        sx={{ fontSize: 18, color: "#824EF2", ml: 1 }}
+                      />
                     )}
                   </div>
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
-
         </div>
 
         {/* Category */}
@@ -507,6 +573,37 @@ export default function Tickets() {
           </FormControl>
         </div>
 
+        {/* Location */}
+        <div className="col-span-1">
+          <Autocomplete
+            size="small"
+            fullWidth
+            disabled={loading}
+            options={locations}
+            getOptionLabel={(opt) =>
+              opt.display_name || opt.location_name || ""
+            }
+            value={locations.find((loc) => loc.id === locationFilter) || null}
+            onChange={(_, newValue) => {
+              setLocationFilter(newValue ? newValue.id : "");
+              setPage(0);
+            }}
+            sx={{
+              "& .MuiInputBase-root": {
+                height: "40px !important",
+              },
+            }}
+            isOptionEqualToValue={(option, value) => option.id === value.id}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Location"
+                placeholder="All Locations"
+              />
+            )}
+          />
+        </div>
+
         {/* Start Date */}
         <div className="col-span-1 sm:col-span-1 lg:col-span-1">
           <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -517,7 +614,11 @@ export default function Tickets() {
               maxDate={endDate}
               disabled={loading}
               slotProps={{
-                textField: { size: "small", fullWidth: true, disabled: loading },
+                textField: {
+                  size: "small",
+                  fullWidth: true,
+                  disabled: loading,
+                },
               }}
             />
           </LocalizationProvider>
@@ -533,7 +634,11 @@ export default function Tickets() {
               minDate={startDate}
               disabled={loading}
               slotProps={{
-                textField: { size: "small", fullWidth: true, disabled: loading },
+                textField: {
+                  size: "small",
+                  fullWidth: true,
+                  disabled: loading,
+                },
               }}
             />
           </LocalizationProvider>
@@ -586,7 +691,7 @@ export default function Tickets() {
         </div> */}
 
         {/* User Filter + Clear button row */}
-        <div className="mb-0.5 col-span-1 sm:col-span-2 lg:col-span-6 flex flex-col lg:flex-row items-stretch lg:items-center gap-2">
+        <div className="mb-0.5 col-span-1 sm:col-span-2 lg:col-span-7 flex flex-col lg:flex-row items-stretch lg:items-center gap-2">
           {/* Filter Buttons */}
           <div className="flex flex-wrap gap-2">
             {(() => {
@@ -608,16 +713,18 @@ export default function Tickets() {
                 <button
                   key={filter.value}
                   onClick={() =>
-                    setUserFilter(userFilter === filter.value ? "assign_to" : filter.value)
+                    setUserFilter(
+                      userFilter === filter.value ? "assign_to" : filter.value,
+                    )
                   }
                   disabled={loading}
-                  className={`px-3 py-[6.15px] !text-xs font-medium rounded-lg border transition-all duration-500 ${loading
-                    ? "opacity-50 cursor-not-allowed"
-                    : ""
-                    } ${userFilter === filter.value
+                  className={`px-3 py-[6.15px] !text-xs font-medium rounded-lg border transition-all duration-500 ${
+                    loading ? "opacity-50 cursor-not-allowed" : ""
+                  } ${
+                    userFilter === filter.value
                       ? "bg-brand-500 text-white border-brand-500 hover:bg-brand-600"
                       : "border border-[#E5E7EB] text-[#969AA1] hover:bg-gray-50"
-                    }`}
+                  }`}
                 >
                   {filter.label}
                 </button>
@@ -632,24 +739,26 @@ export default function Tickets() {
                 setQuery("");
                 setStatusFilter([]);
                 setCategoryFilter("");
+                setLocationFilter("");
                 setStartDate(null);
                 setEndDate(null);
                 setUserFilter("assign_to"); // Reset to default "assigned"
                 setPage(0);
               }}
               disabled={loading}
-              className={`px-3 py-[6.15px] shrink-0 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 transition-all ${loading
-                ? "opacity-50 cursor-not-allowed"
-                : ""
-                } ${query ||
-                  (statusFilter && statusFilter.length > 0) ||
-                  categoryFilter ||
-                  startDate ||
-                  endDate ||
-                  (userFilter && userFilter !== "assign_to")
+              className={`px-3 py-[6.15px] shrink-0 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 transition-all ${
+                loading ? "opacity-50 cursor-not-allowed" : ""
+              } ${
+                query ||
+                (statusFilter && statusFilter.length > 0) ||
+                categoryFilter ||
+                locationFilter ||
+                startDate ||
+                endDate ||
+                (userFilter && userFilter !== "assign_to")
                   ? "border border-red-500 bg-red-500 text-white hover:bg-red-600 focus:ring-red-500"
                   : "border border-[#E5E7EB] text-gray-400 hover:border-gray-300 hover:text-gray-600 hover:bg-brand-50 focus:ring-gray-500"
-                }`}
+              }`}
             >
               Clear
             </button>
@@ -689,8 +798,15 @@ export default function Tickets() {
         <div className="overflow-x-auto">
           {/* Table */}
           <div className="overflow-hidden rounded-lg border border-[#E5E7EB]">
-            <div className="overflow-auto"
-              style={{ maxHeight: recentTickets.length > 0 ? "calc(100dvh - 342.75px)" : "calc(100dvh - 302.75px)" }}   >
+            <div
+              className="overflow-auto"
+              style={{
+                maxHeight:
+                  recentTickets.length > 0
+                    ? "calc(100dvh - 342.75px)"
+                    : "calc(100dvh - 302.75px)",
+              }}
+            >
               <table className="min-w-full divide-y divide-gray-100">
                 <thead className="bg-white sticky top-0 z-10 whitespace-nowrap">
                   <tr className="text-left !text-xs text-gray-500 ">
@@ -711,6 +827,9 @@ export default function Tickets() {
                     </th>
                     <th className="px-4 py-3 border-b border-r border-[#E5E7EB] ">
                       Category
+                    </th>
+                    <th className="px-4 py-3 border-b border-r border-[#E5E7EB] ">
+                      Location
                     </th>
                     {/* <th className="px-4 py-3 border-r border-b border-[#E5E7EB] !font-medium">
                       Due Date
@@ -742,7 +861,11 @@ export default function Tickets() {
                         #{t.id}
                       </td>
                       <td className="px-4 py-3 border-b border-[#E5E7EB] font-medium text-gray-800 max-w-48">
-                        <Tooltip title={toProperCase(cleanText(t.title))} arrow placement="top">
+                        <Tooltip
+                          title={toProperCase(cleanText(t.title))}
+                          arrow
+                          placement="top"
+                        >
                           <div className="line-clamp-none break-words">
                             {toProperCase1(cleanText(t.title))}
                           </div>
@@ -807,11 +930,30 @@ export default function Tickets() {
                           }}
                         />
                       </td>
+  
+                      <td className="px-4 py-3 border-b border-[#E5E7EB]">
+                        {/* {toProperCase(t?.location_name) || "N/A"} */}
+                         <Chip
+                          label={toProperCase(t?.location_name) || "N/A"}
+                          variant="outlined"
+                          sx={{
+                            fontSize: 11.75,
+                            fontWeight: 500,
+                            borderRadius: "6px",
+                            color: "#6B7280",
+                            border: "1px solid #E5E7EB",
+                            // background: "white",
+                            height: 25.5,
+                            "& .MuiChip-label": {
+                              px: "7px !important", // ✅ Correct selector
+                            },
+                          }}
+                        />
+                      </td>
                       {/* <td className="px-4 py-3 border-b border-[#E5E7EB]">
                         <DateWithTooltip date={t?.due_date} />
                       </td> */}
                       <td className="px-4 py-3 border-b border-[#E5E7EB]">
-
                         <Tooltip title="Click to change status" arrow>
                           <div
                             onClick={(e) => {
@@ -847,24 +989,24 @@ export default function Tickets() {
                           label={
                             t.assignees && t.assignees.length > 0
                               ? t.assignees
-                                .map((a) =>
-                                  toProperCase(a.assign_to_username)
-                                )
-                                .join(", ")
+                                  .map((a) =>
+                                    toProperCase(a.assign_to_username),
+                                  )
+                                  .join(", ")
                               : "Unassigned"
                           }
                           variant="filled"
                           sx={chipStyle}
-                        // sx={{
-                        //   fontSize: 12.75,
-                        //   borderRadius: "24px",
-                        //   color: "#353b48",
-                        //   backgroundColor: "#f5f6fa",
-                        //   height: 27.5,
-                        //   "& .MuiChip-label": {
-                        //     px: "7px !important",
-                        //   },
-                        // }}
+                          // sx={{
+                          //   fontSize: 12.75,
+                          //   borderRadius: "24px",
+                          //   color: "#353b48",
+                          //   backgroundColor: "#f5f6fa",
+                          //   height: 27.5,
+                          //   "& .MuiChip-label": {
+                          //     px: "7px !important",
+                          //   },
+                          // }}
                         />
                       </td>
 
@@ -903,7 +1045,7 @@ export default function Tickets() {
             page={page}
             setPage={setPage}
             totalCount={totalCount}
-          // totalCount={filtered.length}
+            // totalCount={filtered.length}
           />
         </div>
       )}
@@ -945,7 +1087,7 @@ export default function Tickets() {
                 if (!isCurrentStatus) {
                   handleStatusUpdate(
                     selectedTicketForStatus?.id,
-                    status.toLowerCase().replace(" ", "_")
+                    status.toLowerCase().replace(" ", "_"),
                   );
                 }
               }}
@@ -970,7 +1112,7 @@ export default function Tickets() {
                 <span className="!text-gray-500"> {status}</span>
                 {updatingStatus &&
                   selectedTicketForStatus?.status?.toLowerCase() ===
-                  status.toLowerCase().replace(" ", "_") && (
+                    status.toLowerCase().replace(" ", "_") && (
                     <CircularProgress size={14} sx={{ ml: 1 }} />
                   )}
                 {isCurrentStatus && (

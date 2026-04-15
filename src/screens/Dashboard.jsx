@@ -15,6 +15,8 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Autocomplete,
+  TextField,
 } from "@mui/material";
 import {
   LineChart,
@@ -30,6 +32,8 @@ import {
 } from "recharts";
 import dayjs from "dayjs";
 import { createAPIEndPoint } from "../config/api/api";
+import { createAPIEndPointAuth } from "../config/api/apiAuth";
+import { useApp } from "../state/AppContext";
 import moment from "moment-timezone";
 import { toProperCase } from "../utils/formatting";
 import Divider from "@mui/material/Divider";
@@ -38,6 +42,7 @@ const url = `/dashboard`;
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { user } = useApp();
   const [loading, setLoading] = useState(true);
   const [statsData, setStatsData] = useState(null);
   const [loadingStats, setLoadingStats] = useState(false);
@@ -46,6 +51,8 @@ export default function Dashboard() {
   const [timeView, setTimeView] = useState("week");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [categories, setCategories] = useState([]);
+  const [locationFilter, setLocationFilter] = useState("");
+  const [locations, setLocations] = useState([]);
 
   useEffect(() => {
     const fetchAuth = async () => {
@@ -80,14 +87,50 @@ export default function Dashboard() {
     fetchCategories();
   }, []);
 
+  // Fetch locations once
+  useEffect(() => {
+    const fetchLocations = async () => {
+      if (!user?.clinic_id) return;
+      try {
+        const res = await createAPIEndPointAuth(
+          `clinic_locations/get_all/${user.clinic_id}`
+        ).fetchAll();
+        const data = res.data?.locations || [];
+        const filtered = data.filter((loc) => {
+          const name = (loc.location_name || "").trim().toLowerCase();
+          return (
+            loc.id !== 25 &&
+            loc.id !== 28 &&
+            // loc.id !== 30 &&
+            loc.id !== 44 &&
+            name !== "sales team" &&
+            name !== "insurance" &&
+            // name !== "anonymous" &&
+            name !== "jazmin spanish"
+          );
+        });
+        const sorted = filtered.sort((a, b) => {
+          const nameA = (a.display_name?.trim() || a.location_name?.trim() || "").toLowerCase();
+          const nameB = (b.display_name?.trim() || b.location_name?.trim() || "").toLowerCase();
+          return nameA.localeCompare(nameB);
+        });
+        setLocations(sorted);
+      } catch (err) {
+        console.error("Error fetching locations:", err);
+      }
+    };
+    fetchLocations();
+  }, [user?.clinic_id]);
+
   const handleClearFilters = () => {
     setTimeView("week");
     setStartDate(dayjs());
     setEndDate(dayjs());
     setCategoryFilter("");
+    setLocationFilter("");
   };
 
-  const hasActiveFilters = timeView !== "week" || categoryFilter !== "";
+  const hasActiveFilters = timeView !== "week" || categoryFilter !== "" || locationFilter !== "";
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -114,6 +157,11 @@ export default function Dashboard() {
           params.push(`category_id=${categoryFilter}`);
         }
 
+        // Add location filter if selected
+        if (locationFilter) {
+          params.push(`location_id=${locationFilter}`);
+        }
+
         if (params.length > 0) {
           apiUrl += `?${params.join("&")}`;
         }
@@ -127,7 +175,7 @@ export default function Dashboard() {
       }
     };
     fetchStats();
-  }, [timeView, startDate, endDate, categoryFilter]);
+  }, [timeView, startDate, endDate, categoryFilter, locationFilter]);
 
   // Pie chart data
   const statusData = Object.entries(statsData?.by_status || {})
@@ -359,6 +407,42 @@ export default function Dashboard() {
                   ))}
                 </Select>
               </FormControl>
+
+              {/* Location Filter */}
+              <Autocomplete
+                size="small"
+                options={locations}
+                getOptionLabel={(opt) => opt.display_name || opt.location_name || ""}
+                value={locations.find((loc) => loc.id === locationFilter) || null}
+                onChange={(_, newValue) => setLocationFilter(newValue ? newValue.id : "")}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                sx={{
+                  minWidth: { xs: "100%", sm: 160 },
+                  maxWidth: { md: 200 },
+                  alignSelf: { xs: "stretch", sm: "center" },
+                  "& .MuiInputBase-root": {
+                    borderRadius: "8px",
+                    fontSize: "0.75rem",
+                    height: "32px",
+                  },
+                  "& .MuiInputLabel-root": { fontSize: "0.75rem" },
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Location"
+                    placeholder="All Locations"
+                    InputLabelProps={{
+                      sx: {
+                        fontSize: "0.75rem",
+                        "&.Mui-focused": {
+                          color: locationFilter ? "#824EF2" : "#6B7280",
+                        },
+                      },
+                    }}
+                  />
+                )}
+              />
 
               {/* Clear Button */}
               <button
