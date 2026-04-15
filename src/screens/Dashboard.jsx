@@ -409,7 +409,7 @@ export default function Dashboard() {
               </FormControl>
 
               {/* Location Filter */}
-              <Autocomplete
+              {/* <Autocomplete
                 size="small"
                 options={locations}
                 getOptionLabel={(opt) => opt.display_name || opt.location_name || ""}
@@ -442,7 +442,7 @@ export default function Dashboard() {
                     }}
                   />
                 )}
-              />
+              /> */}
 
               {/* Clear Button */}
               <button

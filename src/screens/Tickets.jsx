@@ -189,13 +189,13 @@ export default function Tickets() {
         });
         const sorted = filtered.sort((a, b) => {
           const nameA = (
-            a.display_name?.trim() ||
             a.location_name?.trim() ||
+            a.display_name?.trim() ||
             ""
           ).toLowerCase();
           const nameB = (
-            b.display_name?.trim() ||
             b.location_name?.trim() ||
+            b.display_name?.trim() ||
             ""
           ).toLowerCase();
           return nameA.localeCompare(nameB);
@@ -581,7 +581,7 @@ export default function Tickets() {
             disabled={loading}
             options={locations}
             getOptionLabel={(opt) =>
-              opt.display_name || opt.location_name || ""
+              opt.location_name || opt.display_name || ""
             }
             value={locations.find((loc) => loc.id === locationFilter) || null}
             onChange={(_, newValue) => {
