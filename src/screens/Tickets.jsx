@@ -22,11 +22,15 @@ import dayjs from "dayjs";
 import { createAPIEndPoint } from "../config/api/api";
 import { createAPIEndPointAuth } from "../config/api/apiAuth";
 import CustomTablePagination from "../components/CustomTablePagination";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useApp } from "../state/AppContext";
 import StatusBadge from "../components/StatusBadge";
 import DateWithTooltip from "../components/DateWithTooltip";
 import ClearIcon from "@mui/icons-material/Clear";
+import HubOutlinedIcon from "@mui/icons-material/HubOutlined";
+import CallSplitIcon from "@mui/icons-material/CallSplit";
+import CloseIcon from "@mui/icons-material/Close";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { convertToCST } from "../utils";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import { toProperCase, cleanText, toProperCase1 } from "../utils/formatting";
@@ -63,8 +67,10 @@ const ALL_STATUSES = ["pending", "in_progress", "completed"];
 
 export default function Tickets() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useApp();
   const [recentTickets, setRecentTickets] = useState([]);
+  const [recentBarMenuEl, setRecentBarMenuEl] = useState(null);
 
   useEffect(() => {
     const recent = getRecentTickets();
@@ -328,98 +334,181 @@ export default function Tickets() {
 
   const currentItems = tickets;
 
-  console.log(recentTickets.length > 0, "recentTickets.length > 0");
+  const removeRecentTicket = (id) => {
+    const updated = getRecentTickets().filter((t) => String(t.id) !== String(id));
+    localStorage.setItem("recentTickets", JSON.stringify(updated));
+    setRecentTickets(updated);
+  };
+
+  const isTicketsList = location.pathname === "/tickets";
 
   return (
     <div className="space-y-3">
       {recentTickets.length > 0 && (
         <div
-          className="!pb-1 flex items-center gap-2 mt-2 overflow-x-auto !scrollbar-hide   
-    scrollbar-thin
-    scrollbar-thumb-gray-300
-    scrollbar-track-transparent 
-    [&::-webkit-scrollbar]:h-[4px]
-    [&::-webkit-scrollbar-track]:bg-transparent
-    [&::-webkit-scrollbar-thumb]:bg-gray-300
-    [&::-webkit-scrollbar-thumb]:rounded-full"
+          className="flex min-h-[38px] w-full items-stretch overflow-hidden rounded-md border border-[#E5E7EB] bg-white text-[12px] leading-tight text-gray-700"
+          role="region"
+          aria-label="Recent tickets"
         >
-          {/* Label */}
-          <span className="text-[11px] font-medium text-gray-500 uppercase tracking-wide shrink-0">
-            Recent
-          </span>
+          <div
+            className="flex min-w-0 flex-1 items-stretch overflow-x-auto
+            [&::-webkit-scrollbar]:h-[5px]
+            [&::-webkit-scrollbar-track]:bg-gray-100
+            [&::-webkit-scrollbar-thumb]:rounded-full
+            [&::-webkit-scrollbar-thumb]:bg-gray-300"
+          >
+            <Tooltip title="All tickets" arrow placement="top">
+              <button
+                type="button"
+                onClick={() => navigate("/tickets")}
+                className={`flex shrink-0 items-center gap-1.5 border-r border-[#E5E7EB] px-3 py-2 transition-colors ${
+                  isTicketsList
+                    ? "bg-gray-100 text-gray-900"
+                    : "bg-transparent text-gray-600 hover:bg-gray-50"
+                }`}
+              >
+                <HubOutlinedIcon
+                  sx={{ fontSize: 16, opacity: 0.85, color: "inherit" }}
+                />
+                <span
+                  className={`max-w-[100px] truncate font-medium ${
+                    isTicketsList ? "italic" : ""
+                  }`}
+                >
+                  Recent Tickets
+                </span>
+              </button>
+            </Tooltip>
 
-          {/* Divider */}
-          <span className="h-4 w-px bg-gray-200 shrink-0" />
+            {recentTickets.map((t) => (
+              <div
+                key={t.id}
+                className="flex min-w-0 shrink-0 items-stretch border-r border-[#E5E7EB]"
+              >
+                <Tooltip
+                  title={`${toProperCase(t.title)} (#${t.id})`}
+                  arrow
+                  placement="top"
+                >
+                  <button
+                    type="button"
+                    onClick={() => navigate(`/tickets/${t.id}`)}
+                    className="flex min-w-0 max-w-[220px] items-center gap-2 px-2.5 py-2 text-left transition-colors hover:bg-gray-50"
+                  >
+                    <span
+                      className="shrink-0 font-semibold uppercase tracking-tight"
+                      style={{ color: "#4caf50", fontSize: "11px" }}
+                    >
+                      GET
+                    </span>
+                    <span className="min-w-0 flex-1 truncate text-gray-700">
+                      #{t.id}{" "}
+                      {toProperCase(t.title)}
+                    </span>
+                    <span
+                      className="h-1.5 w-1.5 shrink-0 rounded-full"
+                      style={{ backgroundColor: "#ff9800" }}
+                      title="Recent"
+                      aria-hidden
+                    />
+                  </button>
+                </Tooltip>
+                <Tooltip title="Remove from recent" arrow placement="top">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeRecentTicket(t.id);
+                    }}
+                    className="flex shrink-0 items-center border-l border-[#E5E7EB] px-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                    aria-label={`Remove ticket ${t.id} from recent`}
+                  >
+                    <CloseIcon sx={{ fontSize: 15 }} />
+                  </button>
+                </Tooltip>
+              </div>
+            ))}
+          </div>
 
-          {/* Tickets */}
-          {recentTickets.slice(0, 6).map((t) => (
-            <Tooltip
-              key={t.id}
-              title={`${toProperCase(t.title)} (#${t.id})`}
-              arrow
-              placement="top"
-            >
-              <Chip
+          <div className="flex shrink-0 items-center gap-0.5 border-l border-[#E5E7EB] bg-white px-1.5">
+            {/* <Tooltip title="New ticket" arrow placement="top">
+              <button
+                type="button"
+                onClick={() => navigate("new")}
+                className="flex items-center gap-1 rounded-md border border-[#E5E7EB] bg-gray-50 px-2.5 py-1.5 text-[11px] font-medium text-gray-700 transition-colors hover:bg-gray-100"
+              >
+                <CallSplitIcon sx={{ fontSize: 16, color: "inherit" }} />
+                <span className="hidden sm:inline">New ticket</span>
+              </button>
+            </Tooltip> */}
+            {/* <Tooltip title="New ticket" arrow placement="top">
+              <span>
+                <IconButton
+                  size="small"
+                  onClick={() => navigate("new")}
+                  sx={{
+                    color: "#6b7280",
+                    padding: "4px",
+                    "&:hover": {
+                      color: "#111827",
+                      backgroundColor: "rgba(0,0,0,0.04)",
+                    },
+                  }}
+                  aria-label="New ticket"
+                >
+                  <PlusIcon className="h-4 w-4 text-current stroke-[2]" />
+                </IconButton>
+              </span>
+            </Tooltip> */}
+            <Tooltip title="Recent options" arrow placement="top">
+              <IconButton
                 size="small"
-                onClick={() => navigate(`/tickets/${t.id}`)}
-                label={
-                  <span className="max-w-[140px] truncate inline-block -mb-1">
-                    #{t.id} — {toProperCase(t.title)}
-                  </span>
-                }
+                onClick={(e) => setRecentBarMenuEl(e.currentTarget)}
                 sx={{
-                  height: 26,
-                  fontSize: "11.5px",
-                  fontWeight: 500,
-                  borderRadius: "8px",
-                  cursor: "pointer",
-                  backgroundColor: "#FAFAFA",
-                  border: "1px solid #E5E7EB",
-
+                  color: "#6b7280",
+                  padding: "4px",
                   "&:hover": {
-                    backgroundColor: "#F3F4F6",
-                  },
-
-                  "& .MuiChip-label": {
-                    px: 1.25,
-                    color: "#6B7280",
+                    color: "#111827",
+                    backgroundColor: "rgba(0,0,0,0.04)",
                   },
                 }}
-              />
+                aria-label="Open recent menu"
+              >
+                <KeyboardArrowDownIcon sx={{ fontSize: 18 }} />
+              </IconButton>
             </Tooltip>
-          ))}
+            {/* <span className="hidden pl-1 text-[11px] text-gray-500 md:inline">
+              All tickets
+            </span> */}
+          </div>
 
-          {/* More indicator */}
-          {/* {recentTickets.length > 6 && (
-            <span className="text-[11px] text-gray-400 shrink-0">
-              +{recentTickets.length - 6} more
-            </span>
-          )} */}
-
-          {/* Clear */}
-          <Tooltip title="Clear recent tickets">
-            <button
+          <Menu
+            anchorEl={recentBarMenuEl}
+            open={Boolean(recentBarMenuEl)}
+            onClose={() => setRecentBarMenuEl(null)}
+            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+            transformOrigin={{ vertical: "top", horizontal: "right" }}
+            slotProps={{
+              paper: {
+                sx: {
+                  mt: 0.5,
+                  minWidth: 180,
+                  border: "1px solid #E5E7EB",
+                },
+              },
+            }}
+          >
+            <MenuItem
               onClick={() => {
                 localStorage.removeItem("recentTickets");
                 setRecentTickets([]);
+                setRecentBarMenuEl(null);
               }}
-              className="
-      ml-1 px-2 h-[26px] shrink-0
-      rounded-lg
-      text-[11px] font-medium
-      border border-[#E5E7EB]
-      text-[#969AA1]
-      bg-white
-      hover:bg-gray-50
-      hover:text-[#6B7280]
-      transition-all
-      focus:outline-none
-      focus:ring-2 focus:ring-gray-200
-    "
+              sx={{ fontSize: "13px" }}
             >
-              Clear
-            </button>
-          </Tooltip>
+              Clear all recent
+            </MenuItem>
+          </Menu>
         </div>
       )}
 
@@ -579,11 +668,18 @@ export default function Tickets() {
             size="small"
             fullWidth
             disabled={loading}
-            options={locations}
+            options={[
+              { id: "", location_name: "All Locations" },
+              ...locations,
+            ]}
             getOptionLabel={(opt) =>
               opt.location_name || opt.display_name || ""
             }
-            value={locations.find((loc) => loc.id === locationFilter) || null}
+            value={
+              locationFilter === "" 
+                ? { id: "", location_name: "All Locations" }
+                : locations.find((loc) => loc.id === locationFilter) || null
+            }
             onChange={(_, newValue) => {
               setLocationFilter(newValue ? newValue.id : "");
               setPage(0);
@@ -603,6 +699,7 @@ export default function Tickets() {
             )}
           />
         </div>
+ 
 
         {/* Start Date */}
         <div className="col-span-1 sm:col-span-1 lg:col-span-1">
@@ -618,6 +715,9 @@ export default function Tickets() {
                   size: "small",
                   fullWidth: true,
                   disabled: loading,
+                },
+                actionBar: {
+                  actions: ["clear"],
                 },
               }}
             />
@@ -638,6 +738,9 @@ export default function Tickets() {
                   size: "small",
                   fullWidth: true,
                   disabled: loading,
+                },
+                actionBar: {
+                  actions: ["clear"],
                 },
               }}
             />
