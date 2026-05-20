@@ -135,12 +135,12 @@ export default function Layout() {
         {/* <NavItem to="/careers" icon={PlusCircleIcon} label="New Hire Form" /> */}
         {user?.is_form_access && (
           <>
-            <NavItem
+            {/* <NavItem
               to="/forms"
               icon={ClipboardDocumentListIcon}
               label="All Forms"
               matchChildren
-            />
+            /> */}
             <NavItem
               to="/inventory"
               icon={ComputerDesktopIcon}
