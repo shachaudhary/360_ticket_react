@@ -19,7 +19,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { MapPinIcon } from "@heroicons/react/24/outline";
+import { ArrowUpTrayIcon, MapPinIcon } from "@heroicons/react/24/outline";
 import { MapPin, Mail } from "lucide-react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { useApp } from "../state/AppContext";
@@ -93,6 +93,48 @@ function resolveLocationForForm(d, locationsList) {
     location_name: locDetails?.location_name || name,
     display_name: locDetails?.display_name || locDetails?.location_name || name,
   };
+}
+
+/** Same shape as ticket `files` / device GET `images`: { name, url }. */
+function existingDeviceImagesFromRecord(d) {
+  if (!d || typeof d !== "object") return [];
+  const list = [];
+  const seen = new Set();
+  const pushEntry = (entry, fallbackName) => {
+    if (!entry) return;
+    let url = "";
+    let name = fallbackName;
+    if (typeof entry === "string") {
+      url = entry.trim();
+    } else {
+      url = entry.url != null ? String(entry.url).trim() : "";
+      name = entry.name || url.split("/").pop() || fallbackName;
+    }
+    if (!url || seen.has(url)) return;
+    seen.add(url);
+    list.push({ name, previewUrl: url, isExisting: true });
+  };
+  const arrays = [d.images, d.files, d.device_images].filter(Array.isArray);
+  arrays.forEach((arr) => {
+    arr.forEach((img, i) => pushEntry(img, `Image ${i + 1}`));
+  });
+  pushEntry(d.device_image_url, "Device image");
+  return list;
+}
+
+function appendPayloadToFormData(formData, payload) {
+  Object.entries(payload).forEach(([key, value]) => {
+    if (value === undefined) return;
+    if (value === null) {
+      formData.append(key, "");
+      return;
+    }
+    if (typeof value === "boolean") {
+      formData.append(key, value ? "true" : "false");
+      return;
+    }
+    formData.append(key, String(value));
+  });
 }
 
 function assigneeFromDevice(d) {
@@ -180,6 +222,9 @@ export default function InventoryForm({ isEdit = false }) {
 
   const [errors, setErrors] = useState({});
   const [deviceRecord, setDeviceRecord] = useState(null);
+  const [deviceImages, setDeviceImages] = useState([]);
+  const [initialImageUrls, setInitialImageUrls] = useState([]);
+  const [dragActive, setDragActive] = useState(false);
 
   useEffect(() => {
     const fetchLocations = async () => {
@@ -280,6 +325,9 @@ export default function InventoryForm({ isEdit = false }) {
       device_login_password: d.device_login_password ?? "",
       status: normalizeSelectValue(d.status ?? "Active", STATUS_OPTIONS) || "Active",
     });
+    const existingImages = existingDeviceImagesFromRecord(d);
+    setDeviceImages(existingImages);
+    setInitialImageUrls(existingImages.map((img) => img.previewUrl).filter(Boolean));
   }, [isEdit, deviceRecord, locations]);
 
   useEffect(() => {
@@ -349,6 +397,13 @@ export default function InventoryForm({ isEdit = false }) {
     return Object.keys(next).length === 0;
   };
 
+  const resolveDeviceUserId = () => {
+    if (formData.assignee?.user_id != null) return formData.assignee.user_id;
+    if (user?.id != null) return user.id;
+    if (isEdit && deviceRecord?.user_id != null) return deviceRecord.user_id;
+    return null;
+  };
+
   const buildCreatePayload = () => {
     const payload = {
       clinic_id: user.clinic_id,
@@ -357,7 +412,8 @@ export default function InventoryForm({ isEdit = false }) {
       anydesk_installed: !!formData.anydesk_installed,
       status: formData.status || "Active",
     };
-    if (formData.assignee?.user_id) payload.user_id = formData.assignee.user_id;
+    const uid = resolveDeviceUserId();
+    if (uid != null) payload.user_id = uid;
     const optional = [
       ["computer_name", formData.computer_name],
       ["room_number", formData.room_number],
@@ -387,8 +443,8 @@ export default function InventoryForm({ isEdit = false }) {
       anydesk_installed: !!formData.anydesk_installed,
       status: formData.status || "Active",
     };
-    if (formData.assignee?.user_id) payload.user_id = formData.assignee.user_id;
-    else payload.user_id = null;
+    const uid = resolveDeviceUserId();
+    if (uid != null) payload.user_id = uid;
     const optional = [
       ["computer_name", formData.computer_name],
       ["room_number", formData.room_number],
@@ -408,6 +464,17 @@ export default function InventoryForm({ isEdit = false }) {
     return payload;
   };
 
+  const appendNewImagesToFormData = (formData) => {
+    deviceImages.forEach((img) => {
+      if (!img.isExisting && img instanceof File) {
+        formData.append("files", img);
+      }
+    });
+  };
+
+  const hasNewDeviceImages = () =>
+    deviceImages.some((img) => !img.isExisting && (img instanceof File || img?.type));
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) {
@@ -416,10 +483,32 @@ export default function InventoryForm({ isEdit = false }) {
     }
     setIsSubmitting(true);
     try {
+      const newImages = hasNewDeviceImages();
+      const removedAllExisting =
+        isEdit &&
+        initialImageUrls.length > 0 &&
+        !deviceImages.some((img) => img.isExisting);
+
       if (isEdit) {
-        await createAPIEndPoint("devices/").update(id, buildUpdatePayload());
+        const payload = buildUpdatePayload();
+        if (removedAllExisting) payload.clear_images = true;
+        if (newImages || removedAllExisting) {
+          const formData = new FormData();
+          appendPayloadToFormData(formData, payload);
+          appendNewImagesToFormData(formData);
+          await createAPIEndPoint("devices/").update(id, formData);
+        } else {
+          await createAPIEndPoint("devices/").update(id, payload);
+        }
         toast.success("Inventory updated");
         navigate(`/inventory/${id}`);
+      } else if (newImages) {
+        const formData = new FormData();
+        appendPayloadToFormData(formData, buildCreatePayload());
+        appendNewImagesToFormData(formData);
+        await createAPIEndPoint("devices").create(formData);
+        toast.success("Inventory item created");
+        navigate("/inventory");
       } else {
         await createAPIEndPoint("devices").createWithJSONFormat(buildCreatePayload());
         toast.success("Inventory item created");
@@ -815,6 +904,132 @@ export default function InventoryForm({ isEdit = false }) {
               />
             </div>
           </div> */}
+
+          <Divider />
+
+          <div className="space-y-3">
+            <SectionTitle>Device photos</SectionTitle>
+            <Typography variant="body2" className="!text-gray-500 !-mt-2 !mb-2">
+              Upload photos of the device, serial tag, or setup (optional).
+            </Typography>
+            <div
+              onDragOver={(e) => {
+                e.preventDefault();
+                setDragActive(true);
+              }}
+              onDragLeave={() => setDragActive(false)}
+              onDrop={(e) => {
+                e.preventDefault();
+                setDragActive(false);
+                if (e.dataTransfer.files?.length > 0) {
+                  const newFiles = Array.from(e.dataTransfer.files).filter((f) =>
+                    f.type.startsWith("image/")
+                  );
+                  if (newFiles.length === 0) {
+                    toast.error("Please drop image files only (JPG, PNG, GIF, WebP).");
+                    return;
+                  }
+                  setDeviceImages((prev) => [...prev, ...newFiles]);
+                }
+              }}
+              className={`min-h-40 relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-8 text-center transition-all ${
+                dragActive
+                  ? "border-brand-500 bg-purple-50 scale-[1.01] shadow-md"
+                  : "border-gray-300 bg-gray-50 hover:border-gray-400 hover:bg-gray-100"
+              }`}
+            >
+              <input
+                type="file"
+                id="deviceImageUpload"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={(e) => {
+                  const newFiles = Array.from(e.currentTarget.files || []).filter((f) =>
+                    f.type.startsWith("image/")
+                  );
+                  if (newFiles.length > 0) {
+                    setDeviceImages((prev) => [...prev, ...newFiles]);
+                  }
+                  e.target.value = "";
+                }}
+              />
+              <label
+                htmlFor="deviceImageUpload"
+                className="cursor-pointer flex flex-col items-center text-sm font-medium text-gray-600"
+              >
+                <ArrowUpTrayIcon
+                  className={`h-8 w-8 mb-2 transition-colors ${
+                    dragActive || deviceImages.length > 0
+                      ? "text-brand-500"
+                      : "text-gray-400"
+                  }`}
+                />
+                <span className="block">Drag & drop images here</span>
+                <span className="text-gray-400">or click to upload</span>
+              </label>
+            </div>
+
+            {deviceImages.length > 0 && (
+              <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+                {deviceImages.map((file, index) => {
+                  const isImage =
+                    file.type?.startsWith("image/") ||
+                    file.previewUrl?.match(/\.(jpg|jpeg|png|gif|webp)$/i);
+
+                  return (
+                    <div
+                      key={`${file.name}-${index}-${file.previewUrl || ""}`}
+                      className="relative flex flex-col items-center border rounded-lg p-2"
+                    >
+                      {isImage ? (
+                        <img
+                          src={file.previewUrl || URL.createObjectURL(file)}
+                          alt={file.name}
+                          className="h-28 w-full object-cover rounded"
+                        />
+                      ) : (
+                        <div className="h-28 w-full flex items-center justify-center bg-gray-100 text-xs text-gray-600 rounded">
+                          {file.name}
+                        </div>
+                      )}
+                      <Typography
+                        variant="caption"
+                        className="!mt-1 truncate w-full text-center capitalize"
+                      >
+                        {file.name}
+                      </Typography>
+                      <Button
+                        size="small"
+                        color="error"
+                        variant="outlined"
+                        onClick={() => {
+                          setDeviceImages((prev) => {
+                            const updated = [...prev];
+                            updated.splice(index, 1);
+                            return updated;
+                          });
+                        }}
+                        sx={{
+                          position: "absolute",
+                          top: -8,
+                          right: -8,
+                          minWidth: 0,
+                          width: 24,
+                          height: 24,
+                          borderRadius: "50%",
+                          p: 0,
+                          fontSize: 12,
+                        }}
+                      >
+                        ✕
+                      </Button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
 
           <div className="!flex !justify-end !gap-3 !pt-4 !border-t !border-gray-200 !mt-6">
             <Button
