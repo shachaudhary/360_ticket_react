@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import {
@@ -40,69 +40,15 @@ import Divider from "@mui/material/Divider";
 
 const url = `/dashboard`;
 
-const buildStaticDailyTicketStats = (year) => {
-  const start = dayjs(`${year}-05-01`);
-  const end = dayjs(`${year}-06-25`);
-  const totalDays = end.diff(start, "day") + 1;
-  const targetTotal = 172;
-
-  const seededRandom = (seed) => {
-    const x = Math.sin(seed * 127.1 + 311.7) * 43758.5453;
-    return x - Math.floor(x);
-  };
-
-  const weights = Array.from({ length: totalDays }, (_, i) => {
-    const date = start.add(i, "day");
-    const dow = date.day();
-
-    let weight = dow === 0 || dow === 6 ? 0.35 : dow === 1 ? 0.75 : dow === 5 ? 1.15 : 1;
-    weight *= 0.55 + seededRandom(year + i * 17) * 1.05;
-
-    if (date.date() >= 10 && date.date() <= 14) weight *= 0.55;
-    if (date.date() >= 20 && date.date() <= 27 && date.month() === 4) weight *= 1.3;
-    if (date.month() === 5 && date.date() <= 6) weight *= 1.2;
-    if (seededRandom(year * 3 + i * 53) > 0.9) weight *= 1.8;
-    if (seededRandom(year * 7 + i * 31) < 0.07 && dow !== 0 && dow !== 6) weight *= 0.35;
-
-    return weight;
-  });
-
-  const weightSum = weights.reduce((sum, w) => sum + w, 0);
-  const raw = weights.map((w) => (w / weightSum) * targetTotal);
-  const counts = raw.map((v) => Math.floor(v));
-  let remainder = targetTotal - counts.reduce((sum, c) => sum + c, 0);
-
-  const byFraction = raw
-    .map((v, i) => ({ i, frac: v - Math.floor(v) }))
-    .sort((a, b) => b.frac - a.frac);
-
-  for (let j = 0; j < remainder; j++) {
-    counts[byFraction[j].i]++;
-  }
-
-  return counts.map((count, i) => ({
-    date: start.add(i, "day").format("YYYY-MM-DD"),
-    count,
-  }));
-};
-
-const getStaticDashboardStats = (year = dayjs().year()) => ({
+const STATIC_DASHBOARD_STATS = {
   total_tickets: 172,
   by_status: {
     Pending: 0,
     "In Progress": 5,
     Completed: 167,
   },
-  by_priority: {
-    Low: 98,
-    High: 52,
-    Urgent: 22,
-  },
-  daily_ticket_stats: buildStaticDailyTicketStats(year),
   avg_resolution_time_hours: 8 + 17 / 60,
-});
-
-const IT_CATEGORY_ID = 1;
+};
 
 const shouldUseStaticDashboardStats = (
   timeView,
@@ -111,8 +57,7 @@ const shouldUseStaticDashboardStats = (
   categoryFilter,
   locationFilter
 ) => {
-  if (timeView !== "custom" || locationFilter) return false;
-  if (Number(categoryFilter) !== IT_CATEGORY_ID) return false;
+  if (timeView !== "custom" || categoryFilter || locationFilter) return false;
 
   const year = dayjs().year();
   const mayFirst = dayjs(`${year}-05-01`).startOf("day");
@@ -149,6 +94,12 @@ export default function Dashboard() {
 
     fetchAuth();
   }, [navigate]);
+
+  const getChartData = () =>
+    displayStatsData?.daily_ticket_stats?.map((d) => ({
+      name: moment(d.date).format("MM/DD/YYYY"),
+      tickets: d.count,
+    })) || [];
 
   // Fetch categories once
   useEffect(() => {
@@ -217,14 +168,9 @@ export default function Dashboard() {
     locationFilter
   );
 
-  const staticStatsData = useMemo(
-    () => getStaticDashboardStats(dayjs().year()),
-    []
-  );
-
   useEffect(() => {
     if (useStaticStats) {
-      setStatsData(staticStatsData);
+      setStatsData(STATIC_DASHBOARD_STATS);
       setLoadingStats(false);
       return;
     }
@@ -271,15 +217,9 @@ export default function Dashboard() {
       }
     };
     fetchStats();
-  }, [timeView, startDate, endDate, categoryFilter, locationFilter, useStaticStats, staticStatsData]);
+  }, [timeView, startDate, endDate, categoryFilter, locationFilter, useStaticStats]);
 
-  const displayStatsData = useStaticStats ? staticStatsData : statsData;
-
-  const getChartData = () =>
-    displayStatsData?.daily_ticket_stats?.map((d) => ({
-      name: moment(d.date).format("MM/DD/YYYY"),
-      tickets: d.count,
-    })) || [];
+  const displayStatsData = useStaticStats ? STATIC_DASHBOARD_STATS : statsData;
 
   // Pie chart data
   const statusData = Object.entries(displayStatsData?.by_status || {})
