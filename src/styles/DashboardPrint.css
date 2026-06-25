@@ -1,0 +1,291 @@
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 10mm 12mm;
+  }
+
+  html,
+  body {
+    width: 100%;
+    height: 100%;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  aside,
+  header,
+  .no-print,
+  .dashboard-screen-only {
+    display: none !important;
+  }
+
+  .lg992\:pl-64 {
+    padding-left: 0 !important;
+  }
+
+  main,
+  main > div {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    background: #fff !important;
+  }
+
+  .dashbaord-pg {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .dashboard-print-only {
+    display: block !important;
+    width: 100%;
+  }
+
+  .dashboard-print-report {
+    width: 100%;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    color: #111827;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    box-sizing: border-box;
+  }
+
+  .dashboard-print-report * {
+    box-shadow: none !important;
+  }
+
+  .print-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e5e7eb;
+  }
+
+  .print-header-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .print-header-accent {
+    width: 4px;
+    height: 42px;
+    border-radius: 4px;
+    background: #824ef2;
+    flex-shrink: 0;
+  }
+
+  .print-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #111827;
+    line-height: 1.2;
+  }
+
+  .print-subtitle {
+    margin: 2px 0 0;
+    font-size: 11px;
+    color: #6b7280;
+  }
+
+  .print-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 200px;
+  }
+
+  .print-meta-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 10px;
+    color: #6b7280;
+  }
+
+  .print-meta-row strong {
+    color: #111827;
+    font-weight: 600;
+    text-align: right;
+  }
+
+  .print-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .print-stat-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #fafafa;
+    border-left-width: 4px;
+  }
+
+  .print-stat-open-tickets {
+    border-left-color: #3b82f6;
+  }
+
+  .print-stat-in-progress {
+    border-left-color: #fbbf24;
+  }
+
+  .print-stat-completed {
+    border-left-color: #22c55e;
+  }
+
+  .print-stat-main {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .print-stat-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .print-stat-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: #111827;
+    line-height: 1.1;
+  }
+
+  .print-stat-hint {
+    font-size: 9px;
+    color: #9ca3af;
+  }
+
+  .print-stat-extra {
+    text-align: right;
+    padding-left: 8px;
+    border-left: 1px solid #e5e7eb;
+  }
+
+  .print-stat-extra-label {
+    display: block;
+    font-size: 9px;
+    color: #6b7280;
+    margin-bottom: 2px;
+  }
+
+  .print-stat-extra-value {
+    font-size: 13px;
+    font-weight: 700;
+    color: #374151;
+  }
+
+  .print-chart-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 10px 12px 8px;
+    background: #fff;
+  }
+
+  .print-line-card {
+    flex: 1;
+  }
+
+  .print-chart-title {
+    margin: 0 0 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #1f2937;
+  }
+
+  .print-line-wrap {
+    width: 100%;
+    height: 200px;
+  }
+
+  .print-pies-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    flex: 1;
+  }
+
+  .print-pie-card {
+    display: flex;
+    flex-direction: column;
+    min-height: 170px;
+  }
+
+  .print-pie-layout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    flex: 1;
+    padding: 4px 8px;
+  }
+
+  .print-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+    max-width: 180px;
+  }
+
+  .print-legend-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 11px;
+    color: #374151;
+  }
+
+  .print-legend-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .print-legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .print-legend-value {
+    font-weight: 700;
+    color: #111827;
+  }
+
+  .print-empty {
+    margin: 0;
+    padding: 24px;
+    text-align: center;
+    font-size: 11px;
+    color: #9ca3af;
+  }
+}
+
+@media screen {
+  .dashboard-print-only {
+    display: none !important;
+  }
+}

@@ -6,6 +6,7 @@ import {
   CheckCircleIcon,
   WrenchScrewdriverIcon,
   ClockIcon,
+  PrinterIcon,
 } from "@heroicons/react/24/outline";
 import { checkTokenAndAuth } from "../utils/checkTokenAndAuth";
 import { useNavigate } from "react-router-dom";
@@ -37,6 +38,8 @@ import { useApp } from "../state/AppContext";
 import moment from "moment-timezone";
 import { toProperCase } from "../utils/formatting";
 import Divider from "@mui/material/Divider";
+import DashboardPrintReport from "../components/DashboardPrintReport";
+import "../styles/DashboardPrint.css";
 
 const url = `/dashboard`;
 
@@ -44,7 +47,7 @@ const buildStaticDailyTicketStats = (year) => {
   const start = dayjs(`${year}-05-01`);
   const end = dayjs(`${year}-06-25`);
   const totalDays = end.diff(start, "day") + 1;
-  const targetTotal = 172;
+  const targetTotal = 173;
 
   const seededRandom = (seed) => {
     const x = Math.sin(seed * 127.1 + 311.7) * 43758.5453;
@@ -87,19 +90,19 @@ const buildStaticDailyTicketStats = (year) => {
 };
 
 const getStaticDashboardStats = (year = dayjs().year()) => ({
-  total_tickets: 172,
+  total_tickets: 173,
   by_status: {
     Pending: 0,
-    "In Progress": 5,
+    "In Progress": 6,
     Completed: 167,
   },
   by_priority: {
-    Low: 98,
-    High: 52,
-    Urgent: 22,
+    Low: 35,
+    High: 113,
+    Urgent: 25,
   },
   daily_ticket_stats: buildStaticDailyTicketStats(year),
-  avg_resolution_time_hours: 8 + 17 / 60,
+  avg_resolution_time_hours: 5,
 });
 
 const IT_CATEGORY_ID = 1;
@@ -348,26 +351,58 @@ export default function Dashboard() {
     },
   ];
 
+  const chartData = getChartData();
+
+  const getDateRangeLabel = () => {
+    if (timeView === "today") return "Today";
+    if (timeView === "week") return "Last 7 Days";
+    if (timeView === "month") return "Last 30 Days";
+    if (timeView === "custom") {
+      return `${startDate.format("MMM D, YYYY")} – ${endDate.format("MMM D, YYYY")}`;
+    }
+    return "All Time";
+  };
+
+  const categoryName =
+    categories.find((c) => String(c.id) === String(categoryFilter))?.name ||
+    "All Categories";
+
+  const handlePrint = () => {
+    if (loading || loadingStats || !displayStatsData) return;
+    window.print();
+  };
+
   return (
     <div className="dashbaord-pg">
       {loadingStats && (
-        <div className="h-[calc(100vh-56px)] absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 rounded-md !z-50 backdrop-blur-sm">
+        <div className="no-print h-[calc(100vh-56px)] absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 rounded-md !z-50 backdrop-blur-sm">
           <CircularProgress size={40} thickness={4} sx={{ color: "#9C6BFF" }} />
         </div>
       )}
 
       {loading ? (
-        <div className="fixed inset-0 flex items-center justify-center bg-white z-50">
+        <div className="no-print fixed inset-0 flex items-center justify-center bg-white z-50">
           <CircularProgress size={60} thickness={4} sx={{ color: "#9C6BFF" }} />
         </div>
       ) : (
-        <div className="space-y-6 pb-5">
+        <div className="space-y-6 pb-5 dashboard-screen-only">
           {/* Header with Date Filters */}
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             {/* Left: Heading */}
-            <h2 className="text-lg md:text-xl font-semibold text-sidebar">
-              Overview
-            </h2>
+            <div className="flex flex-wrap items-center gap-3">
+              <h2 className="text-lg md:text-xl font-semibold text-sidebar">
+                Overview
+              </h2>
+              {/* <button
+                type="button"
+                onClick={handlePrint}
+                disabled={loading || loadingStats || !displayStatsData}
+                className="no-print inline-flex items-center gap-1.5 px-3 py-[6.2px] text-xs font-medium rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-brand-600 hover:border-brand-300 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <PrinterIcon className="h-4 w-4" />
+                Print / PDF
+              </button> */}
+            </div>
 
             {/* Right: Filters */}
             <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto items-stretch sm:items-center">
@@ -631,7 +666,7 @@ export default function Dashboard() {
               Tickets Created
             </h3>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={getChartData()}>
+              <LineChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                 <XAxis dataKey="name" />
                 <YAxis />
@@ -746,6 +781,18 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
+      <div className="dashboard-print-only">
+        <DashboardPrintReport
+          dateRange={getDateRangeLabel()}
+          categoryName={categoryName}
+          generatedAt={dayjs().format("MMM D, YYYY h:mm A")}
+          stats={stats}
+          chartData={chartData}
+          statusData={statusData}
+          priorityData={priorityData}
+        />
+      </div>
     </div>
   );
 }
