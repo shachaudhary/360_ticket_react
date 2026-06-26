@@ -5,6 +5,8 @@ import {
   Tooltip,
   CircularProgress,
   InputAdornment,
+  Autocomplete,
+  Box,
 } from "@mui/material";
 import ClearIcon from "@mui/icons-material/Clear";
 import { TrashIcon, EyeIcon } from "@heroicons/react/24/outline";
@@ -13,12 +15,37 @@ import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import { createAPIEndPoint } from "../config/api/api";
 import { createAPIEndPointAuth } from "../config/api/apiAuth";
 import { toProperCase } from "../utils/formatting";
+import { convertToCST } from "../utils";
 import CustomTablePagination from "../components/CustomTablePagination";
 import ConfirmationModal from "../components/ConfirmationModal";
 import { Navigate, useNavigate, useLocation } from "react-router-dom";
 import { useApp } from "../state/AppContext";
 import toast from "react-hot-toast";
+import {
+  getStaticInventoryFallbackList,
+  sortInventoryDevicesByCreatedDesc,
+  filterInventoryDevices,
+} from "../data/staticInventoryDevices";
 // import InventoryStatusChip from "../components/InventoryStatusChip";
+
+const inventoryFilterWrapSx = {
+  width: "100%",
+  maxWidth: { xs: "100%", sm: 280 },
+  flexShrink: 0,
+};
+
+const inventoryFilterInputSx = {
+  width: "100%",
+  maxWidth: "100%",
+  "& .MuiOutlinedInput-root": {
+    height: 40,
+    minHeight: 40,
+    boxSizing: "border-box",
+  },
+  "& .MuiInputBase-input": {
+    py: 0,
+  },
+};
 
 export default function InventoryList() {
   const navigate = useNavigate();
@@ -27,8 +54,10 @@ export default function InventoryList() {
 
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [locationFilter, setLocationFilter] = useState("");
   const [loading, setLoading] = useState(true);
   const [devices, setDevices] = useState([]);
+  const [locations, setLocations] = useState([]);
   const [locationsById, setLocationsById] = useState({});
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -52,8 +81,33 @@ export default function InventoryList() {
           `clinic_locations/get_all/${user.clinic_id}`,
         ).fetchAll();
         const locs = res.data?.locations || [];
+        const filtered = locs.filter((loc) => {
+          const name = (loc.location_name || "").trim().toLowerCase();
+          return (
+            loc.id !== 25 &&
+            loc.id !== 28 &&
+            loc.id !== 44 &&
+            name !== "sales team" &&
+            name !== "insurance" &&
+            name !== "jazmin spanish"
+          );
+        });
+        const sorted = filtered.sort((a, b) => {
+          const nameA = (
+            a.display_name?.trim() ||
+            a.location_name?.trim() ||
+            ""
+          ).toLowerCase();
+          const nameB = (
+            b.display_name?.trim() ||
+            b.location_name?.trim() ||
+            ""
+          ).toLowerCase();
+          return nameA.localeCompare(nameB);
+        });
+        setLocations(sorted);
         const map = {};
-        locs.forEach((l) => {
+        sorted.forEach((l) => {
           map[l.id] = l.display_name || l.location_name || `#${l.id}`;
         });
         setLocationsById(map);
@@ -72,26 +126,33 @@ export default function InventoryList() {
     }
     try {
       setLoading(true);
-      let res;
-      if (debouncedQuery.trim()) {
-        res = await createAPIEndPoint("devices/search").fetchFiltered({
-          q: debouncedQuery.trim(),
-        });
-      } else {
-        res = await createAPIEndPoint("devices").fetchFiltered({
-          clinic_id: user.clinic_id,
-        });
+      const params = { clinic_id: user.clinic_id };
+      if (locationFilter) {
+        params.location_id = locationFilter;
       }
-      const list = res.data?.data ?? res.data ?? [];
-      setDevices(Array.isArray(list) ? list : []);
+
+      const res = await createAPIEndPoint("devices").fetchFiltered(params);
+      let list = res.data?.data ?? res.data ?? [];
+      if (!Array.isArray(list)) list = [];
+
+      if (debouncedQuery.trim()) {
+        list = filterInventoryDevices(list, debouncedQuery, locationsById);
+      }
+
+      setDevices(sortInventoryDevicesByCreatedDesc(list));
     } catch (err) {
       console.error(err);
-      toast.error("Failed to load inventory");
-      setDevices([]);
+      setDevices(
+        getStaticInventoryFallbackList(
+          user.clinic_id,
+          debouncedQuery,
+          locationFilter,
+        ),
+      );
     } finally {
       setLoading(false);
     }
-  }, [user?.clinic_id, debouncedQuery]);
+  }, [user?.clinic_id, debouncedQuery, locationFilter, locationsById]);
 
   useEffect(() => {
     fetchDevices();
@@ -138,31 +199,73 @@ export default function InventoryList() {
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="text-lg md:text-xl font-semibold text-sidebar">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <h2 className="text-lg md:text-xl font-semibold text-sidebar shrink-0">
           IT Inventory
         </h2>
-        <div className="flex flex-col sm:flex-row gap-2 sm:items-center sm:ml-auto w-full sm:w-auto">
-          <TextField
-            label="Search serial, name, IP, MAC"
-            size="small"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="w-full sm:!min-w-[260px]"
-            InputProps={{
-              endAdornment: query?.length > 0 && (
-                <InputAdornment position="end">
-                  <IconButton size="small" onClick={() => setQuery("")}>
-                    <ClearIcon fontSize="small" />
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
+        <div className="flex flex-col sm:flex-row gap-2 sm:items-center w-full lg:w-auto lg:justify-end">
+          <Box sx={inventoryFilterWrapSx}>
+            <TextField
+              label="Search location, room, computer, serial, type"
+              size="small"
+              fullWidth
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              disabled={loading}
+              sx={inventoryFilterInputSx}
+              InputProps={{
+                endAdornment: query?.length > 0 && (
+                  <InputAdornment position="end">
+                    <IconButton
+                      size="small"
+                      onClick={() => setQuery("")}
+                      disabled={loading}
+                    >
+                      <ClearIcon fontSize="small" />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Box>
+          <Box sx={inventoryFilterWrapSx}>
+            <Autocomplete
+              size="small"
+              fullWidth
+              disabled={loading}
+              sx={inventoryFilterInputSx}
+              options={[
+                { id: "", location_name: "All Locations" },
+                ...locations,
+              ]}
+              getOptionLabel={(opt) =>
+                opt.display_name || opt.location_name || ""
+              }
+              value={
+                locationFilter === ""
+                  ? { id: "", location_name: "All Locations" }
+                  : locations.find((loc) => loc.id === locationFilter) || null
+              }
+              onChange={(_, newValue) => {
+                setLocationFilter(newValue?.id ? newValue.id : "");
+                setPage(0);
+              }}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  size="small"
+                  fullWidth
+                  label="Location"
+                  placeholder="All Locations"
+                />
+              )}
+            />
+          </Box>
           <button
             type="button"
             onClick={() => navigate("/inventory/new")}
-            className="flex items-center justify-center gap-1 rounded-lg bg-brand-500 px-3 py-2 text-sm font-semibold text-white hover:bg-brand-600 transition-all whitespace-nowrap"
+            className="flex items-center justify-center gap-1 rounded-lg bg-brand-500 px-3 py-2 text-sm font-semibold text-white hover:bg-brand-600 transition-all whitespace-nowrap shrink-0"
           >
             <PlusIcon className="h-4 w-4 text-white stroke-[2.5]" />
             Add inventory
@@ -216,6 +319,9 @@ export default function InventoryList() {
                     <th className="px-4 py-3 border-b border-r border-[#E5E7EB]">
                       Device type
                     </th>
+                    <th className="px-4 py-3 border-b border-r border-[#E5E7EB]">
+                      Created at
+                    </th>
                     {/* <th className="px-4 py-3 border-b border-r border-[#E5E7EB]">
                       Status
                     </th> */}
@@ -247,6 +353,7 @@ export default function InventoryList() {
                         title={locationsById[d.location_id]}
                       >
                         {locationsById[d.location_id] ||
+                          d.location_details?.location_name ||
                           `ID ${d.location_id ?? "—"}`}
                       </td>
                       <td className="px-4 py-3 border-b border-[#E5E7EB] text-gray-600">
@@ -266,6 +373,9 @@ export default function InventoryList() {
                       </td>
                       <td className="px-4 py-3 border-b border-[#E5E7EB]">
                         {d.device_type ? toProperCase(d.device_type) : "—"}
+                      </td>
+                      <td className="px-4 py-3 border-b border-[#E5E7EB] text-gray-600 whitespace-nowrap">
+                        {d.created_at ? convertToCST(d.created_at) : "—"}
                       </td>
                       {/* <td
                         className="px-4 py-3 border-b border-[#E5E7EB]"

@@ -1,0 +1,472 @@
+export const STATIC_INVENTORY_DEVICES = [
+  {
+    anydesk_id: "000-000",
+    anydesk_installed: true,
+    anydesk_password: "321312312312312",
+    clinic_id: 1,
+    computer_name: "Laptop",
+    created_at: "2026-04-07T18:32:55.732590",
+    device_image_url: null,
+    device_images: [],
+    device_login_password: "312312312312312",
+    device_login_username: "332131",
+    device_model: "New",
+    device_name: "New",
+    device_type: "Laptop",
+    id: 2,
+    ip_address: "192.168.1.100",
+    location_details: { clinic_id: 1, location_name: "Dental 360 Armitage" },
+    location_id: 39,
+    mac_address: "AA:BB:CC:DD:EE:FF",
+    room_number: "2002",
+    serial_number: "12",
+    status: "Active",
+    updated_at: "2026-04-08T15:38:54.216937",
+    user_details: null,
+    user_id: null,
+  },
+  {
+    anydesk_id: "909090",
+    anydesk_installed: true,
+    anydesk_password: "123456789",
+    clinic_id: 1,
+    computer_name: "Macbook",
+    created_at: "2026-04-08T14:01:52.375281",
+    device_image_url:
+      "https://elasticbeanstalk-us-east-1-559050213636.s3.us-east-1.amazonaws.com/devices/3/6c8c403ee132490f943718bf4e011759.jpg",
+    device_images: [
+      {
+        name: "M5-MacBook-Pro-review.jpg",
+        url: "https://elasticbeanstalk-us-east-1-559050213636.s3.us-east-1.amazonaws.com/devices/3/6c8c403ee132490f943718bf4e011759.jpg",
+      },
+    ],
+    device_login_password: "123456789",
+    device_login_username: "loginCreds",
+    device_model: "pro m5",
+    device_name: "Macbook pro m5",
+    device_type: "Macbook",
+    id: 3,
+    ip_address: "192.168.1.100",
+    location_details: { clinic_id: 1, location_name: "Pediatrics" },
+    location_id: 29,
+    mac_address: "AA:BB:CC:DD:EE:FF",
+    room_number: "9009",
+    serial_number: "88",
+    status: "Active",
+    updated_at: "2026-05-20T20:04:19.969311",
+    user_details: {
+      email: "amanameerali.03@gmail.com",
+      full_name: "Aman Ali",
+      id: 57,
+      phone: "(000) 000-0000",
+    },
+    user_id: 57,
+  },
+  {
+    anydesk_id: "1420346619",
+    anydesk_installed: true,
+    anydesk_password: "Rain-Chicago-2026",
+    clinic_id: 1,
+    computer_name: "ThinkCenter",
+    created_at: "2026-06-26T14:25:05.503395",
+    device_image_url: null,
+    device_images: [],
+    device_login_password: "Dental360!",
+    device_login_username: "ipfdrcu",
+    device_model: "10T8S3GL00",
+    device_name: "IPFDRCU",
+    device_type: "Desktop",
+    id: 6,
+    ip_address: "192.168.1.172",
+    location_details: { clinic_id: 1, location_name: "Irving Park Family Dentist" },
+    location_id: 1,
+    mac_address: "54-05-DB-F2-F7-ED",
+    room_number: "Dr Parvez Office",
+    serial_number: "MJ0E7XCA",
+    status: "Active",
+    updated_at: "2026-06-26T14:25:05.503398",
+    user_details: {
+      email: "shahrukh.c@dental360grp.com",
+      full_name: "Shahrukh Chaudhary",
+      id: 43,
+      phone: "(437) 665-2985",
+    },
+    user_id: 43,
+  },
+  {
+    anydesk_id: "1654495605",
+    anydesk_installed: false,
+    anydesk_password: null,
+    clinic_id: 1,
+    computer_name: "Lenovo S510",
+    created_at: "2026-06-26T15:32:20.607705",
+    device_image_url: null,
+    device_images: [],
+    device_login_password: "Dental360!",
+    device_login_username: "IrvingRCU",
+    device_model: "S510",
+    device_name: "Lenovo S510",
+    device_type: "Desktop",
+    id: 7,
+    ip_address: "192.168.1.134",
+    location_details: { clinic_id: 1, location_name: "Irving Park Family Dentist" },
+    location_id: 1,
+    mac_address: "BC-D2-2C-61-6C-06",
+    room_number: "Dr Parvez Office",
+    serial_number: "1S10KY002BUSPCOEOXYR",
+    status: "Active",
+    updated_at: "2026-06-26T15:32:20.607709",
+    user_details: {
+      email: "shahrukh.c@dental360grp.com",
+      full_name: "Shahrukh Chaudhary",
+      id: 43,
+      phone: "(437) 665-2985",
+    },
+    user_id: 43,
+  },
+  {
+    anydesk_id: "1454848877",
+    anydesk_installed: true,
+    anydesk_password: "Cloud-Ohare-0626",
+    clinic_id: 1,
+    computer_name: "Dell Optiplex",
+    created_at: "2026-06-26T15:47:13.427544",
+    device_image_url: null,
+    device_images: [],
+    device_login_password: "343500",
+    device_login_username: "IrvingParkFamilyDent",
+    device_model: "Optiplex 3060",
+    device_name: "IPFD",
+    device_type: "Desktop",
+    id: 8,
+    ip_address: "192.168.1.159",
+    location_details: { clinic_id: 1, location_name: "Irving Park Family Dentist" },
+    location_id: 1,
+    mac_address: "6C-2B-59-DC-38-66",
+    room_number: "Office",
+    serial_number: "6BKR0W2",
+    status: "Active",
+    updated_at: "2026-06-26T15:47:30.215644",
+    user_details: {
+      email: "shahrukh.c@dental360grp.com",
+      full_name: "Shahrukh Chaudhary",
+      id: 43,
+      phone: "(437) 665-2985",
+    },
+    user_id: 43,
+  },
+  {
+    anydesk_id: "812369240",
+    anydesk_installed: true,
+    anydesk_password: "Dunkin-Black-2026",
+    clinic_id: 1,
+    computer_name: "Think Center",
+    created_at: "2026-06-26T16:05:37.163150",
+    device_image_url: null,
+    device_images: [],
+    device_login_password: "343500",
+    device_login_username: "Adminstrator",
+    device_model: "10HYCTO1WW",
+    device_name: "IPD-VPN01-PC",
+    device_type: "Desktop",
+    id: 9,
+    ip_address: "192.168.1.148",
+    location_details: { clinic_id: 1, location_name: "Irving Park Family Dentist" },
+    location_id: 1,
+    mac_address: "00-23-24-C4-3D-21",
+    room_number: "Office",
+    serial_number: "MJ04LC6T",
+    status: "Active",
+    updated_at: "2026-06-26T16:05:37.163154",
+    user_details: {
+      email: "shahrukh.c@dental360grp.com",
+      full_name: "Shahrukh Chaudhary",
+      id: 43,
+      phone: "(437) 665-2985",
+    },
+    user_id: 43,
+  },
+  {
+    anydesk_id: "1387952878",
+    anydesk_installed: true,
+    anydesk_password: "Red-Sanitizer-2026",
+    clinic_id: 1,
+    computer_name: "Think Center",
+    created_at: "2026-06-26T16:17:40.961809",
+    device_image_url:
+      "https://elasticbeanstalk-us-east-1-559050213636.s3.us-east-1.amazonaws.com/devices/10/3aa708fedb644717b5a0e4540da915bc.jpeg",
+    device_images: [
+      {
+        name: "WhatsApp Image 2026-06-26 at 12.17.05.jpeg",
+        url: "https://elasticbeanstalk-us-east-1-559050213636.s3.us-east-1.amazonaws.com/devices/10/3aa708fedb644717b5a0e4540da915bc.jpeg",
+      },
+    ],
+    device_login_password: "3534",
+    device_login_username: "d360irving-office",
+    device_model: "Lenovo - 1700",
+    device_name: "M1UKT70A",
+    device_type: "Desktop",
+    id: 10,
+    ip_address: "192.168.1.126",
+    location_details: { clinic_id: 1, location_name: "Irving Park Family Dentist" },
+    location_id: 1,
+    mac_address: "E8-6A-64-21-D5-4D",
+    room_number: "Office",
+    serial_number: "MJ07QFCG",
+    status: "Active",
+    updated_at: "2026-06-26T16:17:40.961812",
+    user_details: {
+      email: "shahrukh.c@dental360grp.com",
+      full_name: "Shahrukh Chaudhary",
+      id: 43,
+      phone: "(437) 665-2985",
+    },
+    user_id: 43,
+  },
+  {
+    anydesk_id: "1091180405",
+    anydesk_installed: true,
+    anydesk_password: "Mask-Off-2026",
+    clinic_id: 1,
+    computer_name: "Think Center",
+    created_at: "2026-06-26T16:24:54.370017",
+    device_image_url:
+      "https://elasticbeanstalk-us-east-1-559050213636.s3.us-east-1.amazonaws.com/devices/11/c98c3a89d0ea427299f4389c5c49d2e7.jpeg",
+    device_images: [
+      {
+        name: "WhatsApp Image 2026-06-26 at 12.24.13.jpeg",
+        url: "https://elasticbeanstalk-us-east-1-559050213636.s3.us-east-1.amazonaws.com/devices/11/c98c3a89d0ea427299f4389c5c49d2e7.jpeg",
+      },
+      {
+        name: "WhatsApp Image 2026-06-26 at 12.24.18.jpeg",
+        url: "https://elasticbeanstalk-us-east-1-559050213636.s3.us-east-1.amazonaws.com/devices/11/a03580d0ada24bb4b14fc589af53f589.jpeg",
+      },
+    ],
+    device_login_password: "Dental@360",
+    device_login_username: "Dental360IrvingPark",
+    device_model: "Lenovo M720q",
+    device_name: "DENTAL360",
+    device_type: "Desktop",
+    id: 11,
+    ip_address: "192.168.1.192",
+    location_details: { clinic_id: 1, location_name: "Irving Park Family Dentist" },
+    location_id: 1,
+    mac_address: "98-FA-9B-7C-CF-E7",
+    room_number: "Office",
+    serial_number: "MJ0ATA9L",
+    status: "Active",
+    updated_at: "2026-06-26T16:24:54.370021",
+    user_details: {
+      email: "shahrukh.c@dental360grp.com",
+      full_name: "Shahrukh Chaudhary",
+      id: 43,
+      phone: "(437) 665-2985",
+    },
+    user_id: 43,
+  },
+  {
+    anydesk_id: "1495782635",
+    anydesk_installed: true,
+    anydesk_password: "Salty-Chips-2026",
+    clinic_id: 1,
+    computer_name: "Think Center",
+    created_at: "2026-06-26T16:32:14.044860",
+    device_image_url:
+      "https://elasticbeanstalk-us-east-1-559050213636.s3.us-east-1.amazonaws.com/devices/12/f0152aed2b924c408d3cb7ac3ae819dd.jpeg",
+    device_images: [
+      {
+        name: "WhatsApp Image 2026-06-26 at 12.31.51.jpeg",
+        url: "https://elasticbeanstalk-us-east-1-559050213636.s3.us-east-1.amazonaws.com/devices/12/f0152aed2b924c408d3cb7ac3ae819dd.jpeg",
+      },
+    ],
+    device_login_password: "343500",
+    device_login_username: "ortho",
+    device_model: "10MUS0N300",
+    device_name: "Desktop-NSL30DR",
+    device_type: "Desktop",
+    id: 12,
+    ip_address: "192.168.1.150",
+    location_details: { clinic_id: 1, location_name: "Irving Park Family Dentist" },
+    location_id: 1,
+    mac_address: "6C-4B-90-79-B0-C2",
+    room_number: "Front Desk Back",
+    serial_number: "MJ07JRWU",
+    status: "Active",
+    updated_at: "2026-06-26T16:32:14.044863",
+    user_details: {
+      email: "shahrukh.c@dental360grp.com",
+      full_name: "Shahrukh Chaudhary",
+      id: 43,
+      phone: "(437) 665-2985",
+    },
+    user_id: 43,
+  },
+  {
+    anydesk_id: "1322952703",
+    anydesk_installed: true,
+    anydesk_password: "Water-Tissue-2026",
+    clinic_id: 1,
+    computer_name: "Thinks Center",
+    created_at: "2026-06-26T16:42:11.188912",
+    device_image_url:
+      "https://elasticbeanstalk-us-east-1-559050213636.s3.us-east-1.amazonaws.com/devices/13/d80a9f80a1ea4d1ba9d5c1630110f3d1.jpeg",
+    device_images: [
+      {
+        name: "WhatsApp Image 2026-06-26 at 12.41.51.jpeg",
+        url: "https://elasticbeanstalk-us-east-1-559050213636.s3.us-east-1.amazonaws.com/devices/13/d80a9f80a1ea4d1ba9d5c1630110f3d1.jpeg",
+      },
+    ],
+    device_login_password: "DENTAL3435!!",
+    device_login_username: "irvingparkfamilydent",
+    device_model: "10MUS3NG00",
+    device_name: "Windows-RGDAGj2",
+    device_type: "Desktop",
+    id: 13,
+    ip_address: "192.168.1.167",
+    location_details: { clinic_id: 1, location_name: "Irving Park Family Dentist" },
+    location_id: 1,
+    mac_address: "6C-4B-90-3E-8D-43",
+    room_number: "Front Desk",
+    serial_number: "MJ06FP9H",
+    status: "Active",
+    updated_at: "2026-06-26T16:42:11.188915",
+    user_details: {
+      email: "shahrukh.c@dental360grp.com",
+      full_name: "Shahrukh Chaudhary",
+      id: 43,
+      phone: "(437) 665-2985",
+    },
+    user_id: 43,
+  },
+  {
+    anydesk_id: "1670279487",
+    anydesk_installed: true,
+    anydesk_password: "Grey-Pink-2026",
+    clinic_id: 1,
+    computer_name: "Think Center",
+    created_at: "2026-06-26T16:47:46.352526",
+    device_image_url:
+      "https://elasticbeanstalk-us-east-1-559050213636.s3.us-east-1.amazonaws.com/devices/14/b67448b652424ca7b0d9d3feb61fa74c.jpeg",
+    device_images: [
+      {
+        name: "WhatsApp Image 2026-06-26 at 12.47.23.jpeg",
+        url: "https://elasticbeanstalk-us-east-1-559050213636.s3.us-east-1.amazonaws.com/devices/14/b67448b652424ca7b0d9d3feb61fa74c.jpeg",
+      },
+    ],
+    device_login_password: "3435",
+    device_login_username: "Dental360",
+    device_model: "10MUS0C800",
+    device_name: "DESKTOP-RP4EGLK",
+    device_type: "Desktop",
+    id: 14,
+    ip_address: "192.168.1.105",
+    location_details: { clinic_id: 1, location_name: "Irving Park Family Dentist" },
+    location_id: 1,
+    mac_address: "00-23-24-F2-F8-DF",
+    room_number: "Front Desk",
+    serial_number: "S4CC3411",
+    status: "Active",
+    updated_at: "2026-06-26T16:47:46.352530",
+    user_details: {
+      email: "shahrukh.c@dental360grp.com",
+      full_name: "Shahrukh Chaudhary",
+      id: 43,
+      phone: "(437) 665-2985",
+    },
+    user_id: 43,
+  },
+  {
+    anydesk_id: "571122791",
+    anydesk_installed: true,
+    anydesk_password: "Purple-Pen-2026",
+    clinic_id: 1,
+    computer_name: "Think Center",
+    created_at: "2026-06-26T16:52:45.434752",
+    device_image_url:
+      "https://elasticbeanstalk-us-east-1-559050213636.s3.us-east-1.amazonaws.com/devices/15/f910e271b27640448a0ef16f70a4abc5.jpeg",
+    device_images: [
+      {
+        name: "WhatsApp Image 2026-06-26 at 12.47.23.jpeg",
+        url: "https://elasticbeanstalk-us-east-1-559050213636.s3.us-east-1.amazonaws.com/devices/15/f910e271b27640448a0ef16f70a4abc5.jpeg",
+      },
+    ],
+    device_login_password: "343500",
+    device_login_username: "Dental360",
+    device_model: "10MUS1A000",
+    device_name: "DESKTOP-NJG54SP",
+    device_type: "Desktop",
+    id: 15,
+    ip_address: "192.168.1.153",
+    location_details: { clinic_id: 1, location_name: "Irving Park Family Dentist" },
+    location_id: 1,
+    mac_address: "6C-4B-90-2B-AD-95",
+    room_number: "Front Desk",
+    serial_number: "MJ063LSS",
+    status: "Active",
+    updated_at: "2026-06-26T16:52:45.434755",
+    user_details: {
+      email: "shahrukh.c@dental360grp.com",
+      full_name: "Shahrukh Chaudhary",
+      id: 43,
+      phone: "(437) 665-2985",
+    },
+    user_id: 43,
+  },
+];
+
+const getSearchableFields = (device, locationsById = {}) => [
+  device.location_details?.location_name,
+  locationsById[device.location_id],
+  device.room_number,
+  device.computer_name,
+  device.device_name,
+  device.serial_number,
+  device.device_type,
+];
+
+export function filterInventoryDevices(devices, query, locationsById = {}) {
+  const term = query.trim().toLowerCase();
+  if (!term) return devices;
+
+  return devices.filter((device) =>
+    getSearchableFields(device, locationsById).some((value) =>
+      String(value ?? "")
+        .toLowerCase()
+        .includes(term),
+    ),
+  );
+}
+
+export function searchStaticInventoryDevices(devices, query, locationsById = {}) {
+  return filterInventoryDevices(devices, query, locationsById);
+}
+
+export function getStaticInventoryDevices(clinicId) {
+  if (!clinicId) return [...STATIC_INVENTORY_DEVICES];
+  return STATIC_INVENTORY_DEVICES.filter(
+    (device) => Number(device.clinic_id) === Number(clinicId),
+  );
+}
+
+export function getStaticInventoryDeviceById(id, clinicId) {
+  const devices = getStaticInventoryDevices(clinicId);
+  return devices.find((device) => String(device.id) === String(id)) ?? null;
+}
+
+export function sortInventoryDevicesByCreatedDesc(devices) {
+  return [...devices].sort((a, b) => {
+    const timeA = new Date(a.created_at || 0).getTime();
+    const timeB = new Date(b.created_at || 0).getTime();
+    return timeB - timeA;
+  });
+}
+
+export function getStaticInventoryFallbackList(clinicId, query = "", locationId = "") {
+  let devices = getStaticInventoryDevices(clinicId);
+  if (locationId) {
+    devices = devices.filter(
+      (device) => String(device.location_id) === String(locationId),
+    );
+  }
+  return sortInventoryDevicesByCreatedDesc(searchStaticInventoryDevices(devices, query));
+}

@@ -20,6 +20,7 @@ import { convertToCST } from "../utils";
 import { toProperCase } from "../utils/formatting";
 import { useApp } from "../state/AppContext";
 import toast from "react-hot-toast";
+import { getStaticInventoryDeviceById } from "../data/staticInventoryDevices";
 // import InventoryStatusChip from "../components/InventoryStatusChip";
 
 function pickDevicePayload(raw) {
@@ -231,12 +232,11 @@ export default function InventoryView() {
       setDevice(d || null);
     } catch (err) {
       console.error(err);
-      toast.error("Failed to load inventory item");
-      setDevice(null);
+      setDevice(getStaticInventoryDeviceById(id, user?.clinic_id));
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, user?.clinic_id]);
 
   useEffect(() => {
     fetchDevice();
