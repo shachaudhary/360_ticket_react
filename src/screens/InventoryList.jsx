@@ -418,7 +418,7 @@ export default function InventoryList() {
                             <PencilSquareIcon className="h-5 w-5 text-gray-500 hover:text-brand-500" />
                           </IconButton>
                         </Tooltip>
-                        <Tooltip title="Delete">
+                        {/* <Tooltip title="Delete">
                           <IconButton
                             size="small"
                             onClick={(e) =>
@@ -427,7 +427,7 @@ export default function InventoryList() {
                           >
                             <TrashIcon className="h-5 w-5 text-gray-500 hover:text-red-500" />
                           </IconButton>
-                        </Tooltip>
+                        </Tooltip> */}
                       </td>
                     </tr>
                   ))}
