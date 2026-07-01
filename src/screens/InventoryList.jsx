@@ -6,15 +6,15 @@ import {
   CircularProgress,
   InputAdornment,
   Autocomplete,
-  Box,
 } from "@mui/material";
 import ClearIcon from "@mui/icons-material/Clear";
-import { TrashIcon, EyeIcon } from "@heroicons/react/24/outline";
+import { TrashIcon, EyeIcon, ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import { createAPIEndPoint } from "../config/api/api";
 import { createAPIEndPointAuth } from "../config/api/apiAuth";
 import { toProperCase } from "../utils/formatting";
+import { canAccessInventory } from "../utils/inventoryAccess";
 import { convertToCST } from "../utils";
 import CustomTablePagination from "../components/CustomTablePagination";
 import ConfirmationModal from "../components/ConfirmationModal";
@@ -28,15 +28,9 @@ import {
 } from "../data/staticInventoryDevices";
 // import InventoryStatusChip from "../components/InventoryStatusChip";
 
-const inventoryFilterWrapSx = {
-  width: "100%",
-  maxWidth: { xs: "100%", sm: 280 },
-  flexShrink: 0,
-};
-
 const inventoryFilterInputSx = {
   width: "100%",
-  maxWidth: "100%",
+  minWidth: 0,
   "& .MuiOutlinedInput-root": {
     height: 40,
     minHeight: 40,
@@ -45,6 +39,14 @@ const inventoryFilterInputSx = {
   "& .MuiInputBase-input": {
     py: 0,
   },
+};
+
+const inventoryLocationSx = {
+  ...inventoryFilterInputSx,
+  width: "100%",
+  flexShrink: 0,
+  minWidth: { sm: 180, lg: 200 },
+  maxWidth: { sm: 220, lg: 240 },
 };
 
 export default function InventoryList() {
@@ -187,7 +189,7 @@ export default function InventoryList() {
     }
   };
 
-  if (!user?.is_form_access) {
+  if (!canAccessInventory(user)) {
     return <Navigate to="/dashboard" replace />;
   }
 
@@ -199,78 +201,76 @@ export default function InventoryList() {
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <h2 className="text-lg md:text-xl font-semibold text-sidebar shrink-0">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-3">
+        <h2 className="text-lg md:text-xl font-semibold text-sidebar shrink-0 lg:pr-1">
           IT Inventory
         </h2>
-        <div className="flex flex-col sm:flex-row gap-2 sm:items-center w-full lg:w-auto lg:justify-end">
-          <Box sx={inventoryFilterWrapSx}>
-            <TextField
-              label="Search location, room, computer, serial, type"
-              size="small"
-              fullWidth
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              disabled={loading}
-              sx={inventoryFilterInputSx}
-              InputProps={{
-                endAdornment: query?.length > 0 && (
-                  <InputAdornment position="end">
-                    <IconButton
-                      size="small"
-                      onClick={() => setQuery("")}
-                      disabled={loading}
-                    >
-                      <ClearIcon fontSize="small" />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
-          </Box>
-          <Box sx={inventoryFilterWrapSx}>
-            <Autocomplete
-              size="small"
-              fullWidth
-              disabled={loading}
-              sx={inventoryFilterInputSx}
-              options={[
-                { id: "", location_name: "All Locations" },
-                ...locations,
-              ]}
-              getOptionLabel={(opt) =>
-                opt.display_name || opt.location_name || ""
-              }
-              value={
-                locationFilter === ""
-                  ? { id: "", location_name: "All Locations" }
-                  : locations.find((loc) => loc.id === locationFilter) || null
-              }
-              onChange={(_, newValue) => {
-                setLocationFilter(newValue?.id ? newValue.id : "");
-                setPage(0);
-              }}
-              isOptionEqualToValue={(option, value) => option.id === value.id}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  size="small"
-                  fullWidth
-                  label="Location"
-                  placeholder="All Locations"
-                />
-              )}
-            />
-          </Box>
-          <button
-            type="button"
-            onClick={() => navigate("/inventory/new")}
-            className="flex items-center justify-center gap-1 rounded-lg bg-brand-500 px-3 py-2 text-sm font-semibold text-white hover:bg-brand-600 transition-all whitespace-nowrap shrink-0"
-          >
-            <PlusIcon className="h-4 w-4 text-white stroke-[2.5]" />
-            Add inventory
-          </button>
+
+        <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center min-w-0">
+          <TextField
+            label="Search"
+            placeholder="Location, room, computer, serial, type"
+            size="small"
+            fullWidth
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            disabled={loading}
+            sx={{ ...inventoryFilterInputSx, flex: 1, minWidth: { sm: 160 } }}
+            InputProps={{
+              endAdornment: query?.length > 0 && (
+                <InputAdornment position="end">
+                  <IconButton
+                    size="small"
+                    onClick={() => setQuery("")}
+                    disabled={loading}
+                  >
+                    <ClearIcon fontSize="small" />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+          <Autocomplete
+            size="small"
+            disabled={loading}
+            sx={inventoryLocationSx}
+            options={[
+              { id: "", location_name: "All Locations" },
+              ...locations,
+            ]}
+            getOptionLabel={(opt) =>
+              opt.display_name || opt.location_name || ""
+            }
+            value={
+              locationFilter === ""
+                ? { id: "", location_name: "All Locations" }
+                : locations.find((loc) => loc.id === locationFilter) || null
+            }
+            onChange={(_, newValue) => {
+              setLocationFilter(newValue?.id ? newValue.id : "");
+              setPage(0);
+            }}
+            isOptionEqualToValue={(option, value) => option.id === value.id}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                size="small"
+                fullWidth
+                label="Location"
+                placeholder="All Locations"
+              />
+            )}
+          />
         </div>
+
+        <button
+          type="button"
+          onClick={() => navigate("/inventory/new")}
+          className="flex w-full lg:w-auto items-center justify-center gap-1 rounded-lg bg-brand-500 px-3 py-2 text-sm font-semibold text-white hover:bg-brand-600 transition-all whitespace-nowrap shrink-0"
+        >
+          <PlusIcon className="h-4 w-4 text-white stroke-[2.5]" />
+          Add inventory
+        </button>
       </div>
 
       {loading ? (
@@ -363,13 +363,13 @@ export default function InventoryList() {
                         className="px-4 py-3 border-b border-[#E5E7EB] text-gray-700 max-w-[160px] truncate"
                         title={d.computer_name}
                       >
-                        {d.computer_name || "—"}
+                        {toProperCase(d.computer_name) || "—"}
                       </td>
                       <td
                         className="px-4 py-3 border-b border-[#E5E7EB] font-medium text-gray-800 max-w-[140px] truncate"
                         title={d.serial_number}
                       >
-                        {d.serial_number || "—"}
+                        {toProperCase(d.serial_number) || "—"}
                       </td>
                       <td className="px-4 py-3 border-b border-[#E5E7EB]">
                         {d.device_type ? toProperCase(d.device_type) : "—"}
@@ -395,6 +395,18 @@ export default function InventoryList() {
                             <EyeIcon className="h-5 w-5 text-gray-500 hover:text-brand-500" />
                           </IconButton>
                         </Tooltip>
+                        <Tooltip title="Open in view">
+                          <IconButton
+                            size="small"
+                            component="a"
+                            href={`/inventory/${d.id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <ArrowTopRightOnSquareIcon className="h-5 w-5 text-gray-500 hover:text-brand-500" />
+                          </IconButton>
+                        </Tooltip>
                         <Tooltip title="Edit">
                           <IconButton
                             size="small"
@@ -406,7 +418,7 @@ export default function InventoryList() {
                             <PencilSquareIcon className="h-5 w-5 text-gray-500 hover:text-brand-500" />
                           </IconButton>
                         </Tooltip>
-                        {/* <Tooltip title="Delete">
+                        <Tooltip title="Delete">
                           <IconButton
                             size="small"
                             onClick={(e) =>
@@ -415,7 +427,7 @@ export default function InventoryList() {
                           >
                             <TrashIcon className="h-5 w-5 text-gray-500 hover:text-red-500" />
                           </IconButton>
-                        </Tooltip> */}
+                        </Tooltip>
                       </td>
                     </tr>
                   ))}

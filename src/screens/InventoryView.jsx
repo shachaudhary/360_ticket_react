@@ -12,15 +12,21 @@ import {
   Typography,
 } from "@mui/material";
 import { useNavigate, useParams, Navigate, useLocation } from "react-router-dom";
-import { ArrowTopRightOnSquareIcon, PencilSquareIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowTopRightOnSquareIcon,
+  EyeIcon,
+  EyeSlashIcon,
+  PencilSquareIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 import { PhotoIcon } from "@heroicons/react/24/solid";
 import { createAPIEndPoint } from "../config/api/api";
 import BackButton from "../components/BackButton";
 import { convertToCST } from "../utils";
 import { toProperCase } from "../utils/formatting";
 import { useApp } from "../state/AppContext";
-import toast from "react-hot-toast";
 import { getStaticInventoryDeviceById } from "../data/staticInventoryDevices";
+import { canAccessInventory } from "../utils/inventoryAccess";
 // import InventoryStatusChip from "../components/InventoryStatusChip";
 
 function pickDevicePayload(raw) {
@@ -216,6 +222,88 @@ const Label = ({ title, value }) => (
   </div>
 );
 
+function SecretLabel({ title, value, className = "" }) {
+  const [visible, setVisible] = useState(false);
+  const text =
+    value != null && String(value).trim() !== "" ? String(value) : null;
+
+  return (
+    <div className={className}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1.5,
+          flexWrap: "nowrap",
+          minHeight: 22,
+        }}
+      >
+        <Typography
+          variant="body2"
+          component="span"
+          sx={{
+            fontWeight: 600,
+            color: "#7E858D",
+            fontSize: "0.875rem",
+            flexShrink: 0,
+            minWidth: { xs: 100, sm: 120 },
+          }}
+        >
+          {title}
+        </Typography>
+
+        <Box
+          sx={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 0.5,
+            minWidth: 0,
+            flex: 1,
+            
+          }}
+        >
+          <Typography
+            component="span"
+            variant="body2"
+            sx={{
+              fontSize: "0.875rem",
+              fontWeight: 500,
+              color: text ? "#374151" : "#9CA3AF",
+              letterSpacing: visible ? 0 : "0.12em",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+             
+            }}
+          >
+            {text ? (visible ? text : "••••••••") : "—"}
+          </Typography>
+
+          {text && (
+            <IconButton
+              size="small"
+              onClick={() => setVisible((v) => !v)}
+              aria-label={visible ? "Hide password" : "Show password"}
+              sx={{
+                p: 0,
+                color: "#9CA3AF",
+                flexShrink: 0,
+                "&:hover": { color: "#824EF2", bgcolor: "transparent" },
+              }}
+            >
+              {visible ? (
+                <EyeSlashIcon className="h-4 w-4" />
+              ) : (
+                <EyeIcon className="h-4 w-4" />
+              )}
+            </IconButton>
+          )}
+        </Box>
+      </Box>
+    </div>
+  );
+}
+
 export default function InventoryView() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -242,7 +330,7 @@ export default function InventoryView() {
     fetchDevice();
   }, [fetchDevice, location.key]);
 
-  if (!user?.is_form_access) {
+  if (!canAccessInventory(user)) {
     return <Navigate to="/dashboard" replace />;
   }
 
@@ -357,7 +445,11 @@ export default function InventoryView() {
                   : "—"
               }
             />
-            <Label title="AnyDesk password" value={device.anydesk_password || "—"} />
+            <SecretLabel
+              title="AnyDesk password"
+              value={device.anydesk_password}
+              className="sm:col-span-2 lg:col-span-3"
+            />
           </div>
 
           <Divider sx={{ my: 3 }} />
@@ -365,7 +457,11 @@ export default function InventoryView() {
           <SectionHeading>Device login</SectionHeading>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Label title="Username" value={device.device_login_username || "—"} />
-            <Label title="Password" value={device.device_login_password || "—"} />
+            <SecretLabel
+              title="Password"
+              value={device.device_login_password}
+              className="sm:col-span-2"
+            />
           </div>
 
           <Divider sx={{ my: 3 }} />

@@ -7,6 +7,7 @@ import {
   WrenchScrewdriverIcon,
   ClockIcon,
   PrinterIcon,
+  ComputerDesktopIcon,
 } from "@heroicons/react/24/outline";
 import { checkTokenAndAuth } from "../utils/checkTokenAndAuth";
 import { useNavigate } from "react-router-dom";
@@ -30,6 +31,8 @@ import {
   PieChart,
   Pie,
   Cell,
+  BarChart,
+  Bar,
 } from "recharts";
 import dayjs from "dayjs";
 import { createAPIEndPoint } from "../config/api/api";
@@ -40,6 +43,12 @@ import { toProperCase } from "../utils/formatting";
 import Divider from "@mui/material/Divider";
 import DashboardPrintReport from "../components/DashboardPrintReport";
 import "../styles/DashboardPrint.css";
+import { canAccessInventory } from "../utils/inventoryAccess";
+import { getStaticInventoryDevices } from "../data/staticInventoryDevices";
+import {
+  buildInventoryStats,
+  inventoryStatsToChartData,
+} from "../utils/inventoryStats";
 
 const url = `/dashboard`;
 
@@ -139,6 +148,9 @@ export default function Dashboard() {
   const [categories, setCategories] = useState([]);
   const [locationFilter, setLocationFilter] = useState("");
   const [locations, setLocations] = useState([]);
+  const [inventoryStats, setInventoryStats] = useState(null);
+  const [loadingInventory, setLoadingInventory] = useState(false);
+  const showInventorySection = canAccessInventory(user);
 
   useEffect(() => {
     const fetchAuth = async () => {
@@ -276,6 +288,38 @@ export default function Dashboard() {
     fetchStats();
   }, [timeView, startDate, endDate, categoryFilter, locationFilter, useStaticStats, staticStatsData]);
 
+  useEffect(() => {
+    if (!showInventorySection || !user?.clinic_id) {
+      setInventoryStats(null);
+      return;
+    }
+
+    const locationsById = locations.reduce((acc, loc) => {
+      acc[loc.id] = loc.display_name || loc.location_name || "";
+      return acc;
+    }, {});
+
+    const fetchInventoryStats = async () => {
+      try {
+        setLoadingInventory(true);
+        const res = await createAPIEndPoint("devices").fetchFiltered({
+          clinic_id: user.clinic_id,
+        });
+        let list = res.data?.data ?? res.data ?? [];
+        if (!Array.isArray(list)) list = [];
+        setInventoryStats(buildInventoryStats(list, locationsById));
+      } catch (err) {
+        console.error("Error fetching inventory stats:", err);
+        const fallback = getStaticInventoryDevices(user.clinic_id);
+        setInventoryStats(buildInventoryStats(fallback, locationsById));
+      } finally {
+        setLoadingInventory(false);
+      }
+    };
+
+    fetchInventoryStats();
+  }, [showInventorySection, user?.clinic_id, locations]);
+
   const displayStatsData = useStaticStats ? staticStatsData : statsData;
 
   const getChartData = () =>
@@ -352,6 +396,44 @@ export default function Dashboard() {
   ];
 
   const chartData = getChartData();
+
+  const {
+    locationData: inventoryLocationData,
+    deviceTypeData: inventoryTypeData,
+    statusData: inventoryStatusData,
+  } = inventoryStatsToChartData(inventoryStats);
+
+  const inventoryStatCards = inventoryStats
+    ? [
+        {
+          label: "Total Devices",
+          value: inventoryStats.total_devices,
+          icon: (
+            <ComputerDesktopIcon className="h-6 w-6 text-brand-500" />
+          ),
+        },
+        {
+          label: "Active",
+          value: inventoryStats.active_count,
+          icon: <CheckCircleIcon className="h-6 w-6 text-green-500" />,
+        },
+        {
+          label: "AnyDesk Installed",
+          value: inventoryStats.anydesk_installed,
+          icon: <WrenchScrewdriverIcon className="h-6 w-6 text-amber-500" />,
+        },
+      ]
+    : [];
+
+  const INVENTORY_COLORS = [
+    "#9C6BFF",
+    "#60a5fa",
+    "#34d399",
+    "#fbbf24",
+    "#f87171",
+    "#a78bfa",
+    "#38bdf8",
+  ];
 
   const getDateRangeLabel = () => {
     if (timeView === "today") return "Today";
@@ -779,6 +861,162 @@ export default function Dashboard() {
               )}
             </div>
           </div>
+
+          {showInventorySection && (
+            <>
+              <Divider sx={{ my: 1 }} />
+
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <h3 className="text-md font-semibold text-sidebar">
+                  IT Inventory
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => navigate("/inventory")}
+                  className="text-xs font-medium text-brand-600 hover:text-brand-700 hover:underline self-start sm:self-auto"
+                >
+                  View all inventory →
+                </button>
+              </div>
+
+              {loadingInventory ? (
+                <div className="flex items-center justify-center py-12 rounded-md border border-gray-100 bg-white">
+                  <CircularProgress size={32} thickness={4} sx={{ color: "#9C6BFF" }} />
+                </div>
+              ) : inventoryStats ? (
+                <>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                    {inventoryStatCards.map((card) => (
+                      <div
+                        key={card.label}
+                        className="rounded-md border border-gray-100 bg-white p-5 shadow-card hover:shadow-md transition-all duration-300 flex items-center gap-4"
+                      >
+                        <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-purple-50">
+                          {card.icon}
+                        </div>
+                        <div>
+                          <div className="text-sm text-gray-500">{card.label}</div>
+                          <div className="mt-1 text-2xl font-bold">{card.value}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="rounded-md border border-gray-100 bg-white p-5 shadow-card hover:shadow-md">
+                    <h3 className="mb-3 text-md font-medium text-sidebar">
+                      Devices by Location
+                    </h3>
+                    {inventoryLocationData.length > 0 ? (
+                      <ResponsiveContainer width="100%" height={Math.max(220, inventoryLocationData.length * 36)}>
+                        <BarChart
+                          data={inventoryLocationData}
+                          layout="vertical"
+                          margin={{ top: 4, right: 16, left: 8, bottom: 4 }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" horizontal={false} />
+                          <XAxis type="number" allowDecimals={false} />
+                          <YAxis
+                            type="category"
+                            dataKey="name"
+                            width={140}
+                            tick={{ fontSize: 11, fill: "#6B7280" }}
+                          />
+                          <Tooltip />
+                          <Bar dataKey="count" fill="#9C6BFF" radius={[0, 4, 4, 0]} barSize={18} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="flex items-center justify-center py-10 text-sm text-gray-500">
+                        No location data
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-5">
+                    <div className="rounded-md border border-gray-100 bg-white p-5 shadow-card hover:shadow-md">
+                      <h3 className="mb-4 text-sidebar font-medium">
+                        Devices by Type
+                      </h3>
+                      {inventoryTypeData.length > 0 ? (
+                        <ResponsiveContainer
+                          width="100%"
+                          height={300}
+                          style={{ border: "1px solid #E5E7EB", borderRadius: "2px" }}
+                        >
+                          <PieChart>
+                            <Pie
+                              data={inventoryTypeData}
+                              cx="50%"
+                              cy="50%"
+                              labelLine={false}
+                              label={({ name, value }) => `${name}: ${value}`}
+                              outerRadius={100}
+                              dataKey="value"
+                            >
+                              {inventoryTypeData.map((_, i) => (
+                                <Cell
+                                  key={`inv-type-${i}`}
+                                  fill={INVENTORY_COLORS[i % INVENTORY_COLORS.length]}
+                                />
+                              ))}
+                            </Pie>
+                            <Tooltip />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      ) : (
+                        <div className="flex items-center justify-center py-10 text-sm text-gray-500">
+                          No device type data
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="rounded-md border border-gray-100 bg-white p-5 shadow-card hover:shadow-md">
+                      <h3 className="mb-4 text-sidebar font-medium">
+                        Devices by Status
+                      </h3>
+                      {inventoryStatusData.length > 0 ? (
+                        <ResponsiveContainer
+                          width="100%"
+                          height={300}
+                          style={{ border: "1px solid #E5E7EB", borderRadius: "2px" }}
+                        >
+                          <PieChart>
+                            <Pie
+                              data={inventoryStatusData}
+                              cx="50%"
+                              cy="50%"
+                              labelLine={false}
+                              label={({ name, value }) => `${name}: ${value}`}
+                              outerRadius={100}
+                              dataKey="value"
+                            >
+                              {inventoryStatusData.map((entry, i) => (
+                                <Cell
+                                  key={`inv-status-${i}`}
+                                  fill={
+                                    entry.name.toLowerCase() === "active"
+                                      ? "#34d399"
+                                      : entry.name.toLowerCase() === "inactive"
+                                        ? "#fbbf24"
+                                        : INVENTORY_COLORS[i % INVENTORY_COLORS.length]
+                                  }
+                                />
+                              ))}
+                            </Pie>
+                            <Tooltip />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      ) : (
+                        <div className="flex items-center justify-center py-10 text-sm text-gray-500">
+                          No status data
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </>
+              ) : null}
+            </>
+          )}
         </div>
       )}
 

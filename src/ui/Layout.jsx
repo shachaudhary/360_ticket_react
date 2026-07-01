@@ -18,6 +18,7 @@ import {
 } from "@heroicons/react/24/outline";
 
 import { useApp } from "../state/AppContext.jsx";
+import { canAccessInventory } from "../utils/inventoryAccess";
 import ProfilePopover from "../components/ProfilePopover.jsx";
 import AppMenu from "../components/AppMenu.jsx";
 import { Box } from "@mui/material";
@@ -85,7 +86,7 @@ export default function Layout() {
         <NavItem to="/dashboard" icon={Squares2X2Icon} label="Dashboard" />
         <NavItem to="/tickets" icon={TicketIcon} label="Tickets" />
         <NavItem to="/projects" icon={FolderIcon} label="Projects" matchChildren />
-        {user?.is_form_access && (
+        {canAccessInventory(user) && (
           <NavItem
             to="/inventory"
             icon={ComputerDesktopIcon}

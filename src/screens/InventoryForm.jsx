@@ -13,13 +13,21 @@ import {
   Divider,
   FormControl,
   FormControlLabel,
+  IconButton,
+  InputAdornment,
   InputLabel,
   MenuItem,
   Select,
   TextField,
   Typography,
 } from "@mui/material";
-import { ArrowUpTrayIcon, MapPinIcon } from "@heroicons/react/24/outline";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
+import {
+  ArrowTopRightOnSquareIcon,
+  ArrowUpTrayIcon,
+  EyeIcon,
+  MapPinIcon,
+} from "@heroicons/react/24/outline";
 import { MapPin, Mail } from "lucide-react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { useApp } from "../state/AppContext";
@@ -28,6 +36,7 @@ import { createAPIEndPointAuth } from "../config/api/apiAuth";
 import BackButton from "../components/BackButton";
 import toast from "react-hot-toast";
 import { toProperCase } from "../utils/formatting";
+import { canAccessInventory } from "../utils/inventoryAccess";
 
 const DEVICE_TYPES = ["Laptop", "Desktop", "Mobile", "Tablet", "Monitor", "Other"];
 const DEVICE_TYPE_PRESETS = ["Laptop", "Desktop", "Mobile", "Tablet", "Monitor"];
@@ -222,6 +231,8 @@ export default function InventoryForm({ isEdit = false }) {
 
   const [errors, setErrors] = useState({});
   const [deviceRecord, setDeviceRecord] = useState(null);
+  const [showAnydeskPassword, setShowAnydeskPassword] = useState(false);
+  const [showDeviceLoginPassword, setShowDeviceLoginPassword] = useState(false);
   const [deviceImages, setDeviceImages] = useState([]);
   const [initialImageUrls, setInitialImageUrls] = useState([]);
   const [dragActive, setDragActive] = useState(false);
@@ -535,7 +546,7 @@ export default function InventoryForm({ isEdit = false }) {
     setLocationModalOpen(true);
   };
 
-  if (!user?.is_form_access) {
+  if (!canAccessInventory(user)) {
     return <Navigate to="/dashboard" replace />;
   }
 
@@ -553,11 +564,34 @@ export default function InventoryForm({ isEdit = false }) {
 
   return (
     <Box>
-      <div className="!flex !items-center !justify-start !gap-2 !mb-4">
-        <BackButton self={isEdit && id ? `/inventory/${id}` : "/inventory"} />
-        <h2 className="text-lg md:text-2xl font-semibold text-sidebar mb-1">
-          {isEdit ? "Edit inventory" : "Register inventory"}
-        </h2>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
+        <div className="flex items-center justify-start gap-2">
+          <BackButton self={isEdit && id ? `/inventory/${id}` : "/inventory"} />
+          <h2 className="text-lg md:text-2xl font-semibold text-sidebar mb-0">
+            {isEdit ? "Edit inventory" : "Register inventory"}
+          </h2>
+        </div>
+        {isEdit && id && (
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={<EyeIcon className="h-4 w-4" />}
+            endIcon={<ArrowTopRightOnSquareIcon className="h-3.5 w-3.5" />}
+            onClick={() =>
+              window.open(`/inventory/${id}`, "_blank", "noopener,noreferrer")
+            }
+            sx={{
+              textTransform: "none",
+              borderRadius: 1.25,
+              borderColor: "#E5E7EB",
+              color: "#374151",
+              alignSelf: { xs: "stretch", sm: "auto" },
+              "&:hover": { borderColor: "#d1d5db", backgroundColor: "#f9fafb" },
+            }}
+          >
+            Open in view
+          </Button>
+        )}
       </div>
 
       <Card className="!p-6 !shadow-md !bg-white !rounded-lg !border !border-gray-100">
@@ -820,13 +854,31 @@ export default function InventoryForm({ isEdit = false }) {
               <TextField
                 label="AnyDesk password"
                 name="anydesk_password"
-                type="password"
+                type={showAnydeskPassword ? "text" : "password"}
                 fullWidth
                 size="small"
                 value={formData.anydesk_password}
                 onChange={handleChange}
                 autoComplete="new-password"
                 sx={fieldHoverSx}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShowAnydeskPassword((v) => !v)}
+                        edge="end"
+                        size="small"
+                        aria-label={showAnydeskPassword ? "Hide password" : "Show password"}
+                      >
+                        {showAnydeskPassword ? (
+                          <VisibilityOff sx={{ fontSize: 18 }} />
+                        ) : (
+                          <Visibility sx={{ fontSize: 18 }} />
+                        )}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
               />
             </div>
           </div>
@@ -848,13 +900,33 @@ export default function InventoryForm({ isEdit = false }) {
               <TextField
                 label="Device login password"
                 name="device_login_password"
-                type="password"
+                type={showDeviceLoginPassword ? "text" : "password"}
                 fullWidth
                 size="small"
                 value={formData.device_login_password}
                 onChange={handleChange}
                 autoComplete="new-password"
                 sx={fieldHoverSx}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShowDeviceLoginPassword((v) => !v)}
+                        edge="end"
+                        size="small"
+                        aria-label={
+                          showDeviceLoginPassword ? "Hide password" : "Show password"
+                        }
+                      >
+                        {showDeviceLoginPassword ? (
+                          <VisibilityOff sx={{ fontSize: 18 }} />
+                        ) : (
+                          <Visibility sx={{ fontSize: 18 }} />
+                        )}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
               />
             </div>
           </div>
