@@ -414,7 +414,7 @@ export default function InventoryForm({ isEdit = false }) {
     if (isEdit && deviceRecord?.user_id != null) return deviceRecord.user_id;
     return null;
   };
-
+  
   const buildCreatePayload = () => {
     const payload = {
       clinic_id: user.clinic_id,
