@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import {
@@ -44,96 +44,12 @@ import Divider from "@mui/material/Divider";
 import DashboardPrintReport from "../components/DashboardPrintReport";
 import "../styles/DashboardPrint.css";
 import { canAccessInventory } from "../utils/inventoryAccess";
-import { getStaticInventoryDevices } from "../data/staticInventoryDevices";
 import {
   buildInventoryStats,
   inventoryStatsToChartData,
 } from "../utils/inventoryStats";
 
 const url = `/dashboard`;
-
-const buildStaticDailyTicketStats = (year) => {
-  const start = dayjs(`${year}-05-01`);
-  const end = dayjs(`${year}-06-25`);
-  const totalDays = end.diff(start, "day") + 1;
-  const targetTotal = 173;
-
-  const seededRandom = (seed) => {
-    const x = Math.sin(seed * 127.1 + 311.7) * 43758.5453;
-    return x - Math.floor(x);
-  };
-
-  const weights = Array.from({ length: totalDays }, (_, i) => {
-    const date = start.add(i, "day");
-    const dow = date.day();
-
-    let weight = dow === 0 || dow === 6 ? 0.35 : dow === 1 ? 0.75 : dow === 5 ? 1.15 : 1;
-    weight *= 0.55 + seededRandom(year + i * 17) * 1.05;
-
-    if (date.date() >= 10 && date.date() <= 14) weight *= 0.55;
-    if (date.date() >= 20 && date.date() <= 27 && date.month() === 4) weight *= 1.3;
-    if (date.month() === 5 && date.date() <= 6) weight *= 1.2;
-    if (seededRandom(year * 3 + i * 53) > 0.9) weight *= 1.8;
-    if (seededRandom(year * 7 + i * 31) < 0.07 && dow !== 0 && dow !== 6) weight *= 0.35;
-
-    return weight;
-  });
-
-  const weightSum = weights.reduce((sum, w) => sum + w, 0);
-  const raw = weights.map((w) => (w / weightSum) * targetTotal);
-  const counts = raw.map((v) => Math.floor(v));
-  let remainder = targetTotal - counts.reduce((sum, c) => sum + c, 0);
-
-  const byFraction = raw
-    .map((v, i) => ({ i, frac: v - Math.floor(v) }))
-    .sort((a, b) => b.frac - a.frac);
-
-  for (let j = 0; j < remainder; j++) {
-    counts[byFraction[j].i]++;
-  }
-
-  return counts.map((count, i) => ({
-    date: start.add(i, "day").format("YYYY-MM-DD"),
-    count,
-  }));
-};
-
-const getStaticDashboardStats = (year = dayjs().year()) => ({
-  total_tickets: 173,
-  by_status: {
-    Pending: 0,
-    "In Progress": 6,
-    Completed: 167,
-  },
-  by_priority: {
-    Low: 35,
-    High: 113,
-    Urgent: 25,
-  },
-  daily_ticket_stats: buildStaticDailyTicketStats(year),
-  avg_resolution_time_hours: 5,
-});
-
-const IT_CATEGORY_ID = 1;
-
-const shouldUseStaticDashboardStats = (
-  timeView,
-  startDate,
-  endDate,
-  categoryFilter,
-  locationFilter
-) => {
-  if (timeView !== "custom" || locationFilter) return false;
-  if (Number(categoryFilter) !== IT_CATEGORY_ID) return false;
-
-  const year = dayjs().year();
-  const mayFirst = dayjs(`${year}-05-01`).startOf("day");
-  const juneTwentyFifth = dayjs(`${year}-06-25`).startOf("day");
-  const start = startDate.startOf("day");
-  const end = endDate.startOf("day");
-
-  return start.isSame(mayFirst, "day") && !end.isBefore(juneTwentyFifth);
-};
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -224,26 +140,7 @@ export default function Dashboard() {
 
   const hasActiveFilters = timeView !== "week" || categoryFilter !== "" || locationFilter !== "";
 
-  const useStaticStats = shouldUseStaticDashboardStats(
-    timeView,
-    startDate,
-    endDate,
-    categoryFilter,
-    locationFilter
-  );
-
-  const staticStatsData = useMemo(
-    () => getStaticDashboardStats(dayjs().year()),
-    []
-  );
-
   useEffect(() => {
-    if (useStaticStats) {
-      setStatsData(staticStatsData);
-      setLoadingStats(false);
-      return;
-    }
-
     const fetchStats = async () => {
       try {
         setLoadingStats(true);
@@ -286,7 +183,7 @@ export default function Dashboard() {
       }
     };
     fetchStats();
-  }, [timeView, startDate, endDate, categoryFilter, locationFilter, useStaticStats, staticStatsData]);
+  }, [timeView, startDate, endDate, categoryFilter, locationFilter]);
 
   useEffect(() => {
     if (!showInventorySection || !user?.clinic_id) {
@@ -310,8 +207,7 @@ export default function Dashboard() {
         setInventoryStats(buildInventoryStats(list, locationsById));
       } catch (err) {
         console.error("Error fetching inventory stats:", err);
-        const fallback = getStaticInventoryDevices(user.clinic_id);
-        setInventoryStats(buildInventoryStats(fallback, locationsById));
+        setInventoryStats(null);
       } finally {
         setLoadingInventory(false);
       }
@@ -320,20 +216,18 @@ export default function Dashboard() {
     fetchInventoryStats();
   }, [showInventorySection, user?.clinic_id, locations]);
 
-  const displayStatsData = useStaticStats ? staticStatsData : statsData;
-
   const getChartData = () =>
-    displayStatsData?.daily_ticket_stats?.map((d) => ({
+    statsData?.daily_ticket_stats?.map((d) => ({
       name: moment(d.date).format("MM/DD/YYYY"),
       tickets: d.count,
     })) || [];
 
   // Pie chart data
-  const statusData = Object.entries(displayStatsData?.by_status || {})
+  const statusData = Object.entries(statsData?.by_status || {})
     .map(([name, value]) => ({ name, value }))
     .filter((i) => i.value > 0);
 
-  const priorityData = Object.entries(displayStatsData?.by_priority || {})
+  const priorityData = Object.entries(statsData?.by_priority || {})
     .map(([name, value]) => ({ name, value }))
     .filter((i) => i.value > 0);
 
@@ -378,19 +272,19 @@ export default function Dashboard() {
   const stats = [
     {
       label: "Open Tickets",
-      value: displayStatsData?.by_status?.Pending ?? 0,
-      total: displayStatsData?.total_tickets ?? 0,
+      value: statsData?.by_status?.Pending ?? 0,
+      total: statsData?.total_tickets ?? 0,
       icon: <TicketIcon className="h-6 w-6 text-blue-400" />,
     },
     {
       label: "In Progress",
-      value: displayStatsData?.by_status?.["In Progress"] ?? 0,
+      value: statsData?.by_status?.["In Progress"] ?? 0,
       icon: <WrenchScrewdriverIcon className="h-6 w-6 text-yellow-400" />,
-      resolutionTime: formatResolutionTime(displayStatsData?.avg_resolution_time_hours),
+      resolutionTime: formatResolutionTime(statsData?.avg_resolution_time_hours),
     },
     {
       label: "Completed",
-      value: displayStatsData?.by_status?.Completed ?? 0,
+      value: statsData?.by_status?.Completed ?? 0,
       icon: <CheckCircleIcon className="h-6 w-6 text-green-400" />,
     },
   ];
@@ -450,7 +344,7 @@ export default function Dashboard() {
     "All Categories";
 
   const handlePrint = () => {
-    if (loading || loadingStats || !displayStatsData) return;
+    if (loading || loadingStats || !statsData) return;
     window.print();
   };
 
@@ -478,7 +372,7 @@ export default function Dashboard() {
               {/* <button
                 type="button"
                 onClick={handlePrint}
-                disabled={loading || loadingStats || !displayStatsData}
+                disabled={loading || loadingStats || !statsData}
                 className="no-print inline-flex items-center gap-1.5 px-3 py-[6.2px] text-xs font-medium rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-brand-600 hover:border-brand-300 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <PrinterIcon className="h-4 w-4" />
